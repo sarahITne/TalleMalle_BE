@@ -41,4 +41,57 @@ public class ChatDto {
             }
         }
     }
+
+    // 채팅방 목록 조회 기능
+    public static class RoomList {
+        // 요청
+        public static class Req {
+            private  Integer userId;
+
+            public Req(Integer userId) {
+                this.userId = userId;
+            }
+
+            public static Req toDto(HttpServletRequest req) {
+                return new Req(
+                        req.getParameter("userId") != null ? Integer.parseInt(req.getParameter("userId")) : null
+                );
+            }
+
+            public Integer getUserId() {
+                return userId;
+            }
+        }
+        // 응답
+        public static class Res {
+            private Integer roomId;
+            private String title;
+            private String lastMessage;
+            private Integer unreadCount;
+
+            public Res(Integer roomId, String title, String lastMessage, Integer unreadCount) {
+                this.roomId = roomId;
+                this.title = title;
+                this.lastMessage = lastMessage;
+                this.unreadCount = unreadCount;
+            }
+            // Getter
+            public Integer getRoomId() {
+                return roomId;
+            }
+
+            public String getTitle() {
+                return title;
+            }
+
+            public String getLastMessage() {
+                return lastMessage;
+            }
+
+            public Integer getUnreadCount() {
+                return unreadCount;
+            }
+        }
+    }
+
 }
