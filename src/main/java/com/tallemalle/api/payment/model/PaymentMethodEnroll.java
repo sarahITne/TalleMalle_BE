@@ -2,7 +2,7 @@ package com.tallemalle.api.payment.model;
 
 import java.util.List;
 
-public class PaymentMethodRegister {
+public class PaymentMethodEnroll {
     public static class Request {
         private String userId;
         private String alias;
