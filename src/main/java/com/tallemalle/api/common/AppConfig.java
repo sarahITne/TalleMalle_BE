@@ -1,5 +1,8 @@
 package com.tallemalle.api.common;
 
+import com.tallemalle.api.notification.NotificationController;
+import com.tallemalle.api.notification.NotificationRepository;
+import com.tallemalle.api.notification.NotificationService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.util.HashMap;
@@ -10,9 +13,20 @@ public class AppConfig {
 
     private final HikariDataSource ds = new HikariDataSource();
 
+    NotificationRepository notificationRepository = new NotificationRepository(ds);
+    NotificationService notificationService = new NotificationService(notificationRepository);
+    NotificationController notificationController = new NotificationController(notificationService);
 
     public AppConfig() {
+        ds.setJdbcUrl("jdbc:mariadb://100.100.100.60:3306/test");
+        ds.setUsername("root");
+        ds.setPassword("qwer1234");
 
+        // Notification
+        controllerMap.put("/notification/list", notificationController);
+        controllerMap.put("/notification/summary", notificationController);
+        controllerMap.put("/notification/readall", notificationController);
+        controllerMap.put("/notification/read", notificationController);
     }
 
     public Controller getController(String uri) {
