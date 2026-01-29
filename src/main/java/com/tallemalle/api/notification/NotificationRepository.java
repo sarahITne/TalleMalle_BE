@@ -18,7 +18,7 @@ public class NotificationRepository {
     }
 
     // 1. 목록 조회
-    public List<NotificationDto.Response.Item> findAllByUserId(long userId) {
+    public List<NotificationDto.Response.Item> findAll(long userId) {
         List<NotificationDto.Response.Item> list = new ArrayList<>();
 
         try {
@@ -124,5 +124,26 @@ public class NotificationRepository {
             throw new RuntimeException(e);
         }
         return affectedRows;
+    }
+
+    // 5. 개별 알림 읽음 처리
+    public int updateRead(long notificationId, long userId) {
+        int updatedCount = 0;
+        try {
+            Class.forName("org.mariadb.jdbc.Driver");
+            try (Connection conn = ds.getConnection()) {
+                String sql = "UPDATE notification SET is_read = 1 " +
+                        "WHERE id = ? AND user_id = ?";
+
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setLong(1, notificationId);
+                pstmt.setLong(2, userId);
+
+                updatedCount = pstmt.executeUpdate();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return updatedCount;
     }
 }

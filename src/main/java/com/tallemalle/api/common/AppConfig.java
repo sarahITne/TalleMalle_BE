@@ -22,9 +22,11 @@ public class AppConfig {
         ds.setUsername("root");
         ds.setPassword("qwer1234");
 
+        // Notification
         controllerMap.put("/notification/list", notificationController);
         controllerMap.put("/notification/summary", notificationController);
         controllerMap.put("/notification/readall", notificationController);
+        controllerMap.put("/notification/read", notificationController);
     }
 
     public Controller getController(String uri) {

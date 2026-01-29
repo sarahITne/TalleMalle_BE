@@ -18,7 +18,7 @@ public class NotificationController implements Controller {
     @Override
     public BaseResponse process(HttpServletRequest req, HttpServletResponse resp) {
 
-        if (req.getRequestURI().contains("list") && req.getMethod().equals("GET")){
+        if (req.getRequestURI().contains("list") && req.getMethod().equals("GET")) {
             String idxStr = req.getParameter("idx");
             long userId = Long.parseLong(idxStr);
             NotificationDto.Response data = this.notificationService.read(userId);
@@ -30,14 +30,27 @@ public class NotificationController implements Controller {
             NotificationDto.Response data = this.notificationService.readUnreadOnly(userId);
 
             return BaseResponse.success(data);
-        } else if (req.getRequestURI().contains("readall") && req.getMethod().equals("POST")) {
+        } else if (req.getRequestURI().contains("readall") && req.getMethod().equals("PATCH")) {
             String idxStr = req.getParameter("idx");
             long userId = Long.parseLong(idxStr);
 
             Map<String, Object> data = this.notificationService.readAll(userId);
 
             return BaseResponse.success(data);
+        } else if (req.getRequestURI().contains("read") && req.getMethod().equals("PATCH")) {
+            // 1. 파라미터 2개 받기
+            String notiIdStr = req.getParameter("id");
+            String userIdStr = req.getParameter("idx");
+
+            long notificationId = Long.parseLong(notiIdStr);
+            long userId = Long.parseLong(userIdStr);
+
+            boolean success = this.notificationService.readOne(notificationId, userId);
+
+            return BaseResponse.success("알림을 읽음 처리했습니다.");
+
         }
+
         return null;
     }
 }

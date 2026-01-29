@@ -15,11 +15,12 @@ public class NotificationService {
 
     public NotificationDto.Response read(long userId) {
 
-        List<NotificationDto.Response.Item> items = notificationRepository.findAllByUserId(userId);
+        List<NotificationDto.Response.Item> items = notificationRepository.findAll(userId);
         long unreadCount = notificationRepository.countUnread(userId);
 
         return new NotificationDto.Response(unreadCount, items);
     }
+
     public NotificationDto.Response readUnreadOnly(Long userId){
         List<NotificationDto.Response.Item> items = notificationRepository.findUnreadTop5(userId);
 
@@ -27,6 +28,7 @@ public class NotificationService {
 
         return new NotificationDto.Response(unreadCount, items);
     }
+
     public Map<String, Object> readAll(long userId) {
         int count = notificationRepository.updateAllRead(userId);
 
@@ -35,5 +37,10 @@ public class NotificationService {
         resultData.put("message", "모든 알림이 읽음 처리되었습니다.");
 
         return resultData;
+    }
+
+    public boolean readOne(long notificationId, long userId) {
+        int count = notificationRepository.updateRead(notificationId, userId);
+        return count > 0;
     }
 }
