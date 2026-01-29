@@ -94,4 +94,50 @@ public class ChatDto {
         }
     }
 
+    // 사용자 차단 기능
+    public static class Block {
+        // 요청
+        public static class Req {
+            private Integer targetId;
+            private  String reason;
+
+            public Req(Integer targetId, String reason) {
+                this.targetId = targetId;
+                this.reason = reason;
+            }
+
+            public static Req toDto(HttpServletRequest req) {
+                return new Req(
+                        req.getParameter("targetId") != null ? Integer.parseInt(req.getParameter("targetId")) : null,
+                        req.getParameter("reason")
+                );
+            }
+
+            public Integer getTargetId() {
+                return targetId;
+            }
+
+            public String getReason() {
+                return reason;
+            }
+        }
+        // 응답
+        public static class Res {
+            private Integer blockId;
+            private String blockedAt;
+
+            public Res(Integer blockId, String blockedAt) {
+                this.blockId = blockId;
+                this.blockedAt = blockedAt;
+            }
+
+            public Integer getBlockId() {
+                return blockId;
+            }
+
+            public String getBlockedAt() {
+                return blockedAt;
+            }
+        }
+    }
 }
