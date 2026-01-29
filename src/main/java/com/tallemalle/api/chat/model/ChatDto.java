@@ -10,6 +10,9 @@ public class ChatDto {
             private Integer roomId;
             private String content;
 
+            public Req() {
+            }
+
             public Req(Integer roomId, String content) {
                 this.roomId = roomId;
                 this.content = content;
@@ -69,9 +72,9 @@ public class ChatDto {
             private String lastMessage;
             private Integer unreadCount;
 
-            public Res(Integer roomId, String title, String lastMessage, Integer unreadCount) {
+            public Res(Integer roomId, String departure, String destination, String lastMessage, Integer unreadCount) {
                 this.roomId = roomId;
-                this.title = title;
+                this.title = departure + " → " + destination;
                 this.lastMessage = lastMessage;
                 this.unreadCount = unreadCount;
             }
