@@ -10,7 +10,11 @@ import jakarta.servlet.http.HttpServletResponse;
 public class NoticeController implements Controller {
     @Override
     public BaseResponse process(HttpServletRequest req, HttpServletResponse resp) {
-        System.out.println("NoticeController 실행 !");
+        if (req.getRequestURI().contains("read") && req.getMethod().equals("GET")) {
+            System.out.println("DB에서 1개만 조회하는 코드");
+        } else if (req.getRequestURI().contains("notice") && req.getMethod().equals("GET")) {
+            System.out.println("DB에서 목록을 조회하는 코드");
+        }
         return null;
     }
 }

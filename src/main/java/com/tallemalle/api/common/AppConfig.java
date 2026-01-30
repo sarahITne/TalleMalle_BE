@@ -35,6 +35,7 @@ public class AppConfig {
 
         // notice
         controllerMap.put("/notice", noticeController);
+        controllerMap.put("/notice/read", noticeController);
     }
 
     public Controller getController(String uri) {
