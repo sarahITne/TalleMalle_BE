@@ -9,6 +9,9 @@ public class PaymentMethodEnroll {
         private String billingKey;
         private Boolean asDefault;
 
+        public Request() {
+        }
+
         public Request(String userId, String alias, String billingKey, Boolean asDefault) {
             this.userId = userId;
             this.alias = alias;

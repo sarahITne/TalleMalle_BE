@@ -1,5 +1,8 @@
 package com.tallemalle.api.common;
 
+import com.tallemalle.api.payment.controller.PaymentController;
+import com.tallemalle.api.payment.controller.PaymentRepository;
+import com.tallemalle.api.payment.controller.PaymentService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.util.HashMap;
@@ -12,7 +15,11 @@ public class AppConfig {
 
 
     public AppConfig() {
-
+        ds.setJdbcUrl(System.getenv("DB_URL"));
+        ds.setUsername(System.getenv("DB_USERNAME"));
+        ds.setPassword(System.getenv("DB_PASSWORD"));
+        ds.setDriverClassName("org.mariadb.jdbc.Driver");
+        controllerMap.put("/payment/enroll", new PaymentController(new PaymentService(new PaymentRepository(ds))));
     }
 
     public Controller getController(String uri) {
