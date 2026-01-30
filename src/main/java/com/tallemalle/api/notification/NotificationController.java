@@ -19,37 +19,35 @@ public class NotificationController implements Controller {
     public BaseResponse process(HttpServletRequest req, HttpServletResponse resp) {
 
         if (req.getRequestURI().contains("list") && req.getMethod().equals("GET")) {
-            String idxStr = req.getParameter("idx");
-            long userId = Long.parseLong(idxStr);
-            NotificationDto.NotificationListRes data = this.notificationService.read(userId);
-            return BaseResponse.success(data);
+            long userId = Long.parseLong(req.getParameter("idx"));
+
+            NotificationDto.NotificationListRes returnDto = notificationService.read(userId);
+
+            return BaseResponse.success(returnDto);
+
         } else if (req.getRequestURI().contains("summary") && req.getMethod().equals("GET")) {
-            String idxStr = req.getParameter("idx");
-            long userId = Long.parseLong(idxStr);
-            NotificationDto.NotificationListRes data = this.notificationService.readUnreadOnly(userId);
+            long userId = Long.parseLong(req.getParameter("idx"));
 
-            return BaseResponse.success(data);
+            NotificationDto.NotificationListRes returnDto = notificationService.readUnreadOnly(userId);
+
+            return BaseResponse.success(returnDto);
+
         } else if (req.getRequestURI().contains("readall") && req.getMethod().equals("PATCH")) {
-            String idxStr = req.getParameter("idx");
-            long userId = Long.parseLong(idxStr);
+            long userId = Long.parseLong(req.getParameter("idx"));
 
-            Map<String, Object> data = this.notificationService.readAll(userId);
+            NotificationDto.NotificationReadAllRes returnDto = notificationService.readAll(userId);
 
-            return BaseResponse.success(data);
+            return BaseResponse.success(returnDto);
+
         } else if (req.getRequestURI().contains("readonly") && req.getMethod().equals("PATCH")) {
-            // 1. 파라미터 2개 받기
-            String notiIdStr = req.getParameter("id");
-            String userIdStr = req.getParameter("idx");
+            long notificationId = Long.parseLong(req.getParameter("id"));
+            long userId = Long.parseLong(req.getParameter("idx"));
 
-            long notificationId = Long.parseLong(notiIdStr);
-            long userId = Long.parseLong(userIdStr);
+            NotificationDto.NotificationReadRes returnDto = notificationService.readOne(notificationId, userId);
 
-            boolean success = this.notificationService.readOne(notificationId, userId);
-
-            return BaseResponse.success("알림을 읽음 처리했습니다.");
+            return BaseResponse.success(returnDto);
 
         }
-
         return null;
     }
 }

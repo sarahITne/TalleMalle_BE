@@ -29,24 +29,23 @@ public class NotificationService {
         return new NotificationDto.NotificationListRes(unreadCount, items);
     }
 
-    public Map<String, Object> readAll(long userId) {
+    public NotificationDto.NotificationReadAllRes readAll(long userId) {
         int count = notificationRepository.updateAllRead(userId);
 
-        Map<String, Object> resultData = new HashMap<>();
-        resultData.put("updatedCount", count);
-        resultData.put("message", "모든 알림이 읽음 처리되었습니다.");
+        NotificationDto.NotificationReadAllRes resultData = new NotificationDto.NotificationReadAllRes();
+        resultData.setUpdatedCount(count);
+        resultData.setMessage("모든 알림이 읽음 처리되었습니다.");
 
         return resultData;
     }
 
-    public boolean readOne(long notificationId, long userId) {
+    public NotificationDto.NotificationReadRes readOne(long notificationId, long userId) {
         int count = notificationRepository.updateRead(notificationId, userId);
 
         if (count > 0) {
-            return true;
+            return new NotificationDto.NotificationReadRes(true, "알림 읽음 처리 완료");
         } else {
-            System.out.println(">>> [Service] DB 업데이트 실패 (대상이 없거나 내 알림 아님)");
-            return false;
+            return new NotificationDto.NotificationReadRes(false, "권한이 없거나 존재하지 않는 알림입니다.");
         }
     }
 }

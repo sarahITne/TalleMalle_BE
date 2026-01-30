@@ -3,7 +3,9 @@ package com.tallemalle.api.notification.model;
 import java.util.List;
 
 public class NotificationDto {
+    // 요청
 
+    // 응답
     public static class NotificationListRes {
         private long unreadCount;
         private List<NotificationItemRes> list; // 바로 아래 정의된 Item을 씀
@@ -40,4 +42,63 @@ public class NotificationDto {
         public boolean isRead() { return isRead; }
         public String getCreatedAt() { return createdAt; }
     }
+
+    public static class NotificationReadAllRes {
+        Integer updatedCount;
+        Object message;
+
+        public NotificationReadAllRes() {
+        }
+
+        public NotificationReadAllRes(Object message, Integer updatedCount) {
+            this.message = message;
+            this.updatedCount = updatedCount;
+        }
+
+        public Integer getUpdatedCount() {
+            return updatedCount;
+        }
+
+        public void setUpdatedCount(Integer updatedCount) {
+            this.updatedCount = updatedCount;
+        }
+
+        public Object getMessage() {
+            return message;
+        }
+
+        public void setMessage(Object message) {
+            this.message = message;
+        }
+    }
+
+    public static class NotificationReadRes {
+        private boolean success;
+        private String message;
+
+        public NotificationReadRes() {
+        }
+
+        public NotificationReadRes(boolean success, String message) {
+            this.success = success;
+            this.message = message;
+        }
+
+        public boolean isSuccess() {
+            return success;
+        }
+
+        public void setSuccess(boolean success) {
+            this.success = success;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+    }
+
 }

@@ -22,7 +22,6 @@ public class NotificationRepository {
         List<NotificationDto.NotificationItemRes> list = new ArrayList<>();
 
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
                 String sql = "SELECT * FROM notification WHERE user_id = ? ORDER BY created_at DESC";
 
@@ -52,7 +51,6 @@ public class NotificationRepository {
     public long countUnread(long userId) {
         long count = 0;
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
                 String sql = "SELECT COUNT(*) FROM notification WHERE user_id = ? AND is_read = 0";
 
@@ -75,9 +73,8 @@ public class NotificationRepository {
         List<NotificationDto.NotificationItemRes> list = new ArrayList<>();
 
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
-                String sql = "SELECT id, type, content, created_at " +
+                String sql = "SELECT id, type, content, is_read, created_at " +
                         "FROM notification " +
                         "WHERE user_id = ? AND is_read = 0 " +
                         "ORDER BY created_at DESC LIMIT 5";
@@ -109,7 +106,6 @@ public class NotificationRepository {
     public int updateAllRead(long userId) {
         int affectedRows = 0;
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
                 // user_id가 일치하고, 아직 안 읽은(0) 것만 읽음(1)으로 변경
                 String sql = "UPDATE notification SET is_read = 1 " +
@@ -131,9 +127,7 @@ public class NotificationRepository {
         int updatedCount = 0;
 
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
-
                 String sql = "UPDATE notification SET is_read = 1 WHERE id = ? AND user_id = ?";
 
                 PreparedStatement pstmt = conn.prepareStatement(sql);
