@@ -20,7 +20,7 @@ public class AppConfig {
     private final NotificationController notificationController = new NotificationController(notificationService);
 
     // 공지사항
-    private final NoticeController noticeController = new NoticeController();
+    private final NoticeController noticeController = new NoticeController(ds);
 
     public AppConfig() {
         ds.setJdbcUrl("jdbc:mariadb://100.100.100.60:3306/test");

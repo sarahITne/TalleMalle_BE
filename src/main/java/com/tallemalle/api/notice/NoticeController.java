@@ -5,9 +5,18 @@ import com.tallemalle.api.common.Controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import javax.sql.DataSource;
+
 // 1. 공지사항 컨트롤러 생성 (Controller 구현) -> AppConfig에 컨트롤러 등록
 // 2. AppConfig에서 -> 현재 클래스의 객체를 생성하고, Map에다 등록
 public class NoticeController implements Controller {
+    // 4. DB 서버에 연결하는 클라이언트를 만듦
+    private final DataSource ds;
+
+    public NoticeController(DataSource ds) {
+        this.ds = ds;
+    }
+
     @Override
     public BaseResponse process(HttpServletRequest req, HttpServletResponse resp) {
         if (req.getRequestURI().contains("read") && req.getMethod().equals("GET")) {
