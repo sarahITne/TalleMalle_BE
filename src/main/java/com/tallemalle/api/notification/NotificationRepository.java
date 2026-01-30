@@ -18,8 +18,8 @@ public class NotificationRepository {
     }
 
     // 1. 목록 조회
-    public List<NotificationDto.Response.Item> findAll(long userId) {
-        List<NotificationDto.Response.Item> list = new ArrayList<>();
+    public List<NotificationDto.NotificationItemRes> findAll(long userId) {
+        List<NotificationDto.NotificationItemRes> list = new ArrayList<>();
 
         try {
             Class.forName("org.mariadb.jdbc.Driver");
@@ -31,7 +31,7 @@ public class NotificationRepository {
                 ResultSet rs = pstmt.executeQuery();
 
                 while (rs.next()) {
-                    NotificationDto.Response.Item item = new NotificationDto.Response.Item(
+                    NotificationDto.NotificationItemRes item = new NotificationDto.NotificationItemRes(
                             rs.getLong("id"),
                             rs.getString("type"),
                             rs.getString("title"),
@@ -71,8 +71,8 @@ public class NotificationRepository {
     }
 
     // 3. 안읽은 알림 Top5 조회
-    public List<NotificationDto.Response.Item> findUnreadTop5(long userId) {
-        List<NotificationDto.Response.Item> list = new ArrayList<>();
+    public List<NotificationDto.NotificationItemRes> findUnreadTop5(long userId) {
+        List<NotificationDto.NotificationItemRes> list = new ArrayList<>();
 
         try {
             Class.forName("org.mariadb.jdbc.Driver");
@@ -88,12 +88,12 @@ public class NotificationRepository {
                 ResultSet rs = pstmt.executeQuery();
 
                 while (rs.next()) {
-                    NotificationDto.Response.Item item = new NotificationDto.Response.Item(
+                    NotificationDto.NotificationItemRes item = new NotificationDto.NotificationItemRes(
                             rs.getLong("id"),
                             rs.getString("type"),
                             null,
                             rs.getString("content"),
-                            false,
+                            rs.getBoolean("is_read"),
                             rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toString() : ""
                     );
                     list.add(item);
@@ -129,11 +129,12 @@ public class NotificationRepository {
     // 5. 개별 알림 읽음 처리
     public int updateRead(long notificationId, long userId) {
         int updatedCount = 0;
+
         try {
             Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
-                String sql = "UPDATE notification SET is_read = 1 " +
-                        "WHERE id = ? AND user_id = ?";
+
+                String sql = "UPDATE notification SET is_read = 1 WHERE id = ? AND user_id = ?";
 
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 pstmt.setLong(1, notificationId);

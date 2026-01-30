@@ -21,13 +21,12 @@ public class NotificationController implements Controller {
         if (req.getRequestURI().contains("list") && req.getMethod().equals("GET")) {
             String idxStr = req.getParameter("idx");
             long userId = Long.parseLong(idxStr);
-            NotificationDto.Response data = this.notificationService.read(userId);
-
+            NotificationDto.NotificationListRes data = this.notificationService.read(userId);
             return BaseResponse.success(data);
         } else if (req.getRequestURI().contains("summary") && req.getMethod().equals("GET")) {
             String idxStr = req.getParameter("idx");
             long userId = Long.parseLong(idxStr);
-            NotificationDto.Response data = this.notificationService.readUnreadOnly(userId);
+            NotificationDto.NotificationListRes data = this.notificationService.readUnreadOnly(userId);
 
             return BaseResponse.success(data);
         } else if (req.getRequestURI().contains("readall") && req.getMethod().equals("PATCH")) {
@@ -37,7 +36,7 @@ public class NotificationController implements Controller {
             Map<String, Object> data = this.notificationService.readAll(userId);
 
             return BaseResponse.success(data);
-        } else if (req.getRequestURI().contains("read") && req.getMethod().equals("PATCH")) {
+        } else if (req.getRequestURI().contains("readonly") && req.getMethod().equals("PATCH")) {
             // 1. 파라미터 2개 받기
             String notiIdStr = req.getParameter("id");
             String userIdStr = req.getParameter("idx");

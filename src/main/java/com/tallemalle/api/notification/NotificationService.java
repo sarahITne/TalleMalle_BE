@@ -13,20 +13,20 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
     }
 
-    public NotificationDto.Response read(long userId) {
+    public NotificationDto.NotificationListRes read(long userId) {
 
-        List<NotificationDto.Response.Item> items = notificationRepository.findAll(userId);
+        List<NotificationDto.NotificationItemRes> items = notificationRepository.findAll(userId);
         long unreadCount = notificationRepository.countUnread(userId);
 
-        return new NotificationDto.Response(unreadCount, items);
+        return new NotificationDto.NotificationListRes(unreadCount, items);
     }
 
-    public NotificationDto.Response readUnreadOnly(Long userId){
-        List<NotificationDto.Response.Item> items = notificationRepository.findUnreadTop5(userId);
+    public NotificationDto.NotificationListRes readUnreadOnly(Long userId){
+        List<NotificationDto.NotificationItemRes> items = notificationRepository.findUnreadTop5(userId);
 
         long unreadCount = notificationRepository.countUnread(userId);
 
-        return new NotificationDto.Response(unreadCount, items);
+        return new NotificationDto.NotificationListRes(unreadCount, items);
     }
 
     public Map<String, Object> readAll(long userId) {
@@ -41,6 +41,12 @@ public class NotificationService {
 
     public boolean readOne(long notificationId, long userId) {
         int count = notificationRepository.updateRead(notificationId, userId);
-        return count > 0;
+
+        if (count > 0) {
+            return true;
+        } else {
+            System.out.println(">>> [Service] DB 업데이트 실패 (대상이 없거나 내 알림 아님)");
+            return false;
+        }
     }
 }
