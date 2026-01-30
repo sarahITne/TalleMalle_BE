@@ -3,6 +3,10 @@ package com.tallemalle.api.common;
 import com.tallemalle.api.notification.NotificationController;
 import com.tallemalle.api.notification.NotificationRepository;
 import com.tallemalle.api.notification.NotificationService;
+import com.tallemalle.api.recruit.RecruitController;
+import com.tallemalle.api.recruit.RecruitRepositoryImpl;
+import com.tallemalle.api.recruit.RecruitRepository;
+import com.tallemalle.api.recruit.RecruitService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.util.HashMap;
@@ -17,8 +21,14 @@ public class AppConfig {
     NotificationService notificationService = new NotificationService(notificationRepository);
     NotificationController notificationController = new NotificationController(notificationService);
 
+    // Recruit
+    RecruitRepository recruitRepository = new RecruitRepositoryImpl(ds);
+    RecruitService recruitService = new RecruitService(recruitRepository);
+    RecruitController recruitController = new RecruitController(recruitService);
+
     public AppConfig() {
-        ds.setJdbcUrl("jdbc:mariadb://100.100.100.60:3306/test");
+        ds.setDriverClassName("org.mariadb.jdbc.Driver");
+        ds.setJdbcUrl("jdbc:mariadb://10.10.10.30:3306/test");
         ds.setUsername("root");
         ds.setPassword("qwer1234");
 
@@ -27,6 +37,9 @@ public class AppConfig {
         controllerMap.put("/notification/summary", notificationController);
         controllerMap.put("/notification/readall", notificationController);
         controllerMap.put("/notification/read", notificationController);
+
+        // Recruit
+        controllerMap.put("/recruits", recruitController);
     }
 
     public Controller getController(String uri) {
