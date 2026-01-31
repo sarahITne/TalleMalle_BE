@@ -34,8 +34,13 @@ public class NoticeRepository {
             List<NoticeDto.NoticeRes> list = new ArrayList<>();
 
             while (rs.next()) {         // 다음 행으로 이동, 처음에는 커서가 아무것도 가리키지 않았는데 이거 실행하자 마자 바로 1번행으로 이동 (이동 가능하면 : true, 다음 행 없어서 이동 못했으면 : false)
-                NoticeDto.NoticeRes returnDto = new NoticeDto.NoticeRes(rs.getLong("notice_idx"), rs.getString("title"), rs.getString("tag"), rs.getBoolean("is_pinned"), rs.getTimestamp("created_at").toLocalDateTime()
-
+                NoticeDto.NoticeRes returnDto = new NoticeDto.NoticeRes(
+                        rs.getLong("notice_idx"),
+                        rs.getString("title"),
+                        rs.getString("tag"),
+                        rs.getBoolean("is_pinned"),
+                        rs.getInt("views"),
+                        rs.getTimestamp("created_at").toLocalDateTime()
                 );
                 list.add(returnDto);
             }
@@ -63,7 +68,14 @@ public class NoticeRepository {
                 ResultSet rs = pstmt.executeQuery();    // DB에서 가져온 결과표 저장
 
                 if (rs.next()) {         // 다음 행으로 이동, 처음에는 커서가 아무것도 가리키지 않았는데 이거 실행하자 마자 바로 1번행으로 이동 (이동 가능하면 : true, 다음 행 없어서 이동 못했으면 : false)
-                    return new NoticeDto.NoticeDetailRes(rs.getLong("notice_idx"), rs.getString("title"), rs.getString("contents"), rs.getString("tag"), rs.getBoolean("is_pinned"), rs.getTimestamp("created_at").toLocalDateTime());
+                    return new NoticeDto.NoticeDetailRes(
+                            rs.getLong("notice_idx"),
+                            rs.getString("title"),
+                            rs.getString("contents"),
+                            rs.getString("tag"),
+                            rs.getBoolean("is_pinned"),
+                            rs.getInt("views"),
+                            rs.getTimestamp("created_at").toLocalDateTime());
                 }
                 return null;
             }
@@ -84,7 +96,7 @@ public class NoticeRepository {
                  PreparedStatement pstmt = conn.prepareStatement(sql);
             ) {
                 pstmt.setLong(1, noticeIdx);
-                pstmt.executeQuery();    // DB에서 가져온 결과표 저장
+                pstmt.executeUpdate();    // DB에서 가져온 결과표 저장
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
