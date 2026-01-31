@@ -23,7 +23,7 @@ public class AppConfig {
     private final NoticeController noticeController = new NoticeController(ds);
 
     public AppConfig() {
-        ds.setJdbcUrl("jdbc:mariadb://100.100.100.60:3306/test");
+        ds.setJdbcUrl("jdbc:mariadb://127.0.0.1:3306/tallemalle_test");
         ds.setUsername("root");
         ds.setPassword("qwer1234");
 
