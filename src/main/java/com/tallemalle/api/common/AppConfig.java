@@ -1,5 +1,8 @@
 package com.tallemalle.api.common;
 
+import com.tallemalle.api.notice.NoticeController;
+import com.tallemalle.api.notice.NoticeRepository;
+import com.tallemalle.api.notice.NoticeService;
 import com.tallemalle.api.notification.NotificationController;
 import com.tallemalle.api.notification.NotificationRepository;
 import com.tallemalle.api.notification.NotificationService;
@@ -13,12 +16,18 @@ public class AppConfig {
 
     private final HikariDataSource ds = new HikariDataSource();
 
-    NotificationRepository notificationRepository = new NotificationRepository(ds);
-    NotificationService notificationService = new NotificationService(notificationRepository);
-    NotificationController notificationController = new NotificationController(notificationService);
+    // 알림
+    private final NotificationRepository notificationRepository = new NotificationRepository(ds);
+    private final NotificationService notificationService = new NotificationService(notificationRepository);
+    private final NotificationController notificationController = new NotificationController(notificationService);
+
+    // 공지사항
+    private final NoticeRepository noticeRepository = new NoticeRepository(ds);
+    private final NoticeService noticeService = new NoticeService(noticeRepository);
+    private final NoticeController noticeController = new NoticeController(noticeService);
 
     public AppConfig() {
-        ds.setJdbcUrl("jdbc:mariadb://100.100.100.60:3306/test");
+        ds.setJdbcUrl("jdbc:mariadb://127.0.0.1:3306/tallemalle");
         ds.setUsername("root");
         ds.setPassword("qwer1234");
 
@@ -27,6 +36,10 @@ public class AppConfig {
         controllerMap.put("/notification/summary", notificationController);
         controllerMap.put("/notification/readall", notificationController);
         controllerMap.put("/notification/read", notificationController);
+
+        // notice
+        controllerMap.put("/notice", noticeController);
+        controllerMap.put("/notice/read", noticeController);
     }
 
     public Controller getController(String uri) {

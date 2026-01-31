@@ -2,13 +2,15 @@ package com.tallemalle.api.utils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.tallemalle.api.common.BaseResponse;
 import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.IOException;
 
 public class JsonParser {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper()
+    .registerModule(new JavaTimeModule());
 
     public static <T> T from(HttpServletRequest req, Class<T> clazz) {
         try {
