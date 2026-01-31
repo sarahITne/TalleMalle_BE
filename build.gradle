@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'software.amazon.awssdk:aws-core:2.40.17'
     implementation 'software.amazon.awssdk:s3:2.41.14'
     implementation 'com.zaxxer:HikariCP:7.0.2'

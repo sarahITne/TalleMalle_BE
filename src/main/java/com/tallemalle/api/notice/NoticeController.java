@@ -31,8 +31,8 @@ public class NoticeController implements Controller {
         } else if (req.getRequestURI().contains("notice") && req.getMethod().equals("GET")) {
             System.out.println("DB에서 목록을 조회하는 코드");
 
-//            try {
-//                Class.forName("org.mariadb.jdbc.Driver");
+            try {
+                Class.forName("org.mariadb.jdbc.Driver");
 
                 // DB 연결 객체를 다 사용하고 나면 반납할 수 있도록 수정
                 try (Connection conn = ds.getConnection()) {
@@ -54,7 +54,7 @@ public class NoticeController implements Controller {
                         list.add(returnDto);
                     }
                     return BaseResponse.success(list);
-//                }
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
