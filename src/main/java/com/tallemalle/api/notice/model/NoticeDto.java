@@ -19,16 +19,18 @@ public class NoticeDto {
         private String title;               // 제목
         private String tag;                 // 태그
         private Boolean isPinned;           // 필독 여부
+        private Integer views;              // 조회수
         private LocalDateTime createdAt;    // 생성일시
 
         public NoticeRes() {
         }
 
-        public NoticeRes(Long noticeIdx, String title, String tag, Boolean isPinned, LocalDateTime createdAt) {
+        public NoticeRes(Long noticeIdx, String title, String tag, Boolean isPinned, Integer views, LocalDateTime createdAt) {
             this.noticeIdx = noticeIdx;
             this.title = title;
             this.tag = tag;
             this.isPinned = isPinned;
+            this.views = views;
             this.createdAt = createdAt;
         }
 
@@ -48,6 +50,10 @@ public class NoticeDto {
             return isPinned;
         }
 
+        public Integer getViews() {
+            return views;
+        }
+
         public LocalDateTime getCreatedAt() {
             return createdAt;
         }
@@ -60,17 +66,19 @@ public class NoticeDto {
         private String contents;            // 내용
         private String tag;                 // 태그
         private Boolean isPinned;           // 필독 여부
+        private Integer views;              // 조회수
         private LocalDateTime createdAt;    // 생성일시
 
         public NoticeDetailRes() {
         }
 
-        public NoticeDetailRes(Long noticeIdx, String title, String contents, String tag, Boolean isPinned, LocalDateTime createdAt) {
+        public NoticeDetailRes(Long noticeIdx, String title, String contents, String tag, Boolean isPinned, Integer views, LocalDateTime createdAt) {
             this.noticeIdx = noticeIdx;
             this.title = title;
             this.contents = contents;
             this.tag = tag;
             this.isPinned = isPinned;
+            this.views = views;
             this.createdAt = createdAt;
         }
 
@@ -112,6 +120,14 @@ public class NoticeDto {
 
         public void setPinned(Boolean pinned) {
             isPinned = pinned;
+        }
+
+        public Integer getViews() {
+            return views;
+        }
+
+        public void setViews(Integer views) {
+            this.views = views;
         }
 
         public LocalDateTime getCreatedAt() {

@@ -6,6 +6,9 @@ import com.tallemalle.api.notice.NoticeService;
 import com.tallemalle.api.notification.NotificationController;
 import com.tallemalle.api.notification.NotificationRepository;
 import com.tallemalle.api.notification.NotificationService;
+import com.tallemalle.api.user.UserController;
+import com.tallemalle.api.user.UserRepository;
+import com.tallemalle.api.user.UserService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.util.HashMap;
@@ -15,6 +18,11 @@ public class AppConfig {
     private final Map<String, Controller> controllerMap = new HashMap<>();
 
     private final HikariDataSource ds = new HikariDataSource();
+
+    // 유저
+    private final UserRepository userRepository = new UserRepository(ds);
+    private final UserService userService = new UserService(userRepository);
+    private final UserController userController = new UserController(userService);
 
     // 알림
     private final NotificationRepository notificationRepository = new NotificationRepository(ds);
@@ -30,6 +38,10 @@ public class AppConfig {
         ds.setJdbcUrl("jdbc:mariadb://127.0.0.1:3306/tallemalle");
         ds.setUsername("root");
         ds.setPassword("qwer1234");
+
+        // User
+        controllerMap.put("/user/login", userController);
+        controllerMap.put("/user/signup", userController);
 
         // Notification
         controllerMap.put("/notification/list", notificationController);
