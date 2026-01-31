@@ -1,6 +1,8 @@
 package com.tallemalle.api.common;
 
 import com.tallemalle.api.notice.NoticeController;
+import com.tallemalle.api.notice.NoticeRepository;
+import com.tallemalle.api.notice.NoticeService;
 import com.tallemalle.api.notification.NotificationController;
 import com.tallemalle.api.notification.NotificationRepository;
 import com.tallemalle.api.notification.NotificationService;
@@ -20,7 +22,9 @@ public class AppConfig {
     private final NotificationController notificationController = new NotificationController(notificationService);
 
     // 공지사항
-    private final NoticeController noticeController = new NoticeController(ds);
+    private final NoticeRepository noticeRepository = new NoticeRepository(ds);
+    private final NoticeService noticeService = new NoticeService(noticeRepository);
+    private final NoticeController noticeController = new NoticeController(noticeService);
 
     public AppConfig() {
         ds.setJdbcUrl("jdbc:mariadb://127.0.0.1:3306/tallemalle");
