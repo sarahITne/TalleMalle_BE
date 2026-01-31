@@ -13,7 +13,7 @@ public class NoticeDto {
 //    private LocalDateTime updatedAt;    // 수정일시
 
     // 3. DTO 생성
-    // 공지사항 리스트 조회 - 응답
+    // 공지사항 리스트 조회 - 응답 dto
     public static class NoticeRes {
         private Long noticeIdx;             // 공지사항 idx (PK)
         private String title;               // 제목
@@ -53,9 +53,74 @@ public class NoticeDto {
         }
     }
 
-    // 공지사항 상세 조회 - 요청
+    // 공지사항 상세 조회 - 응답 dto
+    public static class NoticeDetailRes {
+        private Long noticeIdx;             // 공지사항 idx (PK)
+        private String title;               // 제목
+        private String contents;            // 내용
+        private String tag;                 // 태그
+        private Boolean isPinned;           // 필독 여부
+        private LocalDateTime createdAt;    // 생성일시
 
+        public NoticeDetailRes() {
+        }
 
-    // 공지사항 상세 조회 - 응답
+        public NoticeDetailRes(Long noticeIdx, String title, String contents, String tag, Boolean isPinned, LocalDateTime createdAt) {
+            this.noticeIdx = noticeIdx;
+            this.title = title;
+            this.contents = contents;
+            this.tag = tag;
+            this.isPinned = isPinned;
+            this.createdAt = createdAt;
+        }
+
+        public Long getNoticeIdx() {
+            return noticeIdx;
+        }
+
+        public void setNoticeIdx(Long noticeIdx) {
+            this.noticeIdx = noticeIdx;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getContents() {
+            return contents;
+        }
+
+        public void setContents(String contents) {
+            this.contents = contents;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public void setTag(String tag) {
+            this.tag = tag;
+        }
+
+        public Boolean getPinned() {
+            return isPinned;
+        }
+
+        public void setPinned(Boolean pinned) {
+            isPinned = pinned;
+        }
+
+        public LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
+    }
 
 }

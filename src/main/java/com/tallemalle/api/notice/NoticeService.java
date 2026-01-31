@@ -14,4 +14,8 @@ public class NoticeService {
     public List<NoticeDto.NoticeRes> getNoticeList() {
         return noticeRepository.findAll();
     }
+
+    public NoticeDto.NoticeDetailRes getNoticeDetail(Long noticeIdx) {
+        return noticeRepository.findbyId(noticeIdx);
+    }
 }
