@@ -11,6 +11,9 @@ repositories {
 }
 
 dependencies {
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    implementation 'io.jsonwebtoken:jjwt-orgjson:0.12.6'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     implementation 'software.amazon.awssdk:aws-core:2.40.17'
     implementation 'software.amazon.awssdk:s3:2.41.14'
