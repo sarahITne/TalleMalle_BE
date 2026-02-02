@@ -75,5 +75,9 @@ public class PaymentMethodEnroll {
         public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
             this.paymentMethods = paymentMethods;
         }
+
+        public static PaymentMethodEnroll.Response from(PaymentMethodList.Response res) {
+            return new Response(res.getDefaultMethodId(), res.getPaymentMethods());
+        }
     }
 }
