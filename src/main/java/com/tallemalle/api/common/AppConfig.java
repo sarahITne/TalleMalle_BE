@@ -18,7 +18,6 @@ public class AppConfig {
     NotificationController notificationController = new NotificationController(notificationService);
 
     public AppConfig() {
-        ds.setDriverClassName("org.mariadb.jdbc.Driver");
         ds.setJdbcUrl("jdbc:mariadb://100.100.100.60:3306/test");
         ds.setUsername("root");
         ds.setPassword("qwer1234");
@@ -27,7 +26,7 @@ public class AppConfig {
         controllerMap.put("/notification/list", notificationController);
         controllerMap.put("/notification/summary", notificationController);
         controllerMap.put("/notification/readall", notificationController);
-        controllerMap.put("/notification/readonly", notificationController);
+        controllerMap.put("/notification/read", notificationController);
     }
 
     public Controller getController(String uri) {
