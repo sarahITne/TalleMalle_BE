@@ -10,6 +10,7 @@ public class PaymentMethodList {
     public static class Request {
         private String userId;
 
+        public Request() {}
         public Request(String userId) {
             this.userId = userId;
         }
