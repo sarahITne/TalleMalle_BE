@@ -6,6 +6,9 @@ import com.tallemalle.api.notice.NoticeService;
 import com.tallemalle.api.notification.NotificationController;
 import com.tallemalle.api.notification.NotificationRepository;
 import com.tallemalle.api.notification.NotificationService;
+import com.tallemalle.api.payment.controller.PaymentController;
+import com.tallemalle.api.payment.controller.PaymentRepository;
+import com.tallemalle.api.payment.controller.PaymentService;
 import com.tallemalle.api.user.UserController;
 import com.tallemalle.api.user.UserRepository;
 import com.tallemalle.api.user.UserService;
@@ -24,22 +27,23 @@ public class AppConfig {
     private final UserRepository userRepository = new UserRepository(ds);
     private final UserService userService = new UserService(userRepository);
     private final UserController userController = new UserController(userService);
-  
-    public AppConfig() {
     // 알림
     private final NotificationRepository notificationRepository = new NotificationRepository(ds);
     private final NotificationService notificationService = new NotificationService(notificationRepository);
     private final NotificationController notificationController = new NotificationController(notificationService);
-
     // 공지사항
     private final NoticeRepository noticeRepository = new NoticeRepository(ds);
     private final NoticeService noticeService = new NoticeService(noticeRepository);
     private final NoticeController noticeController = new NoticeController(noticeService);
+    // 결제
+    private final PaymentRepository paymentRepository = new PaymentRepository(ds);
+    private final PaymentService paymentService = new PaymentService(paymentRepository);
+    private final PaymentController paymentController = new PaymentController(paymentService);
 
     public AppConfig() {
-        ds.setJdbcUrl("jdbc:mariadb://127.0.0.1:3306/tallemalle");
-        ds.setUsername("root");
-        ds.setPassword("qwer1234");
+        ds.setJdbcUrl(System.getenv("DB_URL"));
+        ds.setUsername(System.getenv("DB_USERNAME"));
+        ds.setPassword(System.getenv("DB_PASSWORD"));
 
         // User
         controllerMap.put("/user/login", userController);
@@ -54,6 +58,10 @@ public class AppConfig {
         // notice
         controllerMap.put("/notice", noticeController);
         controllerMap.put("/notice/read", noticeController);
+
+        // payment
+        controllerMap.put("/payment/list", paymentController);
+        controllerMap.put("/payment/enroll", paymentController);
     }
 
     public Controller getController(String uri) {
