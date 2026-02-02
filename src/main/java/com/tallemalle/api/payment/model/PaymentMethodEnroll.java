@@ -9,6 +9,9 @@ public class PaymentMethodEnroll {
         private String billingKey;
         private Boolean asDefault;
 
+        public Request() {
+        }
+
         public Request(String userId, String alias, String billingKey, Boolean asDefault) {
             this.userId = userId;
             this.alias = alias;
@@ -71,6 +74,10 @@ public class PaymentMethodEnroll {
 
         public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
             this.paymentMethods = paymentMethods;
+        }
+
+        public static PaymentMethodEnroll.Response from(PaymentMethodList.Response res) {
+            return new Response(res.getDefaultMethodId(), res.getPaymentMethods());
         }
     }
 }

@@ -17,15 +17,19 @@ public class PaymentController implements Controller {
 
     @Override
     public BaseResponse process(HttpServletRequest req, HttpServletResponse resp) {
-        if (req.getRequestURI().contains("list")) {
-            PaymentMethodList.Request parsedReq = JsonParser.from(req, PaymentMethodList.Request.class);
-            PaymentMethodList.Response res = paymentService.list(parsedReq);
-            return BaseResponse.success(res);
-        } else if (req.getRequestURI().contains("enroll")) {
-            PaymentMethodEnroll.Request parsedReq = JsonParser.from(req, PaymentMethodEnroll.Request.class);
-            PaymentMethodEnroll.Response res = paymentService.enroll(parsedReq);
-            return BaseResponse.success(res);
+        try {
+            if (req.getRequestURI().contains("list")) {
+                PaymentMethodList.Request parsedReq = JsonParser.from(req, PaymentMethodList.Request.class);
+                PaymentMethodList.Response res = paymentService.list(parsedReq);
+                return BaseResponse.success(res);
+            } else if (req.getRequestURI().contains("enroll")) {
+                PaymentMethodEnroll.Request parsedReq = JsonParser.from(req, PaymentMethodEnroll.Request.class);
+                PaymentMethodEnroll.Response res = paymentService.enroll(parsedReq);
+                return BaseResponse.success(res);
+            }
+            return BaseResponse.fail(null);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return BaseResponse.fail(null);
     }
 }

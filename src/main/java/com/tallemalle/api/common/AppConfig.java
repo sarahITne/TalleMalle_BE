@@ -9,6 +9,7 @@ import com.tallemalle.api.notification.NotificationService;
 import com.tallemalle.api.user.UserController;
 import com.tallemalle.api.user.UserRepository;
 import com.tallemalle.api.user.UserService;
+
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.util.HashMap;
@@ -23,7 +24,8 @@ public class AppConfig {
     private final UserRepository userRepository = new UserRepository(ds);
     private final UserService userService = new UserService(userRepository);
     private final UserController userController = new UserController(userService);
-
+  
+    public AppConfig() {
     // 알림
     private final NotificationRepository notificationRepository = new NotificationRepository(ds);
     private final NotificationService notificationService = new NotificationService(notificationRepository);
