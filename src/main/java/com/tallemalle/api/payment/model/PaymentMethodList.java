@@ -21,6 +21,10 @@ public class PaymentMethodList {
         public void setUserId(String userId) {
             this.userId = userId;
         }
+
+        public static PaymentMethodList.Request from(PaymentMethodEnroll.Request req) {
+            return new Request(req.getUserId());
+        }
     }
 
     public static class Response {
@@ -40,11 +44,11 @@ public class PaymentMethodList {
             this.defaultMethodId = defaultMethodId;
         }
 
-        public List<PaymentMethod> getPaymentInstruments() {
+        public List<PaymentMethod> getPaymentMethods() {
             return paymentMethods;
         }
 
-        public void setPaymentInstruments(List<PaymentMethod> paymentMethods) {
+        public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
             this.paymentMethods = paymentMethods;
         }
     }
