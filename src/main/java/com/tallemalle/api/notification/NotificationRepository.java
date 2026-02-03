@@ -18,11 +18,10 @@ public class NotificationRepository {
     }
 
     // 1. 목록 조회
-    public List<NotificationDto.Response.Item> findAll(long userId) {
-        List<NotificationDto.Response.Item> list = new ArrayList<>();
+    public List<NotificationDto.NotificationItemRes> findAll(long userId) {
+        List<NotificationDto.NotificationItemRes> list = new ArrayList<>();
 
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
                 String sql = "SELECT * FROM notification WHERE user_id = ? ORDER BY created_at DESC";
 
@@ -31,7 +30,7 @@ public class NotificationRepository {
                 ResultSet rs = pstmt.executeQuery();
 
                 while (rs.next()) {
-                    NotificationDto.Response.Item item = new NotificationDto.Response.Item(
+                    NotificationDto.NotificationItemRes item = new NotificationDto.NotificationItemRes(
                             rs.getLong("id"),
                             rs.getString("type"),
                             rs.getString("title"),
@@ -52,7 +51,6 @@ public class NotificationRepository {
     public long countUnread(long userId) {
         long count = 0;
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
                 String sql = "SELECT COUNT(*) FROM notification WHERE user_id = ? AND is_read = 0";
 
@@ -71,13 +69,12 @@ public class NotificationRepository {
     }
 
     // 3. 안읽은 알림 Top5 조회
-    public List<NotificationDto.Response.Item> findUnreadTop5(long userId) {
-        List<NotificationDto.Response.Item> list = new ArrayList<>();
+    public List<NotificationDto.NotificationItemRes> findUnreadTop5(long userId) {
+        List<NotificationDto.NotificationItemRes> list = new ArrayList<>();
 
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
-                String sql = "SELECT id, type, content, created_at " +
+                String sql = "SELECT id, type, content, is_read, created_at " +
                         "FROM notification " +
                         "WHERE user_id = ? AND is_read = 0 " +
                         "ORDER BY created_at DESC LIMIT 5";
@@ -88,12 +85,12 @@ public class NotificationRepository {
                 ResultSet rs = pstmt.executeQuery();
 
                 while (rs.next()) {
-                    NotificationDto.Response.Item item = new NotificationDto.Response.Item(
+                    NotificationDto.NotificationItemRes item = new NotificationDto.NotificationItemRes(
                             rs.getLong("id"),
                             rs.getString("type"),
                             null,
                             rs.getString("content"),
-                            false,
+                            rs.getBoolean("is_read"),
                             rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toString() : ""
                     );
                     list.add(item);
@@ -109,7 +106,6 @@ public class NotificationRepository {
     public int updateAllRead(long userId) {
         int affectedRows = 0;
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
                 // user_id가 일치하고, 아직 안 읽은(0) 것만 읽음(1)으로 변경
                 String sql = "UPDATE notification SET is_read = 1 " +
@@ -129,11 +125,10 @@ public class NotificationRepository {
     // 5. 개별 알림 읽음 처리
     public int updateRead(long notificationId, long userId) {
         int updatedCount = 0;
+
         try {
-            Class.forName("org.mariadb.jdbc.Driver");
             try (Connection conn = ds.getConnection()) {
-                String sql = "UPDATE notification SET is_read = 1 " +
-                        "WHERE id = ? AND user_id = ?";
+                String sql = "UPDATE notification SET is_read = 1 WHERE id = ? AND user_id = ?";
 
                 PreparedStatement pstmt = conn.prepareStatement(sql);
                 pstmt.setLong(1, notificationId);

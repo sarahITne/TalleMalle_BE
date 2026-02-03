@@ -64,7 +64,7 @@ public class AppConfig {
         controllerMap.put("/notification/list", notificationController);
         controllerMap.put("/notification/summary", notificationController);
         controllerMap.put("/notification/readall", notificationController);
-        controllerMap.put("/notification/read", notificationController);
+        controllerMap.put("/notification/readonly", notificationController);
 
         // notice
         controllerMap.put("/notice", noticeController);

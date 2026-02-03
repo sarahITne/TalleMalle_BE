@@ -1,5 +1,6 @@
 package com.tallemalle.api.common;
 
+import com.tallemalle.api.auth.context.LoginUser;
 import com.tallemalle.api.utils.JsonParser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -38,7 +39,8 @@ public class DispatcherServlet extends HttpServlet {
         }
 
         // 로그인 필요한 api
-        boolean isProtected = req.getRequestURI().contains("/notice/read");
+        boolean isProtected = req.getRequestURI().contains("/notice/read")
+                            || req.getRequestURI().contains("/notification");
 
         // 1. /notice/read 인 경우 로그인 체크 (공지사항 상세 조회)
         if (isProtected) {
@@ -79,6 +81,10 @@ public class DispatcherServlet extends HttpServlet {
 
                 // 필요 시 사용자 정보 전달
                 System.out.println(claims.get("email", String.class));
+
+                // 사용자 정보 LoginUser라는 컨텍스트에 저장
+                LoginUser loginUser = LoginUser.from(claims);
+                req.setAttribute("LoginUser", loginUser);
 //                req.setAttribute("email", claims.get("email", String.class));
 
             } catch (Exception e) {

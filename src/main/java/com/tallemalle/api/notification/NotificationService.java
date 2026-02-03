@@ -13,34 +13,39 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
     }
 
-    public NotificationDto.Response read(long userId) {
+    public NotificationDto.NotificationListRes read(long userId) {
 
-        List<NotificationDto.Response.Item> items = notificationRepository.findAll(userId);
+        List<NotificationDto.NotificationItemRes> items = notificationRepository.findAll(userId);
         long unreadCount = notificationRepository.countUnread(userId);
 
-        return new NotificationDto.Response(unreadCount, items);
+        return new NotificationDto.NotificationListRes(unreadCount, items);
     }
 
-    public NotificationDto.Response readUnreadOnly(Long userId){
-        List<NotificationDto.Response.Item> items = notificationRepository.findUnreadTop5(userId);
+    public NotificationDto.NotificationListRes readUnreadOnly(Long userId){
+        List<NotificationDto.NotificationItemRes> items = notificationRepository.findUnreadTop5(userId);
 
         long unreadCount = notificationRepository.countUnread(userId);
 
-        return new NotificationDto.Response(unreadCount, items);
+        return new NotificationDto.NotificationListRes(unreadCount, items);
     }
 
-    public Map<String, Object> readAll(long userId) {
+    public NotificationDto.NotificationReadAllRes readAll(long userId) {
         int count = notificationRepository.updateAllRead(userId);
 
-        Map<String, Object> resultData = new HashMap<>();
-        resultData.put("updatedCount", count);
-        resultData.put("message", "모든 알림이 읽음 처리되었습니다.");
+        NotificationDto.NotificationReadAllRes resultData = new NotificationDto.NotificationReadAllRes();
+        resultData.setUpdatedCount(count);
+        resultData.setMessage("모든 알림이 읽음 처리되었습니다.");
 
         return resultData;
     }
 
-    public boolean readOne(long notificationId, long userId) {
+    public NotificationDto.NotificationReadRes readOne(long notificationId, long userId) {
         int count = notificationRepository.updateRead(notificationId, userId);
-        return count > 0;
+
+        if (count > 0) {
+            return new NotificationDto.NotificationReadRes(true, "알림 읽음 처리 완료");
+        } else {
+            return new NotificationDto.NotificationReadRes(false, "권한이 없거나 존재하지 않는 알림입니다.");
+        }
     }
 }
