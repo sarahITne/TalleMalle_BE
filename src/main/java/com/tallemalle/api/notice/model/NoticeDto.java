@@ -1,0 +1,142 @@
+package com.tallemalle.api.notice.model;
+
+import java.time.LocalDateTime;
+
+public class NoticeDto {
+//    private Long noticeIdx;             // 공지사항 idx (PK)
+//    private String title;               // 제목
+//    private String contents;            // 내용
+//    private String tag;                 // 태그
+//    private Boolean isPinned;           // 필독 여부
+//    private Integer views;              // 조회수
+//    private LocalDateTime createdAt;    // 생성일시
+//    private LocalDateTime updatedAt;    // 수정일시
+
+    // 3. DTO 생성
+    // 공지사항 리스트 조회 - 응답 dto
+    public static class NoticeRes {
+        private Long noticeIdx;             // 공지사항 idx (PK)
+        private String title;               // 제목
+        private String tag;                 // 태그
+        private Boolean isPinned;           // 필독 여부
+        private Integer views;              // 조회수
+        private LocalDateTime createdAt;    // 생성일시
+
+        public NoticeRes() {
+        }
+
+        public NoticeRes(Long noticeIdx, String title, String tag, Boolean isPinned, Integer views, LocalDateTime createdAt) {
+            this.noticeIdx = noticeIdx;
+            this.title = title;
+            this.tag = tag;
+            this.isPinned = isPinned;
+            this.views = views;
+            this.createdAt = createdAt;
+        }
+
+        public Long getNoticeIdx() {
+            return noticeIdx;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public Boolean getPinned() {
+            return isPinned;
+        }
+
+        public Integer getViews() {
+            return views;
+        }
+
+        public LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+    }
+
+    // 공지사항 상세 조회 - 응답 dto
+    public static class NoticeDetailRes {
+        private Long noticeIdx;             // 공지사항 idx (PK)
+        private String title;               // 제목
+        private String contents;            // 내용
+        private String tag;                 // 태그
+        private Boolean isPinned;           // 필독 여부
+        private Integer views;              // 조회수
+        private LocalDateTime createdAt;    // 생성일시
+
+        public NoticeDetailRes() {
+        }
+
+        public NoticeDetailRes(Long noticeIdx, String title, String contents, String tag, Boolean isPinned, Integer views, LocalDateTime createdAt) {
+            this.noticeIdx = noticeIdx;
+            this.title = title;
+            this.contents = contents;
+            this.tag = tag;
+            this.isPinned = isPinned;
+            this.views = views;
+            this.createdAt = createdAt;
+        }
+
+        public Long getNoticeIdx() {
+            return noticeIdx;
+        }
+
+        public void setNoticeIdx(Long noticeIdx) {
+            this.noticeIdx = noticeIdx;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getContents() {
+            return contents;
+        }
+
+        public void setContents(String contents) {
+            this.contents = contents;
+        }
+
+        public String getTag() {
+            return tag;
+        }
+
+        public void setTag(String tag) {
+            this.tag = tag;
+        }
+
+        public Boolean getPinned() {
+            return isPinned;
+        }
+
+        public void setPinned(Boolean pinned) {
+            isPinned = pinned;
+        }
+
+        public Integer getViews() {
+            return views;
+        }
+
+        public void setViews(Integer views) {
+            this.views = views;
+        }
+
+        public LocalDateTime getCreatedAt() {
+            return createdAt;
+        }
+
+        public void setCreatedAt(LocalDateTime createdAt) {
+            this.createdAt = createdAt;
+        }
+    }
+
+}
