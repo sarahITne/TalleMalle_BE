@@ -1,10 +1,11 @@
 package com.tallemalle.api.notification;
 
+import com.tallemalle.api.common.DataSourceConfig;
 import com.tallemalle.api.notification.model.NotificationDto;
+import org.hibernate.Transaction;
+import org.hibernate.Session;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class NotificationService {
     private final NotificationRepository notificationRepository;
@@ -13,39 +14,58 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
     }
 
-    public NotificationDto.NotificationListRes read(long userId) {
+    public NotificationDto.NotificationReadRes readOne(long notificationId, long userId) {
+        Transaction tx = null;
+        try (Session session = DataSourceConfig.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
 
-        List<NotificationDto.NotificationItemRes> items = notificationRepository.findAll(userId);
-        long unreadCount = notificationRepository.countUnread(userId);
+            int count = notificationRepository.updateRead(session, notificationId, userId);
 
-        return new NotificationDto.NotificationListRes(unreadCount, items);
+            tx.commit();
+
+            if (count > 0) {
+                return new NotificationDto.NotificationReadRes(true, "읽음 처리 성공");
+            }
+            return new NotificationDto.NotificationReadRes(false, "권한이 없거나 존재하지 않는 알림");
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new RuntimeException(e);
+        }
     }
 
-    public NotificationDto.NotificationListRes readUnreadOnly(Long userId){
-        List<NotificationDto.NotificationItemRes> items = notificationRepository.findUnreadTop5(userId);
+    // 2. 안 읽은 알림 요약 조회
+    public NotificationDto.NotificationListRes readUnreadOnly(long userId) {
+        try (Session session = DataSourceConfig.getSessionFactory().openSession()) {
+            // Top 5개만 가져오는 리포지토리 메서드 호출
+            List<NotificationDto.NotificationItemRes> items = notificationRepository.findUnreadTop5(session, userId);
+            long unreadCount = notificationRepository.countUnread(session, userId);
 
-        long unreadCount = notificationRepository.countUnread(userId);
-
-        return new NotificationDto.NotificationListRes(unreadCount, items);
+            return new NotificationDto.NotificationListRes(unreadCount, items);
+        }
     }
 
     public NotificationDto.NotificationReadAllRes readAll(long userId) {
-        int count = notificationRepository.updateAllRead(userId);
+        Transaction tx = null;
+        try (Session session = DataSourceConfig.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
 
-        NotificationDto.NotificationReadAllRes resultData = new NotificationDto.NotificationReadAllRes();
-        resultData.setUpdatedCount(count);
-        resultData.setMessage("모든 알림이 읽음 처리되었습니다.");
+            int count = notificationRepository.updateAllRead(session, userId);
 
-        return resultData;
+            tx.commit();
+            return new NotificationDto.NotificationReadAllRes("모두 읽음 처리 완료", count);
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw new RuntimeException(e);
+        }
     }
 
-    public NotificationDto.NotificationReadRes readOne(long notificationId, long userId) {
-        int count = notificationRepository.updateRead(notificationId, userId);
+    // 조회(SELECT)의 경우 commit이 필수는 아니지만, 일관성을 위해 세션 관리는 필요합니다.
+    public NotificationDto.NotificationListRes read(long userId) {
+        try (Session session = DataSourceConfig.getSessionFactory().openSession()) {
+            List<NotificationDto.NotificationItemRes> items = notificationRepository.findAll(session, userId);
+            long unreadCount = notificationRepository.countUnread(session, userId);
 
-        if (count > 0) {
-            return new NotificationDto.NotificationReadRes(true, "알림 읽음 처리 완료");
-        } else {
-            return new NotificationDto.NotificationReadRes(false, "권한이 없거나 존재하지 않는 알림입니다.");
+            return new NotificationDto.NotificationListRes(unreadCount, items);
         }
     }
 }

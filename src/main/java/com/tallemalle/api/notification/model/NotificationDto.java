@@ -8,7 +8,7 @@ public class NotificationDto {
     // 응답
     public static class NotificationListRes {
         private long unreadCount;
-        private List<NotificationItemRes> list; // 바로 아래 정의된 Item을 씀
+        private List<NotificationItemRes> list;
 
         public NotificationListRes(long unreadCount, List<NotificationItemRes> list) {
             this.unreadCount = unreadCount;

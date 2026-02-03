@@ -1,6 +1,8 @@
 package com.tallemalle.api.notification;
 
+import com.tallemalle.api.notification.entity.Notification;
 import com.tallemalle.api.notification.model.NotificationDto;
+import org.hibernate.Session;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -8,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class NotificationRepository {
 
@@ -17,128 +20,61 @@ public class NotificationRepository {
         this.ds = ds;
     }
 
-    // 1. 목록 조회
-    public List<NotificationDto.NotificationItemRes> findAll(long userId) {
-        List<NotificationDto.NotificationItemRes> list = new ArrayList<>();
-
-        try {
-            try (Connection conn = ds.getConnection()) {
-                String sql = "SELECT * FROM notification WHERE user_id = ? ORDER BY created_at DESC";
-
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-                pstmt.setLong(1, userId);
-                ResultSet rs = pstmt.executeQuery();
-
-                while (rs.next()) {
-                    NotificationDto.NotificationItemRes item = new NotificationDto.NotificationItemRes(
-                            rs.getLong("id"),
-                            rs.getString("type"),
-                            rs.getString("title"),
-                            rs.getString("content"),
-                            rs.getBoolean("is_read"),
-                            rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toString() : ""
-                    );
-                    list.add(item);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return list;
+    // 1. 목록 조회 (JPQL 사용)
+    public List<NotificationDto.NotificationItemRes> findAll(Session session, long userId) {
+        return session.createQuery(
+                        "select n from Notification n where n.userId = :userId order by n.createdAt desc", Notification.class)
+                .setParameter("userId", userId)
+                .getResultList()
+                .stream()
+                .map(n -> new NotificationDto.NotificationItemRes(
+                        n.getId(), n.getType(), n.getTitle(), n.getContent(), n.isRead(), n.getCreatedAt().toString()
+                ))
+                .collect(Collectors.toList());
     }
 
     // 2. 안 읽은 개수 조회
-    public long countUnread(long userId) {
-        long count = 0;
-        try {
-            try (Connection conn = ds.getConnection()) {
-                String sql = "SELECT COUNT(*) FROM notification WHERE user_id = ? AND is_read = 0";
-
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-                pstmt.setLong(1, userId);
-
-                ResultSet rs = pstmt.executeQuery();
-                if (rs.next()) {
-                    count = rs.getLong(1);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return count;
+    public long countUnread(Session session, long userId) {
+        return session.createQuery(
+                        "select count(n) from Notification n where n.userId = :userId and n.isRead = false", Long.class)
+                .setParameter("userId", userId)
+                .getSingleResult();
     }
 
     // 3. 안읽은 알림 Top5 조회
-    public List<NotificationDto.NotificationItemRes> findUnreadTop5(long userId) {
-        List<NotificationDto.NotificationItemRes> list = new ArrayList<>();
-
-        try {
-            try (Connection conn = ds.getConnection()) {
-                String sql = "SELECT id, type, content, is_read, created_at " +
-                        "FROM notification " +
-                        "WHERE user_id = ? AND is_read = 0 " +
-                        "ORDER BY created_at DESC LIMIT 5";
-
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-                pstmt.setLong(1, userId);
-
-                ResultSet rs = pstmt.executeQuery();
-
-                while (rs.next()) {
-                    NotificationDto.NotificationItemRes item = new NotificationDto.NotificationItemRes(
-                            rs.getLong("id"),
-                            rs.getString("type"),
-                            null,
-                            rs.getString("content"),
-                            rs.getBoolean("is_read"),
-                            rs.getTimestamp("created_at") != null ? rs.getTimestamp("created_at").toString() : ""
-                    );
-                    list.add(item);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return list;
+    public List<NotificationDto.NotificationItemRes> findUnreadTop5(Session session, long userId) {
+        return session.createQuery(
+                        "select n from Notification n where n.userId = :userId and n.isRead = false order by n.createdAt desc", Notification.class)
+                .setParameter("userId", userId)
+                .setMaxResults(5) // LIMIT 5
+                .getResultList()
+                .stream()
+                .map(n -> new NotificationDto.NotificationItemRes(
+                        n.getId(), n.getType(), null, n.getContent(), n.isRead(), n.getCreatedAt().toString()
+                ))
+                .collect(Collectors.toList());
     }
 
     // 4. 모두 읽음 처리
-    public int updateAllRead(long userId) {
-        int affectedRows = 0;
-        try {
-            try (Connection conn = ds.getConnection()) {
-                // user_id가 일치하고, 아직 안 읽은(0) 것만 읽음(1)으로 변경
-                String sql = "UPDATE notification SET is_read = 1 " +
-                        "WHERE user_id = ? AND is_read = 0";
+    public int updateAllRead(Session session, long userId) {
 
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-                pstmt.setLong(1, userId);
+        int result = session.createQuery(
+                        "update Notification n set n.isRead = true where n.userId = :userId and n.isRead = false")
+                .setParameter("userId", userId)
+                .executeUpdate();
 
-                affectedRows = pstmt.executeUpdate();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return affectedRows;
+        return result;
     }
 
     // 5. 개별 알림 읽음 처리
-    public int updateRead(long notificationId, long userId) {
-        int updatedCount = 0;
+    public int updateRead(Session session, long notificationId, long userId) {
+        // 객체를 찾아서 영속성 컨텍스트에 올림
+        Notification notification = session.find(Notification.class, notificationId);
 
-        try {
-            try (Connection conn = ds.getConnection()) {
-                String sql = "UPDATE notification SET is_read = 1 WHERE id = ? AND user_id = ?";
-
-                PreparedStatement pstmt = conn.prepareStatement(sql);
-                pstmt.setLong(1, notificationId);
-                pstmt.setLong(2, userId);
-
-                updatedCount = pstmt.executeUpdate();
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (notification != null && notification.getUserId().equals(userId)) {
+            notification.markAsRead(); // 엔티티 상태 변경
+            return 1;
         }
-        return updatedCount;
+        return 0;
     }
 }
