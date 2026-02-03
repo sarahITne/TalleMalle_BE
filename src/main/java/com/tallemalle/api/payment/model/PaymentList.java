@@ -1,11 +1,13 @@
 package com.tallemalle.api.payment.model;
 
+import com.tallemalle.api.payment.model.entity.Payment;
+
 import java.util.List;
 
 /**
  * 결제 수단 목룍 조회
  */
-public class PaymentMethodList {
+public class PaymentList {
 
     public static class Request {
         private String userId;
@@ -22,19 +24,15 @@ public class PaymentMethodList {
         public void setUserId(String userId) {
             this.userId = userId;
         }
-
-        public static PaymentMethodList.Request from(PaymentMethodEnroll.Request req) {
-            return new Request(req.getUserId());
-        }
     }
 
     public static class Response {
         private Integer defaultMethodId;
-        private List<PaymentMethod> paymentMethods;
+        private List<Payment> payments;
 
-        public Response(Integer defaultMethodId, List<PaymentMethod> paymentMethods) {
+        public Response(Integer defaultMethodId, List<Payment> payments) {
             this.defaultMethodId = defaultMethodId;
-            this.paymentMethods = paymentMethods;
+            this.payments = payments;
         }
 
         public Integer getDefaultMethodId() {
@@ -45,12 +43,12 @@ public class PaymentMethodList {
             this.defaultMethodId = defaultMethodId;
         }
 
-        public List<PaymentMethod> getPaymentMethods() {
-            return paymentMethods;
+        public List<Payment> getPaymentMethods() {
+            return payments;
         }
 
-        public void setPaymentMethods(List<PaymentMethod> paymentMethods) {
-            this.paymentMethods = paymentMethods;
+        public void setPaymentMethods(List<Payment> payments) {
+            this.payments = payments;
         }
     }
 }

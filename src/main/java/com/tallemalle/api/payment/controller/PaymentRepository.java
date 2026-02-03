@@ -1,16 +1,15 @@
 package com.tallemalle.api.payment.controller;
 
-import com.tallemalle.api.payment.model.PaymentMethod;
-import com.tallemalle.api.payment.model.PaymentMethodEnroll;
-import com.tallemalle.api.payment.model.PaymentMethodList;
+import com.tallemalle.api.common.DataSourceConfig;
+import com.tallemalle.api.payment.model.entity.Payment;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PaymentRepository {
     private final DataSource ds;
@@ -29,15 +28,14 @@ public class PaymentRepository {
         }
     }
 
-    public ResultSet enroll(Integer userId, String alias, String billingKey) {
-        try (Connection conn = ds.getConnection()) {
-            PreparedStatement pStmt = conn.prepareStatement("INSERT INTO payment(user_id, alias, billing_key) VALUES (?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
-            pStmt.setInt(1, userId);
-            pStmt.setString(2, alias);
-            pStmt.setString(3, billingKey);
-            pStmt.executeUpdate();
-            return pStmt.getGeneratedKeys();
+    public void enroll(Payment payment) {
+        Transaction tx = null;
+        try (Session session = DataSourceConfig.getSessionFactory().openSession()){
+            tx = session.beginTransaction();
+            session.persist(payment);
+            tx.commit();
         } catch (Exception e) {
+            if (tx != null) tx.rollback();
             throw new RuntimeException(e);
         }
     }

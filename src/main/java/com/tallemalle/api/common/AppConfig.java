@@ -9,6 +9,7 @@ import com.tallemalle.api.notification.NotificationService;
 import com.tallemalle.api.payment.controller.PaymentController;
 import com.tallemalle.api.payment.controller.PaymentRepository;
 import com.tallemalle.api.payment.controller.PaymentService;
+import com.tallemalle.api.payment.controller.TossPaymentsAdaptor;
 import com.tallemalle.api.user.UserController;
 import com.tallemalle.api.user.UserRepository;
 import com.tallemalle.api.user.UserService;
@@ -37,13 +38,14 @@ public class AppConfig {
     private final NoticeController noticeController = new NoticeController(noticeService);
     // 결제
     private final PaymentRepository paymentRepository = new PaymentRepository(ds);
-    private final PaymentService paymentService = new PaymentService(paymentRepository);
+    private final PaymentService paymentService = new PaymentService(paymentRepository, new TossPaymentsAdaptor());
     private final PaymentController paymentController = new PaymentController(paymentService);
 
     public AppConfig() {
         ds.setJdbcUrl(System.getenv("DB_URL"));
         ds.setUsername(System.getenv("DB_USERNAME"));
         ds.setPassword(System.getenv("DB_PASSWORD"));
+        ds.setDriverClassName("org.mariadb.jdbc.Driver");
 
         // User
         controllerMap.put("/user/login", userController);
@@ -60,8 +62,8 @@ public class AppConfig {
         controllerMap.put("/notice/read", noticeController);
 
         // payment
-        controllerMap.put("/payment/list", paymentController);
         controllerMap.put("/payment/enroll", paymentController);
+        controllerMap.put("/payment/list", paymentController);
     }
 
     public Controller getController(String uri) {

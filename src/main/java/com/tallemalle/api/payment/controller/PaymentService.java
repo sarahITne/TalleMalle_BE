@@ -1,8 +1,9 @@
 package com.tallemalle.api.payment.controller;
 
-import com.tallemalle.api.payment.model.PaymentMethod;
-import com.tallemalle.api.payment.model.PaymentMethodEnroll;
-import com.tallemalle.api.payment.model.PaymentMethodList;
+import com.tallemalle.api.payment.model.PaymentIssue;
+import com.tallemalle.api.payment.model.entity.Payment;
+import com.tallemalle.api.payment.model.PaymentEnroll;
+import com.tallemalle.api.payment.model.PaymentList;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -10,15 +11,17 @@ import java.util.List;
 
 public class PaymentService {
     private final PaymentRepository paymentRepository;
+    private final TossPaymentsAdaptor tossPaymentsAdaptor;
 
-    public PaymentService(PaymentRepository paymentRepository) {
+    public PaymentService(PaymentRepository paymentRepository, TossPaymentsAdaptor tossPaymentsAdaptor) {
         this.paymentRepository = paymentRepository;
+        this.tossPaymentsAdaptor = tossPaymentsAdaptor;
     }
 
-    public PaymentMethodList.Response list(PaymentMethodList.Request req) throws Exception {
+    public PaymentList.Response list(PaymentList.Request req) throws Exception {
         Integer defaultMethodId = -1;
         Integer userId = Integer.parseInt(req.getUserId());
-        List<PaymentMethod> paymentMethods = new ArrayList<>();
+        List<Payment> payments = new ArrayList<>();
 
         try (ResultSet defaultRs = paymentRepository.fetchDefault(userId)) {
             if (defaultRs.next()) {
@@ -27,20 +30,24 @@ public class PaymentService {
         }
         try (ResultSet listRs = paymentRepository.list(userId)) {
             while (listRs.next()) {
-                paymentMethods.add(new PaymentMethod(listRs.getInt("id"), listRs.getString("alias")));
+                //payments.add(new Payment(listRs.getInt("id"), listRs.getString("alias")));
             }
         }
-        return new PaymentMethodList.Response(defaultMethodId, paymentMethods);
+        return new PaymentList.Response(defaultMethodId, payments);
     }
 
-    public PaymentMethodEnroll.Response enroll(PaymentMethodEnroll.Request req) throws Exception {
-        Integer userId = Integer.parseInt(req.getUserId());
-        try (ResultSet enrollRs = paymentRepository.enroll(userId, req.getAlias(), req.getBillingKey())) {
-            if (enrollRs.next() && req.getAsDefault()) {
-                Integer paymentId = enrollRs.getInt("insert_id");
-                paymentRepository.setDefault(userId, paymentId);
-            }
+    public PaymentEnroll.Response enroll(PaymentEnroll.Request req) throws Exception {
+        // 등록 요청을 받으면 TossPaymentsAdaptor로 빌링키 발행 요청
+        PaymentIssue.Response res = tossPaymentsAdaptor.issueBillingKey(PaymentIssue.Request.from(req));
+        // 빌링키 발행 요청에 대한 응답을 받아서 해당 응답에 대한 처리 후
+        if (res != null) {
+            System.out.println(res);
+        } else {
+            //paymentRepository.enroll(Payment.from())
         }
-        return PaymentMethodEnroll.Response.from(list(PaymentMethodList.Request.from(req)));
+        // 정상 발행이면 PaymentRepository를 통해 실제로 DB에 CRUD
+        // 발행이 안됐으면 그에 대한 응답
+        //return PaymentEnroll.Response.from(list(Pay.Request.from(req)));
+        return null;
     }
 }
