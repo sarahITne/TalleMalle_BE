@@ -12,7 +12,9 @@ import com.tallemalle.api.payment.controller.PaymentService;
 import com.tallemalle.api.user.UserController;
 import com.tallemalle.api.user.UserRepository;
 import com.tallemalle.api.user.UserService;
-
+import com.tallemalle.api.chat.ChatController;
+import com.tallemalle.api.chat.ChatRepository;
+import com.tallemalle.api.chat.ChatService;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.util.HashMap;
@@ -39,6 +41,10 @@ public class AppConfig {
     private final PaymentRepository paymentRepository = new PaymentRepository(ds);
     private final PaymentService paymentService = new PaymentService(paymentRepository);
     private final PaymentController paymentController = new PaymentController(paymentService);
+    // 채팅
+    private final ChatRepository chatRepository = new ChatRepository(ds);
+    private final ChatService chatService = new ChatService(chatRepository);
+    private final ChatController chatController = new ChatController(chatService);
 
     public AppConfig() {
         ds.setDriverClassName("org.mariadb.jdbc.Driver");
@@ -49,6 +55,10 @@ public class AppConfig {
         // User
         controllerMap.put("/user/login", userController);
         controllerMap.put("/user/signup", userController);
+
+        // Chat
+        controllerMap.put("/chat/rooms", chatController);
+        controllerMap.put("/chat/message", chatController);
 
         // Notification
         controllerMap.put("/notification/list", notificationController);
