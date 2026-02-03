@@ -22,16 +22,15 @@ public class ChatController implements Controller {
 
         // 1. 메시지 작성 기능 (POST /chat/messages)
         if (uri.contains("message") && method.equals("POST")) {
-            // JsonParser를 사용하여 요청 데이터를 ChatDto.Write.Req 객체로 변환
-            ChatDto.Write.Req dto = JsonParser.from(req, ChatDto.Write.Req.class);
+            // 변경: ChatDto.Write.Req -> ChatDto.WriteReq
+            ChatDto.WriteReq dto = JsonParser.from(req, ChatDto.WriteReq.class);
             result = chatService.sendMessage(dto);
         }
 
         // 2. 채팅방 참여 목록 조회 기능 (GET /chat/rooms)
         else if (uri.contains("rooms") && method.equals("GET")) {
-            // 요청 파라미터에서 사용자 ID를 추출하여 DTO 생성 (toDto 메서드 활용)
-            ChatDto.RoomList.Req dto = ChatDto.RoomList.Req.toDto(req);
-            // 여러 개의 채팅방 목록을 반환하므로 List 형태로 결과 받음
+            // 변경: ChatDto.RoomList.Req -> ChatDto.RoomListReq
+            ChatDto.RoomListReq dto = ChatDto.RoomListReq.toDto(req);
             result = chatService.getRoomList(dto);
         }
 

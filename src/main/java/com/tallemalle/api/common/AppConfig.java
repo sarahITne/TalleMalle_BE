@@ -47,6 +47,7 @@ public class AppConfig {
     private final ChatController chatController = new ChatController(chatService);
 
     public AppConfig() {
+        ds.setDriverClassName("org.mariadb.jdbc.Driver");
         ds.setJdbcUrl(System.getenv("DB_URL"));
         ds.setUsername(System.getenv("DB_USERNAME"));
         ds.setPassword(System.getenv("DB_PASSWORD"));
