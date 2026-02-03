@@ -40,10 +40,7 @@ public class DispatcherServlet extends HttpServlet {
 
         // 로그인 필요한 api
         boolean isProtected = req.getRequestURI().contains("/notice/read")
-                            || req.getRequestURI().contains("/notification/list")
-                            || req.getRequestURI().contains("/notification/summary")
-                            || req.getRequestURI().contains("/notification/readonly")
-                            || req.getRequestURI().contains("/notification/readall");
+                            || req.getRequestURI().contains("/notification");
 
         // 1. /notice/read 인 경우 로그인 체크 (공지사항 상세 조회)
         if (isProtected) {

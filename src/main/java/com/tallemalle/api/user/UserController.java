@@ -42,7 +42,7 @@ public class UserController implements Controller {
                         .claim("userId", returnDto.getUserId())
                         .claim("email", returnDto.getEmail())
                         .issuedAt(new Date())
-                        .expiration(new Date(System.currentTimeMillis() + 30000))
+                        .expiration(new Date(System.currentTimeMillis() + 300000))
                         .signWith(encodedKey)
                         .compact();
 
