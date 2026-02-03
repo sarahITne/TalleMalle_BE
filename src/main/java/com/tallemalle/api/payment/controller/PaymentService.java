@@ -1,9 +1,10 @@
 package com.tallemalle.api.payment.controller;
 
-import com.tallemalle.api.payment.model.PaymentIssue;
+import com.tallemalle.api.payment.model.dto.PaymentIssue;
 import com.tallemalle.api.payment.model.entity.Payment;
-import com.tallemalle.api.payment.model.PaymentEnroll;
-import com.tallemalle.api.payment.model.PaymentList;
+import com.tallemalle.api.payment.model.dto.PaymentEnroll;
+import com.tallemalle.api.payment.model.dto.PaymentList;
+import com.tallemalle.api.user.model.entity.User;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -42,8 +43,9 @@ public class PaymentService {
         // 빌링키 발행 요청에 대한 응답을 받아서 해당 응답에 대한 처리 후
         if (res != null) {
             System.out.println(res);
+            paymentRepository.enroll(Payment.from(User.fromId(1), res));
         } else {
-            //paymentRepository.enroll(Payment.from())
+            System.out.println("res is null");
         }
         // 정상 발행이면 PaymentRepository를 통해 실제로 DB에 CRUD
         // 발행이 안됐으면 그에 대한 응답

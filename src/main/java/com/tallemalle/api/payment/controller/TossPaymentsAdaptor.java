@@ -1,5 +1,5 @@
 package com.tallemalle.api.payment.controller;
-import com.tallemalle.api.payment.model.PaymentIssue;
+import com.tallemalle.api.payment.model.dto.PaymentIssue;
 import com.tallemalle.api.utils.JsonParser;
 
 import java.io.IOException;

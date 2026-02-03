@@ -1,4 +1,4 @@
-package com.tallemalle.api.payment.model;
+package com.tallemalle.api.payment.model.dto;
 
 import com.tallemalle.api.payment.model.entity.Payment;
 

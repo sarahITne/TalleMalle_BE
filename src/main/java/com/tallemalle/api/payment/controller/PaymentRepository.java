@@ -29,14 +29,22 @@ public class PaymentRepository {
     }
 
     public void enroll(Payment payment) {
+        Session session = null;
         Transaction tx = null;
-        try (Session session = DataSourceConfig.getSessionFactory().openSession()){
+        try {
+            session = DataSourceConfig.getSessionFactory().openSession();
             tx = session.beginTransaction();
             session.persist(payment);
             tx.commit();
         } catch (Exception e) {
-            if (tx != null) tx.rollback();
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
             throw new RuntimeException(e);
+        } finally {
+            if (session != null && session.isOpen()) {
+                session.close();
+            }
         }
     }
 

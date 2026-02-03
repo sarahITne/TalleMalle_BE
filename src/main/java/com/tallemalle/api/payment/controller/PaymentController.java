@@ -2,8 +2,8 @@ package com.tallemalle.api.payment.controller;
 
 import com.tallemalle.api.common.BaseResponse;
 import com.tallemalle.api.common.Controller;
-import com.tallemalle.api.payment.model.PaymentEnroll;
-import com.tallemalle.api.payment.model.PaymentList;
+import com.tallemalle.api.payment.model.dto.PaymentEnroll;
+import com.tallemalle.api.payment.model.dto.PaymentList;
 import com.tallemalle.api.utils.JsonParser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

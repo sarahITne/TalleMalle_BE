@@ -12,4 +12,10 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
+
+    public static User fromId(Integer id) {
+        User user = new User();
+        user.id = id;
+        return user;
+    }
 }
