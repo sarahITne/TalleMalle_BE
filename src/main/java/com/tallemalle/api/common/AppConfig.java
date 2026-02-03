@@ -41,6 +41,7 @@ public class AppConfig {
     private final PaymentController paymentController = new PaymentController(paymentService);
 
     public AppConfig() {
+        ds.setDriverClassName("org.mariadb.jdbc.Driver");
         ds.setJdbcUrl(System.getenv("DB_URL"));
         ds.setUsername(System.getenv("DB_USERNAME"));
         ds.setPassword(System.getenv("DB_PASSWORD"));
@@ -53,7 +54,7 @@ public class AppConfig {
         controllerMap.put("/notification/list", notificationController);
         controllerMap.put("/notification/summary", notificationController);
         controllerMap.put("/notification/readall", notificationController);
-        controllerMap.put("/notification/read", notificationController);
+        controllerMap.put("/notification/readonly", notificationController);
 
         // notice
         controllerMap.put("/notice", noticeController);
