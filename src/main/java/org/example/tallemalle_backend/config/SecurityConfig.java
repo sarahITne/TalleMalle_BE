@@ -44,8 +44,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
                 (auth) -> auth
                         .requestMatchers("/user/login", "/user/signup", "/user/verify").permitAll()
+                        .requestMatchers("/driver/**").hasAuthority("DRIVER")
                         .requestMatchers("/board/reg").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
         );
 
         http.csrf(AbstractHttpConfigurer::disable);
