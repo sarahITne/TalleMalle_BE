@@ -29,4 +29,18 @@ public class ChatDto {
                     .build();
         }
     }
+
+    @Builder
+    @Getter
+    public static class ListRes {
+        private Long idx;
+        private String contents;
+
+        public static ListRes from(Chat entity) {
+            return ListRes.builder()
+                    .idx(entity.getIdx())
+                    .contents(entity.getContents())
+                    .build();
+        }
+    }
 }
