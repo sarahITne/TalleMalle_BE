@@ -5,6 +5,8 @@ jwt:
 project:
   upload:
     path: ${UPLOAD_PATH}
+  aes:
+    key: ${AES_KEY}
 
 spring:
   application:

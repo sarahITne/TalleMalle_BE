@@ -20,8 +20,9 @@ public class User {
     @Setter
     private String password;
     @Setter
+    @Column(columnDefinition = "TINYINT(1) DEFAULT 1")
     private boolean enable;
-    @ColumnDefault(value = "ROLE_USER")
+    @ColumnDefault("'ROLE_USER'")
     private String role;
 
 }
