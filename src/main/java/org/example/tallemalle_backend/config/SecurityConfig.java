@@ -26,6 +26,7 @@ import java.util.List;
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
+    // 비밀번호 인코딩을 위한 객체
     @Bean
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();

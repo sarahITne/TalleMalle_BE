@@ -19,16 +19,20 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    // 회원가입
     public UserDto.SignupRes signup(UserDto.SignupReq dto) {
 
-        // 이메일 중복 확인
+        // 1. 이메일 중복 확인
         if(userRepository.findByEmail(dto.getEmail()).isPresent()){
             throw BaseException.from(SIGNUP_DUPLICATE_EMAIL);
         }
 
-        User user = dto.toEntity();
-        user.setPassword(passwordEncoder.encode(dto.getPassword()));
-        userRepository.save(user);
+        // 2. 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(dto.getPassword());
+
+        // 3. DTO를 엔티티로 변환 후 저장
+        User user = dto.toEntity(encodedPassword);
+        userRepository.save(user);  // 저장 후 user에 idx 세팅됨
 
         return UserDto.SignupRes.from(user);
     }
