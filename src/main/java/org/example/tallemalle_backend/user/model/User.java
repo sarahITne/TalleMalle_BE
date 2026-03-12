@@ -17,39 +17,42 @@ public class User extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, length = 50, unique = true)
     private String nickname;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, length = 100, unique = true)
     private String email;
 
     @Setter
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, length = 20, unique = true)
     private String phoneNumber;
 
     @Column(nullable = false)
     private LocalDate birth;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10)
     private String gender;
 
+    @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'LOCAL'")
     private String provider;
 
     @Setter
+    @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'ROLE_USER'")
     private String role;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'IDLE'")
     private String status;
 
+    @Column(nullable = false)
     @ColumnDefault("false")
     private Boolean enable;
 }

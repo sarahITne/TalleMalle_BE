@@ -30,12 +30,16 @@ public class UserDto {
 
         private String gender;
 
-        public User toEntity() {
+        public User toEntity(String encodedPassword) {
             return User.builder()
                     .email(this.email)
+                    .password(encodedPassword)
                     .name(this.name)
-                    .password(this.password)
-                    .enable(false)
+                    .nickname(this.nickname)
+                    .phoneNumber(this.phoneNumber)
+                    .birth(this.birth)
+                    .gender(this.gender)
+//                    .enable(false)
                     .build();
         }
     }
@@ -47,12 +51,16 @@ public class UserDto {
         private Long idx;
         private String email;
         private String name;
+        private String nickname;
+        private String status;
 
         public static SignupRes from(User entity) {
             return SignupRes.builder()
                     .idx(entity.getIdx())
                     .email(entity.getEmail())
                     .name(entity.getName())
+                    .nickname(entity.getNickname())
+                    .status(entity.getStatus())
                     .build();
         }
     }
