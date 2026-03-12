@@ -37,8 +37,10 @@ public class UserService implements UserDetailsService {
         return UserDto.SignupRes.from(user);
     }
 
+    // 로그인
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        // 이메일로 유저 조회
         User user = userRepository.findByEmail(username).orElseThrow();
 
         return AuthUserDetails.from(user);
