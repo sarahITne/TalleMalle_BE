@@ -27,6 +27,13 @@ public class DriverController {
         return ResponseEntity.ok(result);
     }
 
+    @GetMapping("/mycall")
+    public ResponseEntity read(@AuthenticationPrincipal AuthUserDetails driver){
+        Long driverIdx = driver.getIdx();
+        CallDto.DetailRes result = driverService.readMyCall(driverIdx);
+        return ResponseEntity.ok(result);
+    }
+
     @PatchMapping("/accept/{callIdx}")
     public ResponseEntity accept(@PathVariable Long callIdx, @AuthenticationPrincipal AuthUserDetails driver){
         Long driverIdx = driver.getIdx();

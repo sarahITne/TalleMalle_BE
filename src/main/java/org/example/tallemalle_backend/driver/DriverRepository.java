@@ -18,4 +18,8 @@ public interface DriverRepository extends JpaRepository<Call, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select c from Call c where c.id = :id")
     Optional<Call> findByIdWithLock(@Param("id") Long id);
+
+    boolean existsByDriverIdxAndStatus(Long driverIdx, CallStatus status);
+
+    Optional<Call> findByDriverIdx(Long driverIdx);
 }
