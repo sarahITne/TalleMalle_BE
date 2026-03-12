@@ -28,6 +28,7 @@ public class UserController {
     }
 
 
+    // 로그인
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody UserDto.LoginReq dto) {
         UsernamePasswordAuthenticationToken token =

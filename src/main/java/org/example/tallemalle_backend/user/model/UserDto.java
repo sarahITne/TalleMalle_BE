@@ -34,7 +34,6 @@ public class UserDto {
         @Pattern(message = "전화번호는 숫자만 입력 가능합니다.", regexp = "^01[0-9]-\\d{3,4}-\\d{4}$")
         private String phoneNumber;
 
-        @NotBlank
         private LocalDate birth;
 
         @NotBlank
