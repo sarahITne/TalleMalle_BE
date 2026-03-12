@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.recruit.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.tallemalle_backend.user.model.User;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
