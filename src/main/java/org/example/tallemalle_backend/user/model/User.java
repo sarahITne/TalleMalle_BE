@@ -39,20 +39,24 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 10)
     private String gender;
 
+    @Builder.Default
     @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'LOCAL'")
-    private String provider;
+    private String provider = "LOCAL";
 
     @Setter
+    @Builder.Default
     @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'ROLE_USER'")
-    private String role;
+    private String role = "ROLE_USER";
 
+    @Builder.Default
     @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'IDLE'")
-    private String status;
+    private String status = "IDLE";
 
+    @Builder.Default
     @Column(nullable = false)
     @ColumnDefault("false")
-    private Boolean enable;
+    private Boolean enable = false;
 }
