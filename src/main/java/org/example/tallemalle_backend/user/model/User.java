@@ -24,4 +24,5 @@ public class User {
     @ColumnDefault(value = "ROLE_USER")
     private String role;
 
+
 }
