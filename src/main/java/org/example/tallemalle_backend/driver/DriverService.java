@@ -25,8 +25,19 @@ public class DriverService {
         return CallDto.DetailRes.from(call);
     }
 
+    public CallDto.DetailRes readMyCall(Long driverIdx) {
+        Call call = driverRepository.findByDriverIdx(driverIdx).orElseThrow();
+
+        return CallDto.DetailRes.from(call);
+    }
+
     @Transactional
     public void acceptCall(Long callIdx, Long driverIdx) {
+        boolean alreadyAccepted = driverRepository.existsByDriverIdxAndStatus(driverIdx, CallStatus.ACCEPTED);
+        if (alreadyAccepted) {
+            throw new IllegalStateException("이미 진행 중인 운행이 있습니다.");
+        }
+
         Call call = driverRepository.findByIdWithLock(callIdx)
                 .orElseThrow(() -> new IllegalArgumentException("콜이 존재하지 않습니다."));
 
