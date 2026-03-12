@@ -1,6 +1,7 @@
 package org.example.tallemalle_backend.config;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tallemalle_backend.config.interceptor.JwtHandshakeInterceptor;
 import org.example.tallemalle_backend.config.websocket.WebSocketHandler;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -12,8 +13,12 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketConfigurer {
     private final WebSocketHandler webSocketHandler;
+    private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(webSocketHandler, "/ws").setAllowedOrigins("*");
+        registry.addHandler(webSocketHandler, "/ws")
+                .setAllowedOrigins("*")
+                .addInterceptors(jwtHandshakeInterceptor);
     }
 }
