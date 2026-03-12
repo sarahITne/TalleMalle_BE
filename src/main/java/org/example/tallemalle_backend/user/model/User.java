@@ -46,6 +46,10 @@ public class User extends BaseEntity {
     @ColumnDefault(value = "'ROLE_USER'")
     private String role;
 
+    @Column(nullable = false)
+    @ColumnDefault(value = "'IDLE'")
+    private String status;
+
     @ColumnDefault("false")
     private Boolean enable;
 }
