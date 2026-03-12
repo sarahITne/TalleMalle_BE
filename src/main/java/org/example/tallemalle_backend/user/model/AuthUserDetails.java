@@ -24,7 +24,7 @@ public class AuthUserDetails implements UserDetails {
                 .idx(entity.getIdx())
                 .username(entity.getEmail())
                 .password(entity.getPassword())
-                .enable(entity.isEnable())
+                .enable(entity.getEnable())
                 .role(entity.getRole())
                 .build();
     }
