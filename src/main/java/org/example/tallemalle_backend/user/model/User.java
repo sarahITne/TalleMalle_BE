@@ -2,11 +2,13 @@ package org.example.tallemalle_backend.user.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.tallemalle_backend.recruit.model.Participation;
+import org.example.tallemalle_backend.common.model.BaseEntity;
+import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;
+import java.time.LocalDate;
 import java.util.List;
 
 @NoArgsConstructor
@@ -14,28 +16,43 @@ import java.util.List;
 @Getter
 @Builder
 @Entity
-public class User {
+public class User extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(nullable = false)
-    private String email;
-
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
+
+    @Column(nullable = false, length = 50, unique = true)
+    private String nickname;
+
+    @Column(nullable = false, length = 100, unique = true)
+    private String email;
 
     @Setter
     @Column(nullable = false)
     private String password;
 
-    @Setter
-    @Column(nullable = false)
-    private boolean enable;
+    @Column(nullable = false, length = 20, unique = true)
+    private String phoneNumber;
 
     @Column(nullable = false)
+    private LocalDate birth;
+
+    @Column(nullable = false, length = 10)
+    private String gender;
+
+    @Builder.Default
+    @Column(nullable = false, length = 20)
+    @ColumnDefault(value = "'LOCAL'")
+    private String provider = "LOCAL";
+
+    @Setter
+    @Builder.Default
+    @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'ROLE_USER'")
-    private String role;
+    private String role = "ROLE_USER";
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
@@ -46,4 +63,13 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Participation> participations = new ArrayList<>();
 
+    @Builder.Default
+    @Column(nullable = false, length = 20)
+    @ColumnDefault(value = "'IDLE'")
+    private String status = "IDLE";
+
+    @Builder.Default
+    @Column(nullable = false)
+    @ColumnDefault("false")
+    private Boolean enable = false;
 }
