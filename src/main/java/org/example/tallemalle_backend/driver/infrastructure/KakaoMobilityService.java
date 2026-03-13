@@ -1,9 +1,9 @@
-package org.example.tallemalle_backend.driver;
+package org.example.tallemalle_backend.driver.infrastructure;
 
 import lombok.RequiredArgsConstructor;
-import org.example.tallemalle_backend.driver.model.Call;
-import org.example.tallemalle_backend.driver.model.DirectionInfo;
-import org.example.tallemalle_backend.driver.model.KakaoResponseDto;
+import org.example.tallemalle_backend.driver.call.model.Call;
+import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
+import org.example.tallemalle_backend.driver.infrastructure.model.KakaoResponseDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;

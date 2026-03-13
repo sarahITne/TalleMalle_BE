@@ -1,4 +1,4 @@
-package org.example.tallemalle_backend.user.model;
+package org.example.tallemalle_backend.driver.auth.model;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -8,7 +8,7 @@ import lombok.Getter;
 
 import java.time.LocalDate;
 
-public class UserDto {
+public class DriverDto {
 
     // 회원가입 요청
     @Getter
@@ -39,8 +39,8 @@ public class UserDto {
         @NotBlank
         private String gender;
 
-        public User toEntity(String encodedPassword) {
-            return User.builder()
+        public Driver toEntity(String encodedPassword) {
+            return Driver.builder()
                     .email(this.email)
                     .password(encodedPassword)
                     .name(this.name)
@@ -63,7 +63,7 @@ public class UserDto {
         private String nickname;
         private String status;
 
-        public static SignupRes from(User entity) {
+        public static SignupRes from(Driver entity) {
             return SignupRes.builder()
                     .idx(entity.getIdx())
                     .email(entity.getEmail())
@@ -98,14 +98,14 @@ public class UserDto {
         private String role;
         private String status;
 
-        public static LoginRes from(AuthUserDetails authUserDetails) {
+        public static LoginRes from(AuthDriverDetails authDriverDetails) {
             return LoginRes.builder()
-                    .idx(authUserDetails.getIdx())
-                    .email(authUserDetails.getEmail())
-                    .name(authUserDetails.getName())
-                    .nickname(authUserDetails.getNickname())
-                    .role(authUserDetails.getRole())
-                    .status(authUserDetails.getStatus())
+                    .idx(authDriverDetails.getIdx())
+                    .email(authDriverDetails.getEmail())
+                    .name(authDriverDetails.getName())
+                    .nickname(authDriverDetails.getNickname())
+                    .role(authDriverDetails.getRole())
+                    .status(authDriverDetails.getStatus())
                     .build();
         }
     }

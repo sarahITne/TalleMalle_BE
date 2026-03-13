@@ -1,8 +1,8 @@
-package org.example.tallemalle_backend.driver;
+package org.example.tallemalle_backend.driver.call;
 
 import jakarta.persistence.LockModeType;
-import org.example.tallemalle_backend.driver.model.Call;
-import org.example.tallemalle_backend.driver.model.CallStatus;
+import org.example.tallemalle_backend.driver.call.model.Call;
+import org.example.tallemalle_backend.driver.call.model.CallStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 import java.util.Optional;
 
-public interface DriverRepository extends JpaRepository<Call, Long> {
+public interface CallRepository extends JpaRepository<Call, Long> {
     @Query("SELECT c FROM Call c WHERE c.status IN :statuses")
     List<Call> findByStatusIn(@Param("statuses") List<CallStatus> statuses);
 

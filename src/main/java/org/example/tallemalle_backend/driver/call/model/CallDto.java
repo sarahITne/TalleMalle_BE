@@ -1,9 +1,8 @@
-package org.example.tallemalle_backend.driver.model;
+package org.example.tallemalle_backend.driver.call.model;
 
 import lombok.Builder;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
+import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
 
 public class CallDto {
     // 1. 전체 목록 조회

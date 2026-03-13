@@ -1,29 +1,30 @@
-package org.example.tallemalle_backend.driver;
+package org.example.tallemalle_backend.driver.call;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.example.tallemalle_backend.driver.model.Call;
-import org.example.tallemalle_backend.driver.model.CallDto;
-import org.example.tallemalle_backend.driver.model.CallStatus;
-import org.example.tallemalle_backend.driver.model.DirectionInfo;
+import org.example.tallemalle_backend.driver.infrastructure.KakaoMobilityService;
+import org.example.tallemalle_backend.driver.call.model.Call;
+import org.example.tallemalle_backend.driver.call.model.CallDto;
+import org.example.tallemalle_backend.driver.call.model.CallStatus;
+import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class DriverService {
-    private final DriverRepository driverRepository;
+public class CallService {
+    private final CallRepository callRepository;
     private final KakaoMobilityService kakaoMobilityService;
 
 
     public List<CallDto.ListRes> list() {
-        List<Call> callList = driverRepository.findByStatusIn(List.of(CallStatus.WAITING, CallStatus.CANCELED));
+        List<Call> callList = callRepository.findByStatusIn(List.of(CallStatus.WAITING, CallStatus.CANCELED));
         return callList.stream().map(CallDto.ListRes::from).toList();
     }
 
     public CallDto.DetailRes read(Long callIdx) {
-        Call call = driverRepository.findById(callIdx).orElseThrow();
+        Call call = callRepository.findById(callIdx).orElseThrow();
 
         DirectionInfo direction = kakaoMobilityService.getDirections(call);
 
@@ -33,19 +34,19 @@ public class DriverService {
     }
 
     public CallDto.DetailRes readMyCall(Long driverIdx) {
-        Call call = driverRepository.findByDriverIdx(driverIdx).orElseThrow();
+        Call call = callRepository.findByDriverIdx(driverIdx).orElseThrow();
 
         return CallDto.DetailRes.from(call);
     }
 
     @Transactional
     public void acceptCall(Long callIdx, Long driverIdx) {
-        boolean alreadyAccepted = driverRepository.existsByDriverIdxAndStatus(driverIdx, CallStatus.ACCEPTED);
+        boolean alreadyAccepted = callRepository.existsByDriverIdxAndStatus(driverIdx, CallStatus.ACCEPTED);
         if (alreadyAccepted) {
             throw new IllegalStateException("이미 진행 중인 운행이 있습니다.");
         }
 
-        Call call = driverRepository.findByIdWithLock(callIdx)
+        Call call = callRepository.findByIdWithLock(callIdx)
                 .orElseThrow(() -> new IllegalArgumentException("콜이 존재하지 않습니다."));
 
         if (call.getStatus() != CallStatus.WAITING && call.getStatus() != CallStatus.CANCELED) {
@@ -57,7 +58,7 @@ public class DriverService {
 
     @Transactional
     public void cancelCall(Long callIdx, Long driverIdx) {
-        Call call = driverRepository.findByIdWithLock(callIdx)
+        Call call = callRepository.findByIdWithLock(callIdx)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콜입니다."));
 
         if (call.getDriverIdx() != null && !call.getDriverIdx().equals(driverIdx)) {

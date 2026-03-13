@@ -1,4 +1,4 @@
-package org.example.tallemalle_backend.user.model;
+package org.example.tallemalle_backend.driver.auth.model;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class AuthUserDetails implements UserDetails {
+public class AuthDriverDetails implements UserDetails {
     private Long idx;
     private String email;
     private String password;
@@ -22,8 +22,8 @@ public class AuthUserDetails implements UserDetails {
     private String role;
     private String status;
 
-    public static AuthUserDetails from(User entity) {
-        return AuthUserDetails.builder()
+    public static AuthDriverDetails from(Driver entity) {
+        return AuthDriverDetails.builder()
                 .idx(entity.getIdx())
                 .email(entity.getEmail())
                 .password(entity.getPassword())
