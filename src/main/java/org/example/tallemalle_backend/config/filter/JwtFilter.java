@@ -41,16 +41,16 @@ public class JwtFilter extends OncePerRequestFilter {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals("ATOKEN")) {
-                    try {
-                        String username = jwtUtil.getUsername(cookie.getValue());
-                        Long idx = jwtUtil.getUserIdx(cookie.getValue());
-                        String role = jwtUtil.getRole(cookie.getValue());
+                    // JwtUtil에서 토큰 생성 및 확인하도록 리팩토링
+                    String email = jwtUtil.getEmail(cookie.getValue());
+                    Long idx = jwtUtil.getUserIdx(cookie.getValue());
+                    String role = jwtUtil.getRole(cookie.getValue());
 
-                        AuthUserDetails user = AuthUserDetails.builder()
-                                .idx(idx)
-                                .username(username)
-                                .role(role)
-                                .build();
+                    AuthUserDetails user = AuthUserDetails.builder()
+                            .idx(idx)
+                            .email(email)
+                            .role(role)
+                            .build();
 
                         Authentication authentication = new UsernamePasswordAuthenticationToken(
                                 user,

@@ -8,7 +8,8 @@ project:
 
 spring:
   application:
-    name: spring04
+    name: tallemalle_backend
+
   cloud:
     aws:
       credentials:
@@ -18,6 +19,7 @@ spring:
         bucket: be24-s3
       region:
         static: ap-northeast-2
+
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: ${DB_URL}
