@@ -1,12 +1,12 @@
 package org.example.tallemalle_backend.config.filter;
 
-
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails; // 🌟 기사 객체 import (경로 확인해주세요)
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,7 +30,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
         return path.startsWith("/user/login") ||
                 path.startsWith("/user/signup") ||
-                path.startsWith("/user/verify");
+                path.startsWith("/user/verify") ||
+                path.startsWith("/driver/login") ||
+                path.startsWith("/driver/signup");
     }
 
     @Override
@@ -38,19 +40,29 @@ public class JwtFilter extends OncePerRequestFilter {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals("ATOKEN")) {
-                    // JwtUtil에서 토큰 생성 및 확인하도록 리팩토링
-                    String username = jwtUtil.getUsername(cookie.getValue());
+                    String email = jwtUtil.getEmail(cookie.getValue());
                     Long idx = jwtUtil.getUserIdx(cookie.getValue());
                     String role = jwtUtil.getRole(cookie.getValue());
 
-                    AuthUserDetails user = AuthUserDetails.builder()
-                            .idx(idx)
-                            .username(username)
-                            .role(role)
-                            .build();
+                    // 권한(role)에 따라 Principal 객체를 다르게 생성
+                    Object principal;
+                    if ("DRIVER".equals(role)) {
+                        principal = AuthDriverDetails.builder()
+                                .idx(idx)
+                                .email(email)
+                                .role(role)
+                                .build();
+                    } else {
+                        principal = AuthUserDetails.builder()
+                                .idx(idx)
+                                .email(email)
+                                .role(role)
+                                .build();
+                    }
 
+                    // principal 객체를 넘겨줄 때 role에 맞는 GrantedAuthority를 부여
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
-                            user,
+                            principal,
                             null,
                             List.of(new SimpleGrantedAuthority(role))
                     );

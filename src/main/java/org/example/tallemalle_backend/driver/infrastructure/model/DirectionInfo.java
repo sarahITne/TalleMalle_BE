@@ -1,4 +1,4 @@
-package org.example.tallemalle_backend.driver.model;
+package org.example.tallemalle_backend.driver.infrastructure.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

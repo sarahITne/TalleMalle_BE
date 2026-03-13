@@ -1,4 +1,4 @@
-package org.example.tallemalle_backend.user.model;
+package org.example.tallemalle_backend.driver.auth.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Getter
 @Builder
 @Entity
-public class User extends BaseEntity {
+public class Driver extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
@@ -47,8 +47,8 @@ public class User extends BaseEntity {
     @Setter
     @Builder.Default
     @Column(nullable = false, length = 20)
-    @ColumnDefault(value = "'ROLE_USER'")
-    private String role = "ROLE_USER";
+    @ColumnDefault(value = "'DRIVER'")
+    private String role = "DRIVER";
 
     @Builder.Default
     @Column(nullable = false, length = 20)
