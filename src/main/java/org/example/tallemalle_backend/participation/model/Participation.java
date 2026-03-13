@@ -1,7 +1,8 @@
-package org.example.tallemalle_backend.recruit.model;
+package org.example.tallemalle_backend.participation.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.user.model.User;
 
 @Entity
@@ -27,5 +28,5 @@ public class Participation {
     // 참여 상태를 관리하는 컬럼 (예: ACTIVE(참여중), CANCELED(취소), DONE(완료))
     @Builder.Default
     @Column(nullable = false)
-    private String status = "ACTIVE";
+    private String status;
 }

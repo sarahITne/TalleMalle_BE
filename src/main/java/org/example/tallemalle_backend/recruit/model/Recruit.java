@@ -2,6 +2,7 @@ package org.example.tallemalle_backend.recruit.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.user.model.User;
 
 import java.time.LocalDateTime;
@@ -58,9 +59,11 @@ public class Recruit {
     private Integer maxCapacity;
 
     @Column(name = "current_capacity", nullable = false)
+    @Setter
     private Integer currentCapacity;
 
     @Enumerated(EnumType.STRING)
+    @Setter
     @Column(length = 20, nullable = false)
     private RecruitStatus status;
 

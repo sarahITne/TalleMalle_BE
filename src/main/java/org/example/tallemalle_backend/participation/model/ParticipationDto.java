@@ -1,4 +1,4 @@
-package org.example.tallemalle_backend.recruit.model;
+package org.example.tallemalle_backend.participation.model;
 
 import lombok.Builder;
 import lombok.Getter;
