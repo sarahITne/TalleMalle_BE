@@ -32,6 +32,9 @@ public class CallDto {
         private Long driverIdx;
         private String startLocation;
         private String endLocation;
+        private Double distance;
+        private Integer duration;
+        private int estimatedFare;
         private CallStatus status;
 
         public static DetailRes from(Call entity) {
@@ -44,5 +47,19 @@ public class CallDto {
                     .status(entity.getStatus())
                     .build();
         }
+        public static DetailRes from(Call call, DirectionInfo direction, int estimatedFare) {
+            return DetailRes.builder()
+                    .callIdx(call.getId())
+                    .userIdx(call.getUserIdx())
+                    .driverIdx(call.getDriverIdx())
+                    .startLocation(call.getStartLocation())
+                    .endLocation(call.getEndLocation())
+                    .status(call.getStatus())
+                    .distance(direction.getDistance() / 1000.0) // m -> km
+                    .duration(direction.getDuration() / 60)     // 초 -> 분
+                    .estimatedFare(estimatedFare)
+                    .build();
+        }
+
     }
 }

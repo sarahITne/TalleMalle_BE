@@ -44,6 +44,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
                 (auth) -> auth
                         .requestMatchers("/user/login", "/user/signup", "/user/verify").permitAll()
+                        .requestMatchers("/ws-stomp/**").permitAll()
+                        .requestMatchers("/test/fire-call").permitAll()
                         .requestMatchers("/driver/**").hasAuthority("DRIVER")
                         .requestMatchers("/board/reg").authenticated()
                         .anyRequest().authenticated()

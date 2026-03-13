@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.model.Call;
 import org.example.tallemalle_backend.driver.model.CallDto;
 import org.example.tallemalle_backend.driver.model.CallStatus;
+import org.example.tallemalle_backend.driver.model.DirectionInfo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DriverService {
     private final DriverRepository driverRepository;
+    private final KakaoMobilityService kakaoMobilityService;
+
 
     public List<CallDto.ListRes> list() {
         List<Call> callList = driverRepository.findByStatusIn(List.of(CallStatus.WAITING, CallStatus.CANCELED));
@@ -22,7 +25,11 @@ public class DriverService {
     public CallDto.DetailRes read(Long callIdx) {
         Call call = driverRepository.findById(callIdx).orElseThrow();
 
-        return CallDto.DetailRes.from(call);
+        DirectionInfo direction = kakaoMobilityService.getDirections(call);
+
+        int estimatedFare = calculateTaxiFare(direction.getDistance() / 1000.0, direction.getDuration() / 60);
+
+        return CallDto.DetailRes.from(call, direction, estimatedFare);
     }
 
     public CallDto.DetailRes readMyCall(Long driverIdx) {
@@ -58,5 +65,25 @@ public class DriverService {
         }
 
         call.cancel();
+    }
+
+    // 예상 금액 계산 로직
+    private int calculateTaxiFare(double distanceKm, int durationMinutes) {
+
+        int baseFare = 4800;
+        double baseDistanceKm = 1.6;
+
+        int distanceFare = 0;
+        if (distanceKm > baseDistanceKm) {
+            distanceFare = (int) Math.ceil((distanceKm - baseDistanceKm) / 0.131) * 100;
+        }
+
+        // 실제 시간요금 (1분 = 200원)
+        int timeFare = durationMinutes * 200;
+
+        // 예상요금은 시간요금 50%만 반영
+        int totalFare = baseFare + distanceFare + (timeFare / 2);
+
+        return (totalFare / 100) * 100;
     }
 }
