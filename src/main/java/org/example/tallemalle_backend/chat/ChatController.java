@@ -1,30 +1,38 @@
 package org.example.tallemalle_backend.chat;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Response;
+import org.example.tallemalle_backend.chat.model.Chat;
 import org.example.tallemalle_backend.chat.model.ChatDto;
 import org.example.tallemalle_backend.common.model.BaseResponse;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.DestinationVariable;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RequestMapping("/chat")
 @RestController
 @RequiredArgsConstructor
 public class ChatController {
     private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("/send/{recruitIdx}")
-    public ResponseEntity send(
-            @AuthenticationPrincipal AuthUserDetails user,
-            @PathVariable Long recruitIdx,
-            @RequestBody ChatDto.SendReq dto
+    @MessageMapping("/chat/send/{recruitIdx}")
+    public void sendMessage(
+            @DestinationVariable Long recruitIdx,
+            ChatDto.SendReq dto,
+            SimpMessageHeaderAccessor headerAccessor
     ) {
+        AuthUserDetails user = resolveUser(headerAccessor);
         ChatDto.SendRes result = chatService.send(user, recruitIdx, dto);
-        return ResponseEntity.ok(BaseResponse.success(result));
+        messagingTemplate.convertAndSend("/topic/chat/" + recruitIdx, result);
     }
 
     @GetMapping("/{recruitIdx}/messages")
@@ -34,5 +42,24 @@ public class ChatController {
     ) {
         List<ChatDto.ListRes> dto = chatService.list(user, recruitIdx);
         return ResponseEntity.ok(BaseResponse.success(dto));
+    }
+
+    private AuthUserDetails resolveUser(SimpMessageHeaderAccessor headerAccessor) {
+        Map<String, Object> attributes = headerAccessor.getSessionAttributes();
+        if (attributes == null) {
+            throw new IllegalStateException("웹소켓 세션이 없습니다.");
+        }
+
+        Object authObject = attributes.get("user");
+        if (!(authObject instanceof Authentication authentication)) {
+            throw new IllegalStateException("웹소켓 인증 정보가 없습니다.");
+        }
+
+        Object principal = authentication.getPrincipal();
+        if (!(principal instanceof AuthUserDetails user)) {
+            throw new IllegalStateException("웹소켓 사용자 정보가 없습니다.");
+        }
+
+        return user;
     }
 }

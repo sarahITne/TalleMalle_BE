@@ -6,7 +6,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -21,6 +23,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
@@ -38,23 +41,32 @@ public class JwtFilter extends OncePerRequestFilter {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals("ATOKEN")) {
-                    // JwtUtil에서 토큰 생성 및 확인하도록 리팩토링
-                    String username = jwtUtil.getUsername(cookie.getValue());
-                    Long idx = jwtUtil.getUserIdx(cookie.getValue());
-                    String role = jwtUtil.getRole(cookie.getValue());
+                    try {
+                        String username = jwtUtil.getUsername(cookie.getValue());
+                        Long idx = jwtUtil.getUserIdx(cookie.getValue());
+                        String role = jwtUtil.getRole(cookie.getValue());
 
-                    AuthUserDetails user = AuthUserDetails.builder()
-                            .idx(idx)
-                            .username(username)
-                            .role(role)
-                            .build();
+                        AuthUserDetails user = AuthUserDetails.builder()
+                                .idx(idx)
+                                .username(username)
+                                .role(role)
+                                .build();
 
-                    Authentication authentication = new UsernamePasswordAuthenticationToken(
-                            user,
-                            null,
-                            List.of(new SimpleGrantedAuthority(role))
-                    );
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                user,
+                                null,
+                                List.of(new SimpleGrantedAuthority(role))
+                        );
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                    } catch (JwtException | IllegalArgumentException e) {
+                        log.warn("유효하지 않거나 만료된 ATOKEN 무시: path={}, reason={}", request.getRequestURI(), e.getMessage());
+                        SecurityContextHolder.clearContext();
+
+                        Cookie expiredCookie = new Cookie("ATOKEN", "");
+                        expiredCookie.setPath("/");
+                        expiredCookie.setMaxAge(0);
+                        response.addCookie(expiredCookie);
+                    }
                 }
             }
         }
