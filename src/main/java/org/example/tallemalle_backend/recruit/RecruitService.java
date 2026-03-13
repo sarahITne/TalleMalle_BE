@@ -24,11 +24,14 @@ public class RecruitService {
     private final ParticipationRepository participationRepository;
 
     // TODO: Socket 통신 연결 필요
+    @Transactional
     public void reg(AuthUserDetails user, RecruitDto.RegReq dto) {
+        // 유저 정보 가져오기
         User realUser = userRepository.findById(user.getIdx()).orElseThrow();
 
         Recruit recruit = dto.toEntity(realUser);
 
+        // 매칭 엔티티 생성
         Participation participation = Participation.builder()
                 .user(realUser)
                 .recruit(recruit)
@@ -37,7 +40,15 @@ public class RecruitService {
 
         recruit.getParticipations().add(participation);
         realUser.setCurrentRecruit(recruit);
-        recruitRepository.save(recruit);
+
+        // DB에 모집글 저장
+        Recruit savedRecruit = recruitRepository.save(recruit);
+
+        // 소켓으로 보낼 DTO 생성
+        RecruitDto.ListRes responseDto = RecruitDto.ListRes.from(savedRecruit);
+
+        // 소켓으로 전송
+        simpMessagingTemplate.convertAndSend("/topic/all-calls", responseDto);
     }
 
     // TODO: Slice로 페이징 처리 필요
