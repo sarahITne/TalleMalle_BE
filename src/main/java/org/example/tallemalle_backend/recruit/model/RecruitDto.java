@@ -80,6 +80,7 @@ public class RecruitDto {
                     .departureTime(entity.getDepartureTime())
                     .maxCapacity(entity.getMaxCapacity())
                     .currentCapacity(entity.getCurrentCapacity())
+                    .status(entity.getStatus())
                     .createdAt(entity.getCreatedAt())
                     .build();
         }

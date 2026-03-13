@@ -58,6 +58,12 @@ public class RecruitService {
         return recruitList.stream().map(RecruitDto.ListRes::from).toList();
     }
 
+    // TODO: Slice로 페이징 처리 필요
+    public List<RecruitDto.ListRes> search(Double swLat, Double swLng, Double neLat, Double neLng) {
+        List<Recruit> recruitList = recruitRepository.findRecruitsInBounds(swLat, swLng, neLat, neLng);
+        return recruitList.stream().map(RecruitDto.ListRes::from).toList();
+    }
+
     // TODO: 예외 처리
     @Transactional
     public boolean join(AuthUserDetails user, Long recruitIdx) {
