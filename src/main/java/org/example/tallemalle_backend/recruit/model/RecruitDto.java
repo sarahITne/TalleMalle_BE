@@ -2,6 +2,7 @@ package org.example.tallemalle_backend.recruit.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.example.tallemalle_backend.participation.model.ParticipationDto;
 import org.example.tallemalle_backend.user.model.User;
 
 import java.time.LocalDateTime;

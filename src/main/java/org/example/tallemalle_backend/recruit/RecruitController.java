@@ -28,5 +28,11 @@ public class RecruitController {
         return ResponseEntity.ok(BaseResponse.success(result));
     }
 
+    @PostMapping("/join/{recruitIdx}")
+    public ResponseEntity join(@AuthenticationPrincipal AuthUserDetails user, @PathVariable Long recruitIdx) {
+        boolean result = recruitService.join(user, recruitIdx);
+        return ResponseEntity.ok(BaseResponse.success(result));
+    }
+
 
 }
