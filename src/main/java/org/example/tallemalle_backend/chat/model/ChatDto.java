@@ -25,11 +25,17 @@ public class ChatDto {
     public static class SendRes {
         private Long idx;
         private String contents;
+        private Long writerIdx;
+        private String writer;
+        private Long recruitIdx;
 
         public static SendRes from(Chat entity) {
             return SendRes.builder()
                     .idx(entity.getIdx())
                     .contents(entity.getContents())
+                    .writerIdx(entity.getUser().getIdx())
+                    .writer(entity.getUser().getName())
+                    .recruitIdx(entity.getRecruit().getId())
                     .build();
         }
     }
@@ -39,6 +45,7 @@ public class ChatDto {
     public static class ListRes {
         private Long idx;
         private String contents;
+        private Long writerIdx;
         private String writer;
         private Long recruitIdx;
 
@@ -46,6 +53,7 @@ public class ChatDto {
             return ListRes.builder()
                     .idx(entity.getIdx())
                     .contents(entity.getContents())
+                    .writerIdx(entity.getUser().getIdx())
                     .writer(entity.getUser().getName())
                     .recruitIdx(entity.getRecruit().getId())
                     .build();
