@@ -15,13 +15,10 @@ public class EmailService {
     private final JavaMailSender mailSender;
 
     // 이메일 인증 메일 전송 메소드
-    public void sendWelcomeMail(String email) {
+    public void sendWelcomeMail(String uuid, String email) {
         // 전송될 메일 객체 생성
         MimeMessage message = mailSender.createMimeMessage();
         try {
-            // 이메일 인증에 사용할 고유 토큰 (UUID) 생성
-            String uuid = UUID.randomUUID().toString();
-
             // MimeMessage를 더 쉽게 다루기 위한 Helper 객체 생성
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
