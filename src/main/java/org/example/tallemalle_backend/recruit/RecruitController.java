@@ -44,4 +44,10 @@ public class RecruitController {
         boolean result = recruitService.join(user, recruitIdx);
         return ResponseEntity.ok(BaseResponse.success(result));
     }
+
+    @DeleteMapping("/{recruitIdx}/leave")
+    public ResponseEntity leave(@AuthenticationPrincipal AuthUserDetails user, @PathVariable Long recruitIdx) {
+        boolean result = recruitService.leave(user, recruitIdx);
+        return ResponseEntity.ok(BaseResponse.success(result));
+    }
 }

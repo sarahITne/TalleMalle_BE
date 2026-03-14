@@ -56,7 +56,7 @@ public class User extends BaseEntity {
 
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruit_id")
+    @JoinColumn(name = "recruit_idx")
     private Recruit currentRecruit;
 
     @Builder.Default

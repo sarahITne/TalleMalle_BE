@@ -13,7 +13,9 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +50,10 @@ public class RecruitService {
         // 소켓으로 보낼 DTO 생성
         RecruitDto.ListRes responseDto = RecruitDto.ListRes.from(savedRecruit);
 
+        Map<String, Object> message = new HashMap<>();
+        message.put("type", "newRecruit");
+        message.put("payload", responseDto);
+
         // 소켓으로 전송
         simpMessagingTemplate.convertAndSend("/topic/all-calls", responseDto);
     }
@@ -55,7 +61,6 @@ public class RecruitService {
     // TODO: Slice로 페이징 처리 필요
     public List<RecruitDto.ListRes> list() {
         List<Recruit> recruitList = recruitRepository.findAll();
-
         return recruitList.stream().map(RecruitDto.ListRes::from).toList();
     }
 
@@ -95,8 +100,12 @@ public class RecruitService {
         recruit.setCurrentCapacity(recruit.getCurrentCapacity() + 1);
         // 모집 인원 추가된거 적용
         realUser.setCurrentRecruit(recruit);
+
+        realUser.setStatus("JOINED");
+
         // 매칭 엔티티 저장
         participationRepository.save(participation);
+
 
         // 인원이 다 차면 소켓으로 기사님한테 전송 및 모집 마감
         if (recruit.getCurrentCapacity() == recruit.getMaxCapacity()) {
@@ -106,6 +115,46 @@ public class RecruitService {
             simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
         }
         // 성공 반환
+        return true;
+    }
+
+    @Transactional
+    public boolean leave(AuthUserDetails user, Long recruitIdx) {
+        Recruit recruit = recruitRepository.findById(recruitIdx).orElseThrow();
+        User realUser = userRepository.findById(user.getIdx()).orElseThrow();
+        Participation participation = participationRepository.findByUserIdxAndRecruitIdx(realUser.getIdx(), recruit.getIdx()).orElseThrow();
+
+        // TODO: 방장이 방을 나갈 때 처리 필요
+        if(recruit.getOwner().getIdx().equals(user.getIdx())) {
+            return false;
+        }
+
+        // 꽉 찬 방이었다면 다시 모집 중으로 변경
+        if(recruit.getStatus() == RecruitStatus.FULL) {
+            recruit.setStatus(RecruitStatus.RECRUITING);
+        }
+
+        // 모집 참여 취소로 상태 변경
+        participation.setStatus("CANCELED");
+
+        // 모집글 내부 인원 감소
+        recruit.decreaseCapacity();
+
+        // 유저 상태 다시 IDLE로 변경
+        realUser.setStatus("IDLE");
+
+        // 유저의 recruit_id를 다시 null로 변경
+        realUser.setCurrentRecruit(null);
+
+        // 변경된 모집글 정보를 소켓으로 전송
+        RecruitDto.ListRes updatedDto = RecruitDto.ListRes.from(recruit);
+
+        Map<String, Object> message = new HashMap<>();
+        message.put("type", "updateRecruit");
+        message.put("payload", updatedDto);
+
+        simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
+
         return true;
     }
 }

@@ -26,6 +26,7 @@ public class Participation {
     private Recruit recruit;
 
     // 참여 상태를 관리하는 컬럼 (예: ACTIVE(참여중), CANCELED(취소), DONE(완료))
+    @Setter
     @Column(nullable = false)
     private String status;
 }
