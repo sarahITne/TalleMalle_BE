@@ -3,6 +3,8 @@ package org.example.tallemalle_backend.chat;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.chat.model.Chat;
 import org.example.tallemalle_backend.chat.model.ChatDto;
+import org.example.tallemalle_backend.recruit.RecruitRepository;
+import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.user.UserRepository;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.User;
@@ -15,12 +17,15 @@ import java.util.List;
 public class ChatService {
     private final ChatRepository chatRepository;
     private final UserRepository userRepository;
+    private final RecruitRepository recruitRepository;
 
     public ChatDto.SendRes send(AuthUserDetails user, Long recruitIdx, ChatDto.SendReq dto) {
         User chatUser = userRepository.findById(user.getIdx()).orElseThrow();
+        Recruit recruit = recruitRepository.findById(recruitIdx)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 recruitId 입니다."));
         Chat entity = Chat.builder()
                 .contents(dto.getContents())
-                .recruit(dto.toEntity(user, recruitIdx).getRecruit())
+                .recruit(recruit)
                 .user(chatUser)
                 .build();
         entity = chatRepository.save(entity);
