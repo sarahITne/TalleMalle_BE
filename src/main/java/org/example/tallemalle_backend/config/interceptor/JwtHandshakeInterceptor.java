@@ -37,12 +37,12 @@ public class JwtHandshakeInterceptor implements HandshakeInterceptor {
                     if (cookie.getName().equals("ATOKEN")) {
                         try {
                             Long idx = jwtUtil.getUserIdx(cookie.getValue());
-                            String username = jwtUtil.getUsername(cookie.getValue());
+                            String email = jwtUtil.getEmail(cookie.getValue());
                             String role = jwtUtil.getRole(cookie.getValue());
 
                             AuthUserDetails user = AuthUserDetails.builder()
                                     .idx(idx)
-                                    .username(username)
+                                    .email(email)
                                     .role(role)
                                     .build();
 

@@ -42,22 +42,23 @@ public class JwtFilter extends OncePerRequestFilter {
             for (Cookie cookie : request.getCookies()) {
                 if (cookie.getName().equals("ATOKEN")) {
                     try {
-                        String username = jwtUtil.getUsername(cookie.getValue());
+                        // JwtUtil에서 토큰 생성 및 확인하도록 리팩토링
+                        String email = jwtUtil.getEmail(cookie.getValue());
                         Long idx = jwtUtil.getUserIdx(cookie.getValue());
                         String role = jwtUtil.getRole(cookie.getValue());
 
                         AuthUserDetails user = AuthUserDetails.builder()
                                 .idx(idx)
-                                .username(username)
+                                .email(email)
                                 .role(role)
                                 .build();
 
-                        Authentication authentication = new UsernamePasswordAuthenticationToken(
-                                user,
-                                null,
-                                List.of(new SimpleGrantedAuthority(role))
-                        );
-                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                                    user,
+                                    null,
+                                    List.of(new SimpleGrantedAuthority(role))
+                            );
+                            SecurityContextHolder.getContext().setAuthentication(authentication);
                     } catch (JwtException | IllegalArgumentException e) {
                         log.warn("유효하지 않거나 만료된 ATOKEN 무시: path={}, reason={}", request.getRequestURI(), e.getMessage());
                         SecurityContextHolder.clearContext();

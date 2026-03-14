@@ -14,18 +14,24 @@ import java.util.List;
 @Builder
 public class AuthUserDetails implements UserDetails {
     private Long idx;
-    private String username;
+    private String email;
     private String password;
+    private String name;
+    private String nickname;
     private boolean enable;
     private String role;
+    private String status;
 
     public static AuthUserDetails from(User entity) {
         return AuthUserDetails.builder()
                 .idx(entity.getIdx())
-                .username(entity.getEmail())
+                .email(entity.getEmail())
                 .password(entity.getPassword())
-                .enable(entity.isEnable())
+                .name(entity.getName())
+                .nickname(entity.getNickname())
+                .enable(entity.getEnable())
                 .role(entity.getRole())
+                .status(entity.getStatus())
                 .build();
     }
 
@@ -46,7 +52,7 @@ public class AuthUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override
@@ -67,7 +73,7 @@ public class AuthUserDetails implements UserDetails {
     public User toEntity() {
         return User.builder()
                 .idx(this.idx)
-                .email(this.username)
+                .email(this.email)
                 .password(this.password)
                 .enable(this.enable)
                 .role(this.role)
