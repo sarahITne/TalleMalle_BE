@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -44,9 +45,22 @@ public class UserController {
     }
 
 
+    // 소셜 로그인 한 사용자 추가 정보 업데이트
+    @PatchMapping("/signup/extra")
+    public ResponseEntity extraInfo(
+            @AuthenticationPrincipal AuthUserDetails user,
+            @Valid @RequestBody UserDto.ExtraInfoReq dto
+    ) {
+        UserDto.ExtraInfoRes result = userService.extraInfo(user.getEmail(), dto);
+
+        // 추가 정보 입력 후 로그인 페이지로 리다이렉트
+        return ResponseEntity.ok(result);
+    }
+
+
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody UserDto.LoginReq dto) {
+    public ResponseEntity login(@Valid @RequestBody UserDto.LoginReq dto) {
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword(), null);
 

@@ -51,9 +51,9 @@ public class OAuth2UserService extends DefaultOAuth2UserService {
                             .nickname("임시 닉네임")          // 임시 닉네임 (카카오에서 받아올 수 없음, 이후 추가 회원가입 단계에서 정보 입력)
                             .phoneNumber("010-0000-0000")   // 임시 번호
                             .birth(LocalDate.parse("1900-01-01"))    // 임시 생년월일
-                            .gender("PENDING")    // 임시 성별 : 대기중
-                            .provider(provider)
-                            .role("'ROLE_GUEST'")   // 권한으로 추가 정보 대상자 구분
+                            .gender("PENDING")    // 임시 성별
+                            .provider(provider.toUpperCase())
+                            .role("ROLE_GUEST")   // 권한으로 추가 정보 대상자 구분
                             .build()
             );
 

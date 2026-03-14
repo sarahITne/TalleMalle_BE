@@ -60,4 +60,14 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     @ColumnDefault("false")
     private Boolean enable = false;
+
+    // 소셜 로그인 후 유저 추가 정보 업데이트
+    public void updateExtraInfo(String nickname, String phoneNumber, LocalDate birth, String gender) {
+        this.nickname = nickname; // 닉네임을 이름 필드에 저장하거나 별도 필드 사용
+        this.phoneNumber = phoneNumber;
+        this.birth = birth;
+        this.gender = gender;
+        this.role = "ROLE_USER";   // 권한 승격
+        this.enable = true;      // 계정 활성화
+    }
 }

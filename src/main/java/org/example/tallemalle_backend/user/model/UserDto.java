@@ -75,6 +75,45 @@ public class UserDto {
     }
 
 
+    // 소셜 로그인 사용자 회원가입 추가 정보 업데이트
+    @Getter
+    public static class ExtraInfoReq {
+        @NotBlank
+        @Pattern(message = "닉네임은 한글과 숫자만 가능합니다.", regexp = "^[가-힣0-9]+$")
+        private String nickname;
+
+        @NotBlank
+        @Pattern(message = "전화번호는 숫자만 입력 가능합니다.", regexp = "^01[0-9]-\\d{3,4}-\\d{4}$")
+        private String phoneNumber;
+
+        private LocalDate birth;
+
+        @NotBlank
+        private String gender;
+    }
+
+    // 소셜 로그인 사용자 회원가입 추가 정보 업데이트 응답
+    @Builder
+    @Getter
+    public static class ExtraInfoRes {
+        private Long idx;
+        private String email;
+        private String name;
+        private String nickname;
+        private String status;
+
+        public static ExtraInfoRes from(User entity) {
+            return ExtraInfoRes.builder()
+                    .idx(entity.getIdx())
+                    .email(entity.getEmail())
+                    .name(entity.getName())
+                    .nickname(entity.getNickname())
+                    .status(entity.getStatus())
+                    .build();
+        }
+    }
+
+
     // 로그인 요청
     @Getter
     public static class LoginReq {

@@ -29,8 +29,17 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String jwt = jwtUtil.createToken(user);
         response.addHeader("Set-Cookie", "ATOKEN=" + jwt +"; Path=/");
 
+        // 권한 확인 후 리다이렉트 경로 결정
+        String role = user.getAuthorities().iterator().next().getAuthority();
+
         // 로그인 성공 시 프론트엔드로 리다이렉트
         String redirectUrl = "http://localhost:5173";
+
+        if ("ROLE_GUEST".equals(role)) {
+            // 추가 정보 입력 페이지로 이동 (토큰을 들고 가야 함)
+            redirectUrl += "/signup/extra";
+        }
+
         getRedirectStrategy().sendRedirect(request, response, redirectUrl);
     }
 }
