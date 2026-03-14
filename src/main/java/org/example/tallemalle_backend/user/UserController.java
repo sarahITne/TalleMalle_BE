@@ -5,11 +5,14 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.UserDto;
 import org.example.tallemalle_backend.utils.JwtUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @CrossOrigin
 @RequestMapping("/user")
@@ -25,6 +28,19 @@ public class UserController {
     public ResponseEntity signup(@Valid @RequestBody UserDto.SignupReq dto) {
         UserDto.SignupRes result =  userService.signup(dto);
         return ResponseEntity.ok(result);
+    }
+
+
+    // 이메일 인증
+    @GetMapping("/verify")
+    public ResponseEntity verify(String uuid) {
+        userService.verify(uuid);
+
+        // 인증 성공하면 프론트로 리다이렉트
+        return ResponseEntity
+                .status(HttpStatus.MOVED_PERMANENTLY)
+                .location(URI.create("http://localhost:5173"))
+                .build();
     }
 
 
