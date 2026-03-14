@@ -10,6 +10,26 @@ spring:
   application:
     name: tallemalle_backend
 
+  security:
+    oauth2:
+      client:
+        registration:
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            client-name: kakao
+            redirect-uri: ${KAKAO_REDIRECT_URI}
+            authorization-grant-type: authorization_code  # 카카오 문서 보면 이렇게 지정하라고 함
+            scope:
+              - profile_nickname   # 받아올 항목
+            client-authentication-method: client_secret_post  # 통신 방식
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize  # 인가 코드 받기 요청 uri
+            token-uri: https://kauth.kakao.com/oauth/token    # 토큰 받기 요청 uri
+            user-info-uri: https://kapi.kakao.com/v2/user/me  # 사용자 정보 조회하기 요청 uri
+            user-name-attribute: id
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -24,16 +44,6 @@ spring:
           auth: true
           timeout: 5000
 
-  cloud:
-    aws:
-      credentials:
-        access-key: ${AWS_ACCESS_KEY}
-        secret-key: ${AWS_SECRET_KEY}
-      s3:
-        bucket: be24-s3
-      region:
-        static: ap-northeast-2
-
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     url: ${DB_URL}
@@ -47,6 +57,16 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      s3:
+        bucket: be24-s3
+      region:
+        static: ap-northeast-2
 
 logging:
   level:

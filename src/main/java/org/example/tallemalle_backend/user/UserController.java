@@ -26,7 +26,7 @@ public class UserController {
     // 회원가입
     @PostMapping("/signup")
     public ResponseEntity signup(@Valid @RequestBody UserDto.SignupReq dto) {
-        UserDto.SignupRes result =  userService.signup(dto);
+        UserDto.SignupRes result = userService.signup(dto);
         return ResponseEntity.ok(result);
     }
 
@@ -39,7 +39,7 @@ public class UserController {
         // 인증 성공하면 프론트로 리다이렉트
         return ResponseEntity
                 .status(HttpStatus.MOVED_PERMANENTLY)
-                .location(URI.create("http://localhost:5173"))
+                .location(URI.create("http://localhost:5173/login"))
                 .build();
     }
 

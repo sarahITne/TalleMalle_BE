@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.config.filter.JwtFilter;
+import org.example.tallemalle_backend.user.OAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +26,8 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig {
     private final JwtFilter jwtFilter;
+    private final OAuth2UserService oAuth2UserService;  // 소셜 로그인 관련 Service 클래스
+    private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
 
     // 비밀번호 인코딩을 위한 객체
     @Bean
@@ -49,7 +52,15 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable);
 
-        // 3. 권한 설정 (인가)
+        // 3. OAuth2 로그인 기능 설정
+        http.oauth2Login(config -> {
+            // 사용자 정보를 받아오는 코드를 어떤 클래스에 짤건지 지정하는 부분 (-> OAuth2UserService 클래스)
+            config.userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService));
+            // OAuth2 인증 과정이 성공했을 때 실행될 커스텀 핸들러
+            config.successHandler(oAuth2AuthenticationSuccessHandler);
+        });
+
+        // 4. 권한 설정 (인가)
         http.authorizeHttpRequests(
                 (auth) -> auth
                         // 접근 제어
@@ -58,7 +69,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
         );
 
-        // 4. JWT 필터 추가
+        // 5. JWT 필터 추가
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

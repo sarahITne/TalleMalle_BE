@@ -25,6 +25,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'          // 이메일 인증
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+    // --- OAuth(소셜 로그인 관련) ---
+    implementation 'org.springframework.security:spring-security-oauth2-client'
+
     // --- JTW 관련 ---
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
     implementation 'io.jsonwebtoken:jjwt-impl:0.12.6'
