@@ -49,16 +49,16 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable);
 
-        // 3. 권한 설정
+        // 3. 권한 설정 (인가)
         http.authorizeHttpRequests(
                 (auth) -> auth
                         // 접근 제어
-                        .requestMatchers("/user/login", "/user/signup", "/user/verify").permitAll()
+                        .requestMatchers("/user/signup", "/user/login", "/user/verify").permitAll()
                         .requestMatchers("/board/reg").authenticated()
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
         );
 
-        // 4. 필터 추가
+        // 4. JWT 필터 추가
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
