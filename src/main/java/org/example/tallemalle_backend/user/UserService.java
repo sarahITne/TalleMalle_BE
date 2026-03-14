@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.user;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.example.tallemalle_backend.user.model.EmailVerify;
 import org.example.tallemalle_backend.user.model.User;
 import org.example.tallemalle_backend.user.model.UserDto;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -11,6 +12,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 import static org.example.tallemalle_backend.common.model.BaseResponseStatus.SIGNUP_DUPLICATE_EMAIL;
 
 @RequiredArgsConstructor
@@ -18,6 +21,8 @@ import static org.example.tallemalle_backend.common.model.BaseResponseStatus.SIG
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
+    private final EmailVerifyRepository emailVerifyRepository;
 
     // 회원가입
     public UserDto.SignupRes signup(UserDto.SignupReq dto) {
@@ -34,8 +39,36 @@ public class UserService implements UserDetailsService {
         User user = dto.toEntity(encodedPassword);
         userRepository.save(user);  // 저장 후 user에 idx 세팅됨
 
+        // 4. 이메일 인증 메일 보내기
+        String uuid = UUID.randomUUID().toString();     // 이메일 인증에 사용할 고유 토큰 (UUID) 생성
+        emailService.sendWelcomeMail(uuid, dto.getEmail());
+
+        // 4-1. 이메일 전송 내역 저장
+        EmailVerify emailVerify =
+                EmailVerify.builder()
+                        .email(dto.getEmail())
+                        .uuid(uuid)
+                        .build();
+
+        emailVerifyRepository.save(emailVerify);
+
         return UserDto.SignupRes.from(user);
     }
+
+
+    // 이메일 인증 및 처리
+    public void verify(String uuid) {
+        // 1. uuid로 이메일 찾기
+        EmailVerify emailVerify = emailVerifyRepository.findByUuid(uuid).orElseThrow();
+
+        // 2. 이메일로 user 찾기
+        User user = userRepository.findByEmail(emailVerify.getEmail()).orElseThrow();
+
+        // 3. 해당 유저의 enable을 true로 update
+        user.setEnable(true);
+        userRepository.save(user);
+    }
+
 
     // 로그인
     @Override

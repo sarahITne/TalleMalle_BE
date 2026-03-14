@@ -21,8 +21,8 @@ repositories {
 dependencies {
     // --- 스타터팩 ---
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-security'      // 스프링 시큐리티
+    implementation 'org.springframework.boot:spring-boot-starter-mail'          // 이메일 인증
     implementation 'org.springframework.boot:spring-boot-starter-validation'
 
     // --- JTW 관련 ---

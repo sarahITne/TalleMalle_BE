@@ -55,6 +55,7 @@ public class User extends BaseEntity {
     @ColumnDefault(value = "'IDLE'")
     private String status = "IDLE";
 
+    @Setter
     @Builder.Default
     @Column(nullable = false)
     @ColumnDefault("false")

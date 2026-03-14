@@ -10,6 +10,20 @@ spring:
   application:
     name: tallemalle_backend
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_ADDR}
+    password: ${MAIL_PASS}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required : true
+          auth: true
+          timeout: 5000
+
   cloud:
     aws:
       credentials:
