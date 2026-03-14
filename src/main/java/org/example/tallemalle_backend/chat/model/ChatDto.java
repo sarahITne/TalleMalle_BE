@@ -2,12 +2,14 @@ package org.example.tallemalle_backend.chat.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.Setter;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 
 public class ChatDto {
 
     @Getter
+    @Setter
     public static class SendReq {
         private String contents;
 
