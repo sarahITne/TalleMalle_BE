@@ -1,68 +1,111 @@
 package org.example.tallemalle_backend.user.model;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDate;
+
 public class UserDto {
 
+    // 회원가입 요청
     @Getter
     public static class SignupReq {
 
-        @Pattern(message = "이메일 형식이 아닙니다.", regexp = "^[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_.]?[0-9a-zA-Z])*\\.[a-zA-Z]{2,3}$")
+        @NotBlank
+        @Email(message = "이메일 형식이 올바르지 않습니다.")
         private String email;
 
-        @Pattern(message = "이름은 한글만 가능합니다.", regexp = "^[가-힣]+$")
-        private String name;
-
+        @NotBlank
         @Pattern(message = "비밀번호는 숫자, 영문, 특수문자( !@#$%^&*() )를 조합해 8~20자로 생성해주세요.", regexp = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()])[A-Za-z\\d!@#$%^&*()]{8,20}$")
         private String password;
 
-        public User toEntity() {
+        @NotBlank
+        @Pattern(message = "이름은 한글만 가능합니다.", regexp = "^[가-힣]+$")
+        private String name;
+
+        @NotBlank
+        @Pattern(message = "닉네임은 한글과 숫자만 가능합니다.", regexp = "^[가-힣0-9]+$")
+        private String nickname;
+
+        @NotBlank
+        @Pattern(message = "전화번호는 숫자만 입력 가능합니다.", regexp = "^01[0-9]-\\d{3,4}-\\d{4}$")
+        private String phoneNumber;
+
+        private LocalDate birth;
+
+        @NotBlank
+        private String gender;
+
+        public User toEntity(String encodedPassword) {
             return User.builder()
                     .email(this.email)
+                    .password(encodedPassword)
                     .name(this.name)
-                    .password(this.password)
-                    .enable(false)
+                    .nickname(this.nickname)
+                    .phoneNumber(this.phoneNumber)
+                    .birth(this.birth)
+                    .gender(this.gender)
                     .build();
         }
     }
 
 
+    // 회원가입 응답
     @Builder
     @Getter
     public static class SignupRes {
         private Long idx;
         private String email;
         private String name;
+        private String nickname;
+        private String status;
 
         public static SignupRes from(User entity) {
             return SignupRes.builder()
                     .idx(entity.getIdx())
                     .email(entity.getEmail())
                     .name(entity.getName())
+                    .nickname(entity.getNickname())
+                    .status(entity.getStatus())
                     .build();
         }
     }
 
+
+    // 로그인 요청
     @Getter
     public static class LoginReq {
+        @NotBlank
+        @Email
         private String email;
+
+        @NotBlank
         private String password;
     }
 
+
+    // 로그인 응답
     @Builder
     @Getter
     public static class LoginRes {
         private Long idx;
         private String email;
         private String name;
+        private String nickname;
+        private String role;
+        private String status;
 
-        public static LoginRes from(User entity) {
+        public static LoginRes from(AuthUserDetails authUserDetails) {
             return LoginRes.builder()
-                    .idx(entity.getIdx())
-                    .email(entity.getEmail())
-                    .name(entity.getName())
+                    .idx(authUserDetails.getIdx())
+                    .email(authUserDetails.getEmail())
+                    .name(authUserDetails.getName())
+                    .nickname(authUserDetails.getNickname())
+                    .role(authUserDetails.getRole())
+                    .status(authUserDetails.getStatus())
                     .build();
         }
     }
