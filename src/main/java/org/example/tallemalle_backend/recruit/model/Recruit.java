@@ -19,8 +19,8 @@ public class Recruit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "recruit_id")
-    private Long id;
+    @Column(name = "recruit_idx")
+    private Long idx;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
@@ -70,4 +70,9 @@ public class Recruit {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public void decreaseCapacity() {
+        if (this.currentCapacity > 1) {
+            this.currentCapacity--;
+        }
+    }
 }

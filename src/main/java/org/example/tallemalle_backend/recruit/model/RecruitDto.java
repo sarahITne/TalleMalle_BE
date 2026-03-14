@@ -67,7 +67,7 @@ public class RecruitDto {
 
         public static ListRes from(Recruit entity) {
             return ListRes.builder()
-                    .idx(entity.getId())
+                    .idx(entity.getIdx())
                     .ownerId(entity.getOwner().getIdx())
                     .participationList(entity.getParticipations().stream().map(ParticipationDto.ReadRes::from).toList())
                     .description(entity.getDescription())
