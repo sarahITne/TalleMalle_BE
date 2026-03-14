@@ -40,6 +40,7 @@ public class RecruitService {
 
         recruit.getParticipations().add(participation);
         realUser.setCurrentRecruit(recruit);
+        realUser.setStatus("OWNER");
 
         // DB에 모집글 저장
         Recruit savedRecruit = recruitRepository.save(recruit);

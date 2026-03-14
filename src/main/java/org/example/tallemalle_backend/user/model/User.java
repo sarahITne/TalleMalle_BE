@@ -63,6 +63,7 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     private List<Participation> participations = new ArrayList<>();
 
+    @Setter
     @Builder.Default
     @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'IDLE'")
