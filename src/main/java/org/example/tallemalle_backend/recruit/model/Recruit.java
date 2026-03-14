@@ -19,7 +19,7 @@ public class Recruit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "recruit_id")
+    @Column(name = "recruit_idx")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
