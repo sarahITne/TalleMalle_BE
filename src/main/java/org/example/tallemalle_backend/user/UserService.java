@@ -18,6 +18,7 @@ import static org.example.tallemalle_backend.common.model.BaseResponseStatus.SIG
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     // 회원가입
     public UserDto.SignupRes signup(UserDto.SignupReq dto) {
@@ -33,6 +34,9 @@ public class UserService implements UserDetailsService {
         // 3. DTO를 엔티티로 변환 후 저장
         User user = dto.toEntity(encodedPassword);
         userRepository.save(user);  // 저장 후 user에 idx 세팅됨
+
+        // 4. 이메일 인증 메일 보내기
+        emailService.sendWelcomeMail(dto.getEmail());
 
         return UserDto.SignupRes.from(user);
     }
