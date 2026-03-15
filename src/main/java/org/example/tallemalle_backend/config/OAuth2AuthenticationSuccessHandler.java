@@ -10,6 +10,7 @@ import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.IOException;
 
@@ -33,7 +34,14 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String role = user.getAuthorities().iterator().next().getAuthority();
 
         // 로그인 성공 시 프론트엔드로 리다이렉트
-        String redirectUrl = "http://localhost:5173";
+        String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/social/success")
+                .queryParam("idx", user.getIdx())
+                .queryParam("email", user.getEmail())
+                .queryParam("name", user.getName())
+                .queryParam("nickname", user.getNickname())
+                .queryParam("role", user.getRole())
+                .queryParam("status", user.getStatus())
+                .build().encode().toUriString();
 
         if ("ROLE_GUEST".equals(role)) {
             // 추가 정보 입력 페이지로 이동 (토큰을 들고 가야 함)
