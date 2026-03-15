@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.chat.model.Chat;
 import org.example.tallemalle_backend.chat.model.ChatDto;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
+import org.example.tallemalle_backend.push.WebPushService;
 import org.example.tallemalle_backend.recruit.RecruitRepository;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.user.UserRepository;
@@ -20,6 +21,7 @@ public class ChatService {
     private final UserRepository userRepository;
     private final RecruitRepository recruitRepository;
     private final ParticipationRepository participationRepository;
+    private final WebPushService webPushService;
 
     public ChatDto.SendRes send(AuthUserDetails user, Long recruitIdx, ChatDto.SendReq dto) {
         validateParticipant(user, recruitIdx);
@@ -32,6 +34,8 @@ public class ChatService {
                 .user(chatUser)
                 .build();
         entity = chatRepository.save(entity);
+
+        webPushService.notifyRoom(recruitIdx, chatUser, dto.getContents());
         return ChatDto.SendRes.from(entity);
     }
 
