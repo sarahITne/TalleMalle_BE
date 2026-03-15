@@ -1,4 +1,7 @@
 package org.example.tallemalle_backend.notice;
 
-public class NoticeRepository {
+import org.example.tallemalle_backend.notice.model.Notice;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface NoticeRepository extends JpaRepository<Notice, Long> {
 }
