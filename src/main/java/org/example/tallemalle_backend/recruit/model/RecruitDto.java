@@ -25,8 +25,6 @@ public class RecruitDto {
         private String description;
 
         public Recruit toEntity(User user) {
-            LocalDateTime parsedDepartureTime = LocalDateTime.now();
-
             return Recruit.builder()
                     .owner(user) // 방장 설정
                     .description(this.description)
@@ -36,7 +34,7 @@ public class RecruitDto {
                     .destPointName(this.destPointName)
                     .destLat(this.destLat)
                     .destLng(this.destLng)
-                    .departureTime(parsedDepartureTime)
+                    .departureTime(this.departureTime)
                     .maxCapacity(this.maxCapacity)
                     .currentCapacity(1)
                     .status(RecruitStatus.RECRUITING)
