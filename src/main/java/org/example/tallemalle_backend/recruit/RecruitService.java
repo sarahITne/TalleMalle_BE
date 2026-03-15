@@ -145,16 +145,38 @@ public class RecruitService {
     public boolean leave(AuthUserDetails user, Long recruitIdx) {
         Recruit recruit = recruitRepository.findById(recruitIdx).orElseThrow();
         User realUser = userRepository.findById(user.getIdx()).orElseThrow();
+
+        // 방장이 방을 나갈 때
+        if(recruit.getOwner().getIdx().equals(user.getIdx())) {
+            // 방에 참여 중인 모든 유저의 상태를 IDLE로 변경
+            recruit.getParticipations().forEach(p -> {
+                User pUser = p.getUser();
+                pUser.setStatus("IDLE");
+                pUser.setCurrentRecruit(null);
+            });
+
+            // TODO: Soft 삭제로 변경해야 함
+            // DB에서 모집글 삭제
+            recruitRepository.delete(recruit);
+
+            // 소켓 통신으로 방이 없어졌다고 알림
+            Map<String, Object> message = new HashMap<>();
+            message.put("type", "deleteRecruit");
+            message.put("payload", recruitIdx);
+
+            simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
+
+            return true;
+
+        }
         Participation participation = participationRepository.findByUserIdxAndRecruitIdx(realUser.getIdx(), recruit.getIdx()).orElseThrow();
 
-        // TODO: 방장이 방을 나갈 때 처리 필요
-        if(recruit.getOwner().getIdx().equals(user.getIdx())) {
-            return false;
-        }
 
-        // 꽉 찬 방이었다면 다시 모집 중으로 변경
+        // 방이 가득차면 나갈 수 없음
         if(recruit.getStatus() == RecruitStatus.FULL) {
-            recruit.setStatus(RecruitStatus.RECRUITING);
+            return false;
+            // 꽉 찬 모집 방에서 나가기
+            // recruit.setStatus(RecruitStatus.RECRUITING);
         }
 
         // 모집 참여 취소로 상태 변경
