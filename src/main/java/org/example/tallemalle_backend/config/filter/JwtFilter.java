@@ -42,14 +42,20 @@ public class JwtFilter extends OncePerRequestFilter {
                 // ATOKEN 쿠키 찾기
                 if (cookie.getName().equals("ATOKEN")) {
                     // JWT에서 정보 꺼내기
-                    String email = jwtUtil.getEmail(cookie.getValue());
                     Long idx = jwtUtil.getUserIdx(cookie.getValue());
+                    String email = jwtUtil.getEmail(cookie.getValue());
+                    String name = jwtUtil.getName(cookie.getValue());
+                    String nickname = jwtUtil.getNickname(cookie.getValue());
                     String role = jwtUtil.getRole(cookie.getValue());
+                    String status = jwtUtil.getStatus(cookie.getValue());
 
                     AuthUserDetails user = AuthUserDetails.builder()
                             .idx(idx)
                             .email(email)
+                            .name(name)
+                            .nickname(nickname)
                             .role(role)
+                            .status(status)
                             .build();
 
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
