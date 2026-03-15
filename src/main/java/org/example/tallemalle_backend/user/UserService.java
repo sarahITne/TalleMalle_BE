@@ -1,17 +1,24 @@
 package org.example.tallemalle_backend.user;
 
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.EmailVerify;
 import org.example.tallemalle_backend.user.model.User;
 import org.example.tallemalle_backend.user.model.UserDto;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.example.tallemalle_backend.common.model.BaseResponseStatus.SIGNUP_DUPLICATE_EMAIL;
@@ -67,6 +74,25 @@ public class UserService implements UserDetailsService {
         // 3. 해당 유저의 enable을 true로 update
         user.setEnable(true);
         userRepository.save(user);
+    }
+
+
+    // 소셜 로그인 사용자 추가 정보 업데이트
+    @Transactional
+    public UserDto.ExtraInfoRes extraInfo(String email, UserDto.ExtraInfoReq dto) {
+        // 1. 전달 받은 email로 유저 조회
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("유저를 찾을 수 없습니다."));
+
+        // 2. 유저 정보 업데이트 (Dirty Checking으로 자동 저장됨)
+        user.updateExtraInfo(
+                dto.getNickname(),
+                dto.getPhoneNumber(),
+                dto.getBirth(),
+                dto.getGender()
+        );
+
+        return UserDto.ExtraInfoRes.from(user);
     }
 
 
