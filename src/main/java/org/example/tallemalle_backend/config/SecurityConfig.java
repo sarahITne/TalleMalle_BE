@@ -78,7 +78,7 @@ public class SecurityConfig {
                 (auth) -> auth
                         // 접근 제어
                         .requestMatchers("/user/signup", "/user/login", "/user/verify").permitAll()
-                        .requestMatchers("/board/reg").authenticated()
+                        .requestMatchers("/notices/**").authenticated()
                         .anyRequest().authenticated()
         );
 
