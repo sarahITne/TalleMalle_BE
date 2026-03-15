@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +33,8 @@ public class RecruitService {
         User realUser = userRepository.findById(user.getIdx()).orElseThrow();
 
         Recruit recruit = dto.toEntity(realUser);
+
+        // 이미 방에 접속 중이거나, 방장이면 반환
 
         // 매칭 엔티티 생성
         Participation participation = Participation.builder()
@@ -55,7 +58,7 @@ public class RecruitService {
         message.put("payload", responseDto);
 
         // 소켓으로 전송
-        simpMessagingTemplate.convertAndSend("/topic/all-calls", responseDto);
+        simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
     }
 
     // TODO: Slice로 페이징 처리 필요
@@ -76,25 +79,40 @@ public class RecruitService {
         // 모집글 찾아오기 TODO: 비관적 락
         Recruit recruit = recruitRepository.findById(recruitIdx).orElseThrow();
 
-        // 인원이 꽉 차면 false 반환
-        if (recruit.getCurrentCapacity() >= recruit.getMaxCapacity()) {
-            return false;
-        }
-
         // 모집에 참여하고 싶은 유저 조회
         User realUser = userRepository.findById(user.getIdx()).orElseThrow();
 
-        // 중복 참여 여부 확인
-        if (participationRepository.existsByUserAndRecruit(realUser, recruit)) {
+        // 방장이 방에 입장하려고 하는 경우
+        if(recruit.getOwner().getIdx().equals(realUser.getIdx())) {
             return false;
         }
 
-        // 매칭 엔티티 생성
-        Participation participation = Participation.builder()
-                .user(realUser)
-                .recruit(recruit)
-                .status("ACTIVE")
-                .build();
+        // 모집글 인원이 FULL인데 입장하려는 경우
+        if(recruit.getStatus().equals(RecruitStatus.FULL)) {
+            return false;
+        }
+
+        // 중복 참여 여부 확인
+        Optional<Participation> optParticipation = participationRepository.findByUserIdxAndRecruitIdx(realUser.getIdx(), recruit.getIdx());
+
+        if (optParticipation.isPresent()) {
+            Participation existingParticipation = optParticipation.get();
+            // 이미 참여 중이면 거절
+            if ("ACTIVE".equals(existingParticipation.getStatus())) {
+                return false;
+            } else {
+                // 과거에 나갔다가 다시 들어오는 경우 상태만 Update
+                existingParticipation.setStatus("ACTIVE");
+            }
+        } else {
+            // 아예 처음 참여하는 경우 새로 만들어서 저장
+            Participation newParticipation = Participation.builder()
+                    .user(realUser)
+                    .recruit(recruit)
+                    .status("ACTIVE")
+                    .build();
+            participationRepository.save(newParticipation);
+        }
 
         // 모집 인원 + 1
         recruit.setCurrentCapacity(recruit.getCurrentCapacity() + 1);
@@ -103,12 +121,17 @@ public class RecruitService {
 
         realUser.setStatus("JOINED");
 
-        // 매칭 엔티티 저장
-        participationRepository.save(participation);
+        // 소켓 전송 Dto 생성
+        RecruitDto.ListRes updatedDto = RecruitDto.ListRes.from(recruit);
 
+        Map<String, Object> message = new HashMap<>();
+        message.put("type", "updateRecruit");
+        message.put("payload", updatedDto);
+
+        simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
 
         // 인원이 다 차면 소켓으로 기사님한테 전송 및 모집 마감
-        if (recruit.getCurrentCapacity() == recruit.getMaxCapacity()) {
+        if (recruit.getCurrentCapacity().equals(recruit.getMaxCapacity())) {
             // 모집 마감
             recruit.setStatus(RecruitStatus.FULL);
             // 기사님들 한테 모집 완료 되어 콜 잡으라고 전송
