@@ -121,6 +121,14 @@ public class RecruitService {
 
         realUser.setStatus("JOINED");
 
+        // 인원이 다 차면 소켓으로 기사님한테 전송 및 모집 마감
+        if (recruit.getCurrentCapacity().equals(recruit.getMaxCapacity())) {
+            // 모집 마감
+            recruit.setStatus(RecruitStatus.FULL);
+            // 기사님들 한테 모집 완료 되어 콜 잡으라고 전송
+            simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
+        }
+
         // 소켓 전송 Dto 생성
         RecruitDto.ListRes updatedDto = RecruitDto.ListRes.from(recruit);
 
@@ -130,13 +138,6 @@ public class RecruitService {
 
         simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
 
-        // 인원이 다 차면 소켓으로 기사님한테 전송 및 모집 마감
-        if (recruit.getCurrentCapacity().equals(recruit.getMaxCapacity())) {
-            // 모집 마감
-            recruit.setStatus(RecruitStatus.FULL);
-            // 기사님들 한테 모집 완료 되어 콜 잡으라고 전송
-            simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
-        }
         // 성공 반환
         return true;
     }
@@ -174,7 +175,7 @@ public class RecruitService {
 
         // 방이 가득차면 나갈 수 없음
         if(recruit.getStatus() == RecruitStatus.FULL) {
-            return false;
+            throw new IllegalStateException("모집이 마감되어 나갈 수 없습니다.");
             // 꽉 찬 모집 방에서 나가기
             // recruit.setStatus(RecruitStatus.RECRUITING);
         }

@@ -21,7 +21,6 @@ public class RecruitDto {
         private Double destLng;
         private LocalDateTime departureTime;
         private Integer maxCapacity;
-        private List<String> tags;
         private String description;
 
         public Recruit toEntity(User user) {
