@@ -1,4 +1,4 @@
-package org.example.tallemalle_backend.config;
+package org.example.tallemalle_backend.config.oauth2;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

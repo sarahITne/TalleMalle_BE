@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.config.filter.JwtFilter;
+import org.example.tallemalle_backend.config.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.example.tallemalle_backend.config.oauth2.OAuth2AuthorizationRequestRepository;
 import org.example.tallemalle_backend.user.OAuth2UserService;
 import org.springframework.context.annotation.Bean;
