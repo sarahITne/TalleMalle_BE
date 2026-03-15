@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.config.filter.JwtFilter;
+import org.example.tallemalle_backend.config.oauth2.OAuth2AuthorizationRequestRepository;
 import org.example.tallemalle_backend.user.OAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +12,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,6 +30,7 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
     private final OAuth2UserService oAuth2UserService;  // 소셜 로그인 관련 Service 클래스
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
+    private final OAuth2AuthorizationRequestRepository oAuth2AuthorizationRequestRepository;
 
     // 비밀번호 인코딩을 위한 객체
     @Bean
@@ -52,15 +55,24 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable);
 
-        // 3. OAuth2 로그인 기능 설정
+        // 3. 스프링 시큐리티 기본 세션 로그인 방식 꺼주기 (OAuth 로그인 관련)
+        http.sessionManagement(session ->
+                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));    // 즉, 상태 저장할 필요 없다는 뜻
+
+
+        // 4. OAuth2 로그인 기능 설정
         http.oauth2Login(config -> {
+            config.authorizationEndpoint(endpoint
+                    -> endpoint.authorizationRequestRepository(oAuth2AuthorizationRequestRepository)
+            );
+
             // 사용자 정보를 받아오는 코드를 어떤 클래스에 짤건지 지정하는 부분 (-> OAuth2UserService 클래스)
             config.userInfoEndpoint(endpoint -> endpoint.userService(oAuth2UserService));
             // OAuth2 인증 과정이 성공했을 때 실행될 커스텀 핸들러
             config.successHandler(oAuth2AuthenticationSuccessHandler);
         });
 
-        // 4. 권한 설정 (인가)
+        // 5. 권한 설정 (인가)
         http.authorizeHttpRequests(
                 (auth) -> auth
                         // 접근 제어
@@ -69,7 +81,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
         );
 
-        // 5. JWT 필터 추가
+        // 6. JWT 필터 추가
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
