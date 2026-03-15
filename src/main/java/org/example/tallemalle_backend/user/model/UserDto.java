@@ -86,12 +86,22 @@ public class UserDto {
         private String role;
 
         public static OAuth from(Map<String, Object> attributes, String provider) {
-            String providerId = ((Long) attributes.get("id")).toString();
+            String providerId = null;
+            String email = null;
+            Map properties = null;
+            String name = null;
 
-            // 이메일 확인
-            String email = providerId + "@kakao.social";    // 소셜 로그인한 사용자의 이메일 형식 맞춰줌 (소셜 로그인 구분)
-            Map properties = (Map) attributes.get("properties");
-            String name = (String) properties.get("nickname");
+            if (provider.equals("kakao")) {
+                providerId = ((Long) attributes.get("id")).toString();
+                // 받아온 정보 가공
+                email = providerId + "@kakao.social";
+                properties = (Map) attributes.get("properties");
+                name = (String) properties.get("nickname");
+
+            } else if (provider.equals("google")) {
+                email = attributes.get("email").toString();
+                name = attributes.get("name").toString();
+            }
 
             return OAuth.builder()
                     .email(email)
@@ -103,7 +113,7 @@ public class UserDto {
         public User toEntity() {
             return User.builder()
                     .email(email)
-                    .password("kakao-social-login")
+                    .password("social-login")
                     .name(name)
                     .nickname("임시 닉네임")          // 임시 닉네임 (카카오에서 받아올 수 없음, 이후 추가 회원가입 단계에서 정보 입력)
                     .phoneNumber("010-0000-0000")   // 임시 번호
