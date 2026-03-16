@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RequestMapping("/notices")
 @RestController
@@ -23,10 +25,19 @@ public class NoticeController {
         return ResponseEntity.ok(result);
     }
 
+
+    // 공지사항 목록 조회 (전체 조회)
+    @GetMapping
+    public ResponseEntity getNotices() {
+        List<NoticeDto.ListRes> result = noticeService.getNotices();
+        return ResponseEntity.ok(result);
+    }
+
+
     // 공지사항 상세 조회 (단건 조회)
     @GetMapping("/{idx}")
     public ResponseEntity getNotice(@PathVariable Long idx) {
-        NoticeDto.ReadRes result = noticeService.getNotice(idx);
+        NoticeDto.DetailRes result = noticeService.getNotice(idx);
         return ResponseEntity.ok(result);
     }
 }

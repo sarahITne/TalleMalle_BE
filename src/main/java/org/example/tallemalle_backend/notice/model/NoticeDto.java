@@ -60,10 +60,33 @@ public class NoticeDto {
     }
 
 
+    // 공지 사항 목록 조회 응답 dto
+    @Getter
+    @Builder
+    public static class ListRes {
+        private Long idx;
+        private String title;
+        private String tag;
+        private Boolean isPinned;
+        private String writer;
+
+        // 엔티티 -> dto
+        public static ListRes from(Notice entity) {
+            return ListRes.builder()
+                    .idx(entity.getIdx())
+                    .title(entity.getTitle())
+                    .tag(entity.getTag())
+                    .isPinned(entity.getIsPinned())
+                    .writer(entity.getUser().getNickname())
+                    .build();
+        }
+    }
+
+
     // 공지사항 상세 조회 응답 dto
     @Getter
     @Builder
-    public static class ReadRes {
+    public static class DetailRes {
         private Long idx;
         private String title;
         private String contents;
@@ -72,8 +95,8 @@ public class NoticeDto {
         private String writer;
 
         // 엔티티 -> dto
-        public static ReadRes from(Notice entity) {
-            return ReadRes.builder()
+        public static DetailRes from(Notice entity) {
+            return DetailRes.builder()
                     .idx(entity.getIdx())
                     .title(entity.getTitle())
                     .contents(entity.getContents())
