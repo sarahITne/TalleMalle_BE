@@ -6,6 +6,8 @@ import lombok.Setter;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 
+import java.util.Date;
+
 public class ChatDto {
 
     @Getter
@@ -28,6 +30,7 @@ public class ChatDto {
         private Long idx;
         private String type;
         private String contents;
+        private Date createdAt;
         private Long senderId;
         private String senderName;
         private Long writerIdx;
@@ -40,6 +43,7 @@ public class ChatDto {
                     .type("message")
                     .contents(entity.getContents())
                     .senderId(entity.getUser().getIdx())
+                    .createdAt(entity.getCreatedAt())
                     .senderName(entity.getUser().getName())
                     .writerIdx(entity.getUser().getIdx())
                     .writer(entity.getUser().getName())
@@ -54,6 +58,7 @@ public class ChatDto {
         private Long idx;
         private String type;
         private String contents;
+        private Date createdAt;
         private Long senderId;
         private String senderName;
         private Long writerIdx;
@@ -65,6 +70,7 @@ public class ChatDto {
                     .idx(entity.getIdx())
                     .type("message")
                     .contents(entity.getContents())
+                    .createdAt(entity.getCreatedAt())
                     .senderId(entity.getUser().getIdx())
                     .senderName(entity.getUser().getName())
                     .writerIdx(entity.getUser().getIdx())
