@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface ChatRepository extends JpaRepository<Chat, Long> {
     List<Chat> findAllByRecruit_IdOrderByIdxAsc(Long recruitIdx);
+    boolean existsByRecruit_IdAndIdxGreaterThanAndUser_IdxNot(Long recruitIdx, Long idx, Long userIdx);
 }

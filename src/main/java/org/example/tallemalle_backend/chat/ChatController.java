@@ -44,6 +44,14 @@ public class ChatController {
         return ResponseEntity.ok(BaseResponse.success(dto));
     }
 
+    @GetMapping("/unread")
+    public ResponseEntity unread(
+            @AuthenticationPrincipal AuthUserDetails user
+    ) {
+        List<Long> dto = chatService.unreadRecruitIds(user);
+        return ResponseEntity.ok(BaseResponse.success(dto));
+    }
+
     private AuthUserDetails resolveUser(SimpMessageHeaderAccessor headerAccessor) {
         Map<String, Object> attributes = headerAccessor.getSessionAttributes();
         if (attributes == null) {
