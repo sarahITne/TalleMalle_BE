@@ -5,6 +5,8 @@ jwt:
 project:
   upload:
     path: ${UPLOAD_PATH}
+  payment:
+    toss: ${TOSS_SECRET_KEY}
 
 spring:
   application:
