@@ -25,10 +25,8 @@ public class Notice extends BaseEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String contents;
 
-    @Builder.Default
     @Column(nullable = false, length = 55)
-    @ColumnDefault(value = "일반")
-    private String tag = "일반";
+    private String tag;
 
     @Builder.Default
     @Column(nullable = false, name = "is_pinned")

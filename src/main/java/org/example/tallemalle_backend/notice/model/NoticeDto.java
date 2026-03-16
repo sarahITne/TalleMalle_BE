@@ -16,11 +16,19 @@ public class NoticeDto {
         @NotBlank
         private String contents;
 
+        @NotBlank
+        private String tag;
+
+        private Boolean isPinned;
+
+
         // dto -> 엔티티
         public Notice toEntity(AuthUserDetails user) {
             return Notice.builder()
                     .title(this.title)
                     .contents(this.contents)
+                    .tag(this.tag)
+                    .isPinned(this.isPinned)
                     .user(user.toEntity())
                     .build();
         }
@@ -34,6 +42,8 @@ public class NoticeDto {
         private Long idx;
         private String title;
         private String contents;
+        private String tag;
+        private Boolean isPinned;
         private String writer;
 
         // 엔티티 -> dto
@@ -42,6 +52,56 @@ public class NoticeDto {
                     .idx(entity.getIdx())
                     .title(entity.getTitle())
                     .contents(entity.getContents())
+                    .tag(entity.getTag())
+                    .isPinned(entity.getIsPinned())
+                    .writer(entity.getUser().getNickname())
+                    .build();
+        }
+    }
+
+
+    // 공지 사항 목록 조회 응답 dto
+    @Getter
+    @Builder
+    public static class ListRes {
+        private Long idx;
+        private String title;
+        private String tag;
+        private Boolean isPinned;
+        private String writer;
+
+        // 엔티티 -> dto
+        public static ListRes from(Notice entity) {
+            return ListRes.builder()
+                    .idx(entity.getIdx())
+                    .title(entity.getTitle())
+                    .tag(entity.getTag())
+                    .isPinned(entity.getIsPinned())
+                    .writer(entity.getUser().getNickname())
+                    .build();
+        }
+    }
+
+
+    // 공지사항 상세 조회 응답 dto
+    @Getter
+    @Builder
+    public static class DetailRes {
+        private Long idx;
+        private String title;
+        private String contents;
+        private String tag;
+        private Boolean isPinned;
+        private String writer;
+
+        // 엔티티 -> dto
+        public static DetailRes from(Notice entity) {
+            return DetailRes.builder()
+                    .idx(entity.getIdx())
+                    .title(entity.getTitle())
+                    .contents(entity.getContents())
+                    .tag(entity.getTag())
+                    .isPinned(entity.getIsPinned())
                     .writer(entity.getUser().getNickname())
                     .build();
         }
