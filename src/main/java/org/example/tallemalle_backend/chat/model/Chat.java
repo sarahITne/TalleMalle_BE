@@ -20,6 +20,9 @@ public class Chat extends BaseEntity {
     private Long idx;
     private String contents;
 
+    @Column(nullable = false, length = 20)
+    private String type;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_idx")
     private User user;

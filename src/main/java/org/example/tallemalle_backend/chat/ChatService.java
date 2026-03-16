@@ -32,6 +32,7 @@ public class ChatService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 recruitId 입니다."));
         Chat entity = Chat.builder()
                 .contents(dto.getContents())
+                .type(dto.getType() == null ? "message" : dto.getType())
                 .recruit(recruit)
                 .user(chatUser)
                 .build();
