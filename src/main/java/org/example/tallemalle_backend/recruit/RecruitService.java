@@ -1,6 +1,8 @@
 package org.example.tallemalle_backend.recruit;
 
 import lombok.RequiredArgsConstructor;
+import org.example.tallemalle_backend.common.exception.BaseException;
+import org.example.tallemalle_backend.common.model.BaseResponseStatus;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.recruit.model.Recruit;
@@ -30,13 +32,18 @@ public class RecruitService {
     @Transactional
     public void reg(AuthUserDetails user, RecruitDto.RegReq dto) {
         // 유저 정보 가져오기
-        User realUser = userRepository.findById(user.getIdx()).orElseThrow();
+        User realUser = userRepository.findById(user.getIdx()).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
 
         Recruit recruit = dto.toEntity(realUser);
 
-        // 이미 방에 접속 중이거나, 방장이면 반환
-        if(realUser.getCurrentRecruit() != null || recruit.getOwner() == realUser) {
-            return;
+        // 이미 방에 접속 중이면 반환
+        boolean isAlreadyJoined = realUser.getParticipations().stream()
+                .anyMatch(p -> "ACTIVE".equals(p.getStatus()));
+
+        if (isAlreadyJoined) {
+            throw new BaseException(BaseResponseStatus.ALREADY_JOINED);
         }
 
         // 매칭 엔티티 생성
@@ -47,7 +54,6 @@ public class RecruitService {
                 .build();
 
         recruit.getParticipations().add(participation);
-        realUser.setCurrentRecruit(recruit);
         realUser.setStatus("OWNER");
 
         // DB에 모집글 저장
@@ -80,19 +86,23 @@ public class RecruitService {
     @Transactional
     public boolean join(AuthUserDetails user, Long recruitIdx) {
         // 모집글 찾아오기 TODO: 비관적 락
-        Recruit recruit = recruitRepository.findById(recruitIdx).orElseThrow();
+        Recruit recruit = recruitRepository.findById(recruitIdx).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
 
         // 모집에 참여하고 싶은 유저 조회
-        User realUser = userRepository.findById(user.getIdx()).orElseThrow();
+        User realUser = userRepository.findById(user.getIdx()).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
 
         // 방장이 방에 입장하려고 하는 경우
         if(recruit.getOwner().getIdx().equals(realUser.getIdx())) {
-            return false;
+            throw new BaseException(BaseResponseStatus.ALREADY_JOINED);
         }
 
         // 모집글 인원이 FULL인데 입장하려는 경우
         if(recruit.getStatus().equals(RecruitStatus.FULL)) {
-            return false;
+            throw new BaseException(BaseResponseStatus.RECRUIT_FULL);
         }
 
         // 중복 참여 여부 확인
@@ -119,8 +129,6 @@ public class RecruitService {
 
         // 모집 인원 + 1
         recruit.setCurrentCapacity(recruit.getCurrentCapacity() + 1);
-        // 모집 인원 추가된거 적용
-        realUser.setCurrentRecruit(recruit);
 
         realUser.setStatus("JOINED");
 
@@ -147,8 +155,12 @@ public class RecruitService {
 
     @Transactional
     public boolean leave(AuthUserDetails user, Long recruitIdx) {
-        Recruit recruit = recruitRepository.findById(recruitIdx).orElseThrow();
-        User realUser = userRepository.findById(user.getIdx()).orElseThrow();
+        Recruit recruit = recruitRepository.findById(recruitIdx).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
+        User realUser = userRepository.findById(user.getIdx()).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
 
         // 방장이 방을 나갈 때
         if(recruit.getOwner().getIdx().equals(user.getIdx())) {
@@ -156,12 +168,15 @@ public class RecruitService {
             recruit.getParticipations().forEach(p -> {
                 User pUser = p.getUser();
                 pUser.setStatus("IDLE");
-                pUser.setCurrentRecruit(null);
             });
 
             // TODO: Soft 삭제로 변경해야 함
             // DB에서 모집글 삭제
-            recruitRepository.delete(recruit);
+            try {
+                recruitRepository.delete(recruit);
+            } catch (Exception e) {
+                System.out.println("방 폭파 중 오류 발생 (무시됨)");
+            }
 
             // 소켓 통신으로 방이 없어졌다고 알림
             Map<String, Object> message = new HashMap<>();
@@ -173,12 +188,14 @@ public class RecruitService {
             return true;
 
         }
-        Participation participation = participationRepository.findByUserIdxAndRecruitIdx(realUser.getIdx(), recruit.getIdx()).orElseThrow();
+        Participation participation = participationRepository.findByUserIdxAndRecruitIdx(realUser.getIdx(), recruit.getIdx()).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
 
 
         // 방이 가득차면 나갈 수 없음
         if(recruit.getStatus() == RecruitStatus.FULL) {
-            throw new IllegalStateException("모집이 마감되어 나갈 수 없습니다.");
+            throw new BaseException(BaseResponseStatus.RECRUIT_FULL);
             // 꽉 찬 모집 방에서 나가기
             // recruit.setStatus(RecruitStatus.RECRUITING);
         }
@@ -191,9 +208,6 @@ public class RecruitService {
 
         // 유저 상태 다시 IDLE로 변경
         realUser.setStatus("IDLE");
-
-        // 유저의 recruit_id를 다시 null로 변경
-        realUser.setCurrentRecruit(null);
 
         // 변경된 모집글 정보를 소켓으로 전송
         RecruitDto.ListRes updatedDto = RecruitDto.ListRes.from(recruit);
