@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 
+import java.util.Date;
+
 public class NoticeDto {
 
     // 공지사항 작성 요청
@@ -69,6 +71,7 @@ public class NoticeDto {
         private String tag;
         private Boolean isPinned;
         private String writer;
+        private Date createdAt;
 
         // 엔티티 -> dto
         public static ListRes from(Notice entity) {
@@ -78,6 +81,7 @@ public class NoticeDto {
                     .tag(entity.getTag())
                     .isPinned(entity.getIsPinned())
                     .writer(entity.getUser().getNickname())
+                    .createdAt(entity.getCreatedAt())
                     .build();
         }
     }
@@ -93,6 +97,8 @@ public class NoticeDto {
         private String tag;
         private Boolean isPinned;
         private String writer;
+        private Date createdAt;
+        private Date updatedAt;
 
         // 엔티티 -> dto
         public static DetailRes from(Notice entity) {
@@ -103,6 +109,8 @@ public class NoticeDto {
                     .tag(entity.getTag())
                     .isPinned(entity.getIsPinned())
                     .writer(entity.getUser().getNickname())
+                    .createdAt(entity.getCreatedAt())
+                    .updatedAt(entity.getUpdatedAt())
                     .build();
         }
     }
