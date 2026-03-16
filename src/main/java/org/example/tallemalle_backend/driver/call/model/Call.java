@@ -1,10 +1,7 @@
 package org.example.tallemalle_backend.driver.call.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -36,6 +33,10 @@ public class Call {
     private BigDecimal endLat;
     @Column(precision = 10, scale = 7)
     private BigDecimal endLng;
+
+    @Builder.Default
+    @Setter
+    private int estimatedFare = 0;
 
     @Enumerated(EnumType.STRING)
     private CallStatus status;

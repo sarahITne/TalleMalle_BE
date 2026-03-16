@@ -46,6 +46,19 @@ public class CallDto {
                     .status(entity.getStatus())
                     .build();
         }
+
+        public static DetailRes from(Call entity, int estimatedFare) {
+            return DetailRes.builder()
+                    .callIdx(entity.getId())
+                    .userIdx(entity.getUserIdx())
+                    .driverIdx(entity.getDriverIdx())
+                    .startLocation(entity.getStartLocation())
+                    .endLocation(entity.getEndLocation())
+                    .estimatedFare(estimatedFare)
+                    .status(entity.getStatus())
+                    .build();
+        }
+
         public static DetailRes from(Call call, DirectionInfo direction, int estimatedFare) {
             return DetailRes.builder()
                     .callIdx(call.getId())
