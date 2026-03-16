@@ -54,11 +54,6 @@ public class User extends BaseEntity {
     @ColumnDefault(value = "'ROLE_USER'")
     private String role = "ROLE_USER";
 
-    @Setter
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruit_idx")
-    private Recruit currentRecruit;
-
     @Builder.Default
     @OneToMany(mappedBy = "user")
     private List<Participation> participations = new ArrayList<>();
