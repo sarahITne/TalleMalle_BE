@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.chat.model.Chat;
 import org.example.tallemalle_backend.chat.model.ChatDto;
 import org.example.tallemalle_backend.common.model.BaseResponse;
+import org.example.tallemalle_backend.upload.UploadService;
+import org.example.tallemalle_backend.upload.PresignedUploadDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -13,6 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,15 @@ public class ChatController {
     ) {
         List<Long> dto = chatService.unreadRecruitIds(user);
         return ResponseEntity.ok(BaseResponse.success(dto));
+    }
+
+    // 이미지 전송
+    private final UploadService uploadService;
+
+    @PostMapping("/image/presign")
+    public ResponseEntity presign(@RequestBody PresignedUploadDto.PresignReq req) {
+        PresignedUploadDto.PresignRes result = uploadService.presign(req);
+        return ResponseEntity.ok(BaseResponse.success(result));
     }
 
     private AuthUserDetails resolveUser(SimpMessageHeaderAccessor headerAccessor) {

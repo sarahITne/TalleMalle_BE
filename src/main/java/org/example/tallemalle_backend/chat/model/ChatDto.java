@@ -14,10 +14,12 @@ public class ChatDto {
     @Setter
     public static class SendReq {
         private String contents;
+        private String type;
 
         public Chat toEntity(AuthUserDetails user, Long recruitIdx) {
             return Chat.builder()
                     .contents(this.contents)
+                    .type(this.type)
                     .recruit(Recruit.builder().id(recruitIdx).build())
                     .user(user.toEntity())
                     .build();
@@ -38,9 +40,10 @@ public class ChatDto {
         private Long recruitIdx;
 
         public static SendRes from(Chat entity) {
+            String messageType = entity.getType() == null ? "message" : entity.getType();
             return SendRes.builder()
                     .idx(entity.getIdx())
-                    .type("message")
+                    .type(messageType)
                     .contents(entity.getContents())
                     .senderId(entity.getUser().getIdx())
                     .createdAt(entity.getCreatedAt())
@@ -66,9 +69,10 @@ public class ChatDto {
         private Long recruitIdx;
 
         public static ListRes from(Chat entity) {
+            String messageType = entity.getType() == null ? "message" : entity.getType();
             return ListRes.builder()
                     .idx(entity.getIdx())
-                    .type("message")
+                    .type(messageType)
                     .contents(entity.getContents())
                     .createdAt(entity.getCreatedAt())
                     .senderId(entity.getUser().getIdx())
