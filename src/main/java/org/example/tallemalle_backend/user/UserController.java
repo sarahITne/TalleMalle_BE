@@ -10,7 +10,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @CrossOrigin
 @RequestMapping("/user")
@@ -21,25 +24,54 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    // 회원가입
     @PostMapping("/signup")
     public ResponseEntity signup(@Valid @RequestBody UserDto.SignupReq dto) {
-        UserDto.SignupRes result =  userService.signup(dto);
-
+        UserDto.SignupRes result = userService.signup(dto);
         return ResponseEntity.ok(result);
     }
 
 
+    // 이메일 인증
+    @GetMapping("/verify")
+    public ResponseEntity verify(String uuid) {
+        userService.verify(uuid);
+
+        // 인증 성공하면 프론트로 리다이렉트
+        return ResponseEntity
+                .status(HttpStatus.MOVED_PERMANENTLY)
+                .location(URI.create("http://localhost:5173/login"))
+                .build();
+    }
+
+
+    // 소셜 로그인 한 사용자 추가 정보 업데이트
+    @PatchMapping("/signup/extra")
+    public ResponseEntity extraInfo(
+            @AuthenticationPrincipal AuthUserDetails user,
+            @Valid @RequestBody UserDto.ExtraInfoReq dto
+    ) {
+        UserDto.ExtraInfoRes result = userService.extraInfo(user.getEmail(), dto);
+
+        // 추가 정보 입력 후 로그인 페이지로 리다이렉트
+        return ResponseEntity.ok(result);
+    }
+
+
+    // 로그인
     @PostMapping("/login")
-    public ResponseEntity login(@RequestBody UserDto.LoginReq dto) {
+    public ResponseEntity login(@Valid @RequestBody UserDto.LoginReq dto) {
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword(), null);
 
-        Authentication authentication = authenticationManager.authenticate(token);
-        AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();
+        Authentication authentication = authenticationManager.authenticate(token);  // 여기서 UserService의 loadUserByUsername 메소드로 이동
+        AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();     // 현재 로그인한 사용자의 객체를 꺼내는 메소드
 
         if(user != null) {
-            String jwt = jwtUtil.createToken(user.getIdx(), user.getUsername(), user.getRole());
-            return ResponseEntity.ok().header("Set-Cookie", "ATOKEN=" + jwt + "; Path=/").build();
+            String jwt = jwtUtil.createToken(user);
+            return ResponseEntity.ok()
+                    .header("Set-Cookie", "ATOKEN=" + jwt + "; path=/")   // JWT 토큰을 헤더로 설정해서 응답 (쿠키)
+                    .body(UserDto.LoginRes.from(user));  // 응답 결과로 로그인한 사용자 정보 같이 반환
         }
 
         return ResponseEntity.ok("로그인 실패");
