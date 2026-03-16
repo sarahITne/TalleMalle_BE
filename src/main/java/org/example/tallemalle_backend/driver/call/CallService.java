@@ -26,11 +26,14 @@ public class CallService {
     public CallDto.DetailRes read(Long callIdx) {
         Call call = callRepository.findById(callIdx).orElseThrow();
 
-        DirectionInfo direction = kakaoMobilityService.getDirections(call);
+        if (call.getEstimatedFare() == 0) {
+            DirectionInfo direction = kakaoMobilityService.getDirections(call);
+            int fare = calculateTaxiFare(direction.getDistance() / 1000.0, direction.getDuration() / 60);
+            call.setEstimatedFare(fare);
+            callRepository.save(call);
+        }
 
-        int estimatedFare = calculateTaxiFare(direction.getDistance() / 1000.0, direction.getDuration() / 60);
-
-        return CallDto.DetailRes.from(call, direction, estimatedFare);
+        return CallDto.DetailRes.from(call, call.getEstimatedFare());
     }
 
     public CallDto.DetailRes readMyCall(Long driverIdx) {
