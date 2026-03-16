@@ -6,7 +6,7 @@ import org.example.tallemalle_backend.notification.model.NotificationDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,10 +16,10 @@ import java.util.List;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
 
-    public NotificationDto.PageRes list(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
+    public NotificationDto.PageRes list(Long idx, int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("idx").descending());
 
-        Page<Notification> result = notificationRepository.findAll(pageRequest);
+        Page<Notification> result = notificationRepository.findAllByUserIdx(idx, pageRequest);
 
         return NotificationDto.PageRes.from(result);
     }
@@ -29,8 +29,8 @@ public class NotificationService {
         return entitiesTop5.stream().map(NotificationDto.ReadTop5Res::from).toList();
     }
 
-    public NotificationDto.ReadOnlyRes readOnly(Long idx) {
-        Notification entity = notificationRepository.findById(idx).orElseThrow();
+    public NotificationDto.ReadOnlyRes readOnly(AuthUserDetails user, Long idx) {
+        Notification entity = notificationRepository.findByUserIdxAndIdx(user.getIdx(), idx).orElseThrow();
         entity.setRead(true);
         Notification result = notificationRepository.save(entity);
         return NotificationDto.ReadOnlyRes.from(result);

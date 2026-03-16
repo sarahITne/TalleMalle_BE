@@ -2,6 +2,7 @@ package org.example.tallemalle_backend.notification;
 
 import com.fasterxml.jackson.databind.ser.Serializers;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.tallemalle_backend.common.model.BaseResponse;
 import org.example.tallemalle_backend.notification.model.NotificationDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
@@ -19,9 +20,10 @@ public class NotificationController {
 
     @GetMapping("/list")
     public ResponseEntity list(
+            @AuthenticationPrincipal AuthUserDetails user,
             @RequestParam(required = true, defaultValue = "0") int page,
-            @RequestParam(required = true, defaultValue = "10") int size) {
-        NotificationDto.PageRes dto = notificationService.list(page, size);
+            @RequestParam(required = true, defaultValue = "5") int size) {
+        NotificationDto.PageRes dto = notificationService.list(user.getIdx(), page, size);
         return ResponseEntity.ok(BaseResponse.success(dto));
     }
 
@@ -32,8 +34,10 @@ public class NotificationController {
     }
 
     @PatchMapping("/readonly/{idx}")
-    public ResponseEntity readOnly(@PathVariable Long idx){
-        NotificationDto.ReadOnlyRes result = notificationService.readOnly(idx);
+    public ResponseEntity readOnly(@AuthenticationPrincipal AuthUserDetails user,
+                                   @PathVariable Long idx){
+        NotificationDto.ReadOnlyRes result = notificationService.readOnly(user, idx);
+
         return ResponseEntity.ok(BaseResponse.success(result));
     }
 
