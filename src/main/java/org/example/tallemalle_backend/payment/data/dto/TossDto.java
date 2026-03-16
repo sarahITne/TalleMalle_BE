@@ -11,6 +11,16 @@ public class TossDto {
 
     @Builder
     @Getter
+    public static class Card {
+        private String issuerCode;
+        private String acquirerCode;
+        private String number;
+        private String cardType;
+        private String ownerType;
+    }
+
+    @Builder
+    @Getter
     public static class issueBillingKeyRequest {
         private String authKey;
         private String customerKey;
@@ -39,14 +49,15 @@ public class TossDto {
             return CARD_MAP.getOrDefault(card.issuerCode, "기타") + "(" + this.card.getNumber().substring(0, 4) + ")";
         }
     }
+    @Builder
+    @Getter
+    public static class revokeBillingKeyRequest {
+        private String billingKey;
+    }
 
     @Builder
     @Getter
-    public static class Card {
-        private String issuerCode;
-        private String acquirerCode;
-        private String number;
-        private String cardType;
-        private String ownerType;
+    public static class revokeBillingKeyResponse {
+        private String billingKey;
     }
 }

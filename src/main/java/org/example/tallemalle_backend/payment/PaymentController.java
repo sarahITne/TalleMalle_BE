@@ -8,10 +8,7 @@ import org.example.tallemalle_backend.payment.data.dto.PaymentDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -35,5 +32,22 @@ public class PaymentController {
                 .build();
 
         return ResponseEntity.ok(BaseResponse.success(paymentService.enroll(user, dto)));
+    }
+
+    @GetMapping("/revoke/{idx}")
+    public ResponseEntity revoke(
+            @AuthenticationPrincipal AuthUserDetails user,
+            @PathVariable Long idx) {
+
+        if (user == null) {
+            throw BaseException.from(BaseResponseStatus.PAYMENT_UNAUTHENTICATED_USER);
+        }
+
+        PaymentDto.RevokeRequest dto = PaymentDto.RevokeRequest.builder()
+                .ownerIdx(user.getIdx())
+                .billingIdx(idx)
+                .build();
+
+        return ResponseEntity.ok(BaseResponse.success(paymentService.revoke(dto)));
     }
 }

@@ -2,8 +2,32 @@ package org.example.tallemalle_backend.payment.data.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.example.tallemalle_backend.payment.data.entity.Billing;
+
+import java.util.List;
 
 public class PaymentDto {
+
+    @Builder
+    @Getter
+    public static class BillingRes {
+        private Long idx;
+        private String alias;
+
+        public static BillingRes fromEntity(Billing entity) {
+            return BillingRes.builder()
+                    .idx(entity.getIdx())
+                    .alias(entity.getAlias())
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    public static class BillingGroupRes {
+        private BillingRes defaultBilling;
+        private List<BillingRes> otherBillings;
+    }
 
     @Builder
     @Getter
@@ -22,7 +46,25 @@ public class PaymentDto {
     @Builder
     @Getter
     public static class EnrollResponse {
-        private Long idx;
-        private String alias;
+        BillingGroupRes billingGroup;
+    }
+
+    @Builder
+    @Getter
+    public static class RevokeRequest {
+        private Long ownerIdx;
+        private Long billingIdx;
+    }
+
+    @Builder
+    @Getter
+    public static class RevokeResponse {
+        BillingGroupRes billingGroup;
+    }
+
+    @Builder
+    @Getter
+    public static class ListResponse {
+        BillingGroupRes billingGroup;
     }
 }

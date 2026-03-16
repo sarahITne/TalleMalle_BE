@@ -29,4 +29,13 @@ public class TossPaymentsAdaptor {
                 .bodyToMono(TossDto.issueBillingKeyResponse.class)
                 .block();
     }
+
+    public TossDto.revokeBillingKeyResponse revokeBillingKey(TossDto.revokeBillingKeyRequest dto) {
+        String uri = "/billing/" + dto.getBillingKey();
+        return webClient.delete()
+                .uri(uri)
+                .retrieve()
+                .bodyToMono(TossDto.revokeBillingKeyResponse.class)
+                .block();
+    }
 }
