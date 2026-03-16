@@ -11,13 +11,20 @@ import org.springframework.stereotype.Service;
 public class NoticeService {
     private final NoticeRepository noticeRepository;
 
-    // 게시글 작성
+    // 공지사항 작성
     public NoticeDto.CreateRes createNotice(AuthUserDetails user, NoticeDto.CreateReq dto) {
         // 1. 요청 DTO를 Entity로 변환하여 저장
         Notice notice = noticeRepository.save(dto.toEntity(user));
 
         // 2. 저장된 Entity를 응답 DTO로 변환하여 반환
         return NoticeDto.CreateRes.from(notice);
+    }
+
+
+    // 공지사항 상세 조회
+    public NoticeDto.ReadRes getNotice(Long idx) {
+        Notice notice = noticeRepository.findById(idx).orElseThrow();
+        return NoticeDto.ReadRes.from(notice);
     }
 
 }

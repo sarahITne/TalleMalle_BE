@@ -58,4 +58,29 @@ public class NoticeDto {
                     .build();
         }
     }
+
+
+    // 공지사항 상세 조회 응답 dto
+    @Getter
+    @Builder
+    public static class ReadRes {
+        private Long idx;
+        private String title;
+        private String contents;
+        private String tag;
+        private Boolean isPinned;
+        private String writer;
+
+        // 엔티티 -> dto
+        public static ReadRes from(Notice entity) {
+            return ReadRes.builder()
+                    .idx(entity.getIdx())
+                    .title(entity.getTitle())
+                    .contents(entity.getContents())
+                    .tag(entity.getTag())
+                    .isPinned(entity.getIsPinned())
+                    .writer(entity.getUser().getNickname())
+                    .build();
+        }
+    }
 }
