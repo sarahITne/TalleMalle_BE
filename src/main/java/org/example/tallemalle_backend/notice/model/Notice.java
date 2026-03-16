@@ -41,4 +41,16 @@ public class Notice extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_idx")
     private User user;
+
+    // 게시글 수정 시 엔티티 변경 -> 더티 체킹 (바뀐 내용을 알아서 DB에 update 반영)
+    public void update(NoticeDto.UpdateReq dto) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("제목 필수");
+        }
+
+        this.title = dto.getTitle();
+        this.contents = dto.getContents();
+        this.tag = dto.getTag();
+        this.isPinned = dto.getIsPinned();
+    }
 }
