@@ -36,6 +36,7 @@ public class NotificationDto {
         private Long idx;
         private String title;
         private String contents;
+        private String type;
         private boolean isRead;
 
         public static ReadRes from(Notification entity) {
@@ -43,6 +44,7 @@ public class NotificationDto {
                     .idx(entity.getIdx())
                     .title(entity.getTitle())
                     .contents(entity.getContents())
+                    .type(entity.getType())
                     .isRead(entity.isRead())
                     .build();
         }
