@@ -35,6 +35,9 @@ public class RecruitService {
         Recruit recruit = dto.toEntity(realUser);
 
         // 이미 방에 접속 중이거나, 방장이면 반환
+        if(realUser.getCurrentRecruit() != null || recruit.getOwner() == realUser) {
+            return;
+        }
 
         // 매칭 엔티티 생성
         Participation participation = Participation.builder()
