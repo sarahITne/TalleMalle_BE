@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.payment.data.dto;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.tallemalle_backend.payment.data.entity.Billing;
+import org.example.tallemalle_backend.user.model.User;
 
 import java.util.Map;
 
@@ -26,10 +27,11 @@ public class TossDto {
         private String billingKey;
         private Card card;
 
-        public Billing toEntity() {
+        public Billing toEntity(User user) {
             return Billing.builder()
                     .billingKey(this.billingKey)
                     .alias(createAlias())
+                    .owner(user)
                     .build();
         }
 

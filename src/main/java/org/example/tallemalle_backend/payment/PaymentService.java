@@ -29,7 +29,7 @@ public class PaymentService {
 
         TossDto.issueBillingKeyResponse response = tossPaymentsAdaptor.issueBillingKey(dto.toIssueBillingKeyDto());
 
-        Billing billing = response.toEntity();
+        Billing billing = response.toEntity(user);
 
         billing = billingRepository.save(billing);
 
