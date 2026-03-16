@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.chat;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.chat.model.Chat;
 import org.example.tallemalle_backend.chat.model.ChatDto;
+import org.example.tallemalle_backend.chat.model.ChatRead;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.push.WebPushService;
 import org.example.tallemalle_backend.recruit.RecruitRepository;
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatService {
     private final ChatRepository chatRepository;
+    private final ChatReadRepository chatReadRepository;
     private final UserRepository userRepository;
     private final RecruitRepository recruitRepository;
     private final ParticipationRepository participationRepository;
@@ -43,8 +45,37 @@ public class ChatService {
         validateParticipant(user, recruitIdx);
         List<Chat> chatList = chatRepository.findAllByRecruit_IdOrderByIdxAsc(recruitIdx);
 
+        if (!chatList.isEmpty()) {
+            Long lastChatIdx = chatList.get(chatList.size() - 1).getIdx();
+            upsertReadMarker(user.getIdx(), recruitIdx, lastChatIdx);
+        }
+
         return chatList.stream()
                 .map(ChatDto.ListRes::from)
+                .toList();
+    }
+
+    public List<Long> unreadRecruitIds(AuthUserDetails user) {
+        List<Long> recruitIds = participationRepository.findAllByUser_Idx(user.getIdx())
+                .stream()
+                .map(p -> p.getRecruit().getId())
+                .toList();
+
+        if (recruitIds.isEmpty()) {
+            return List.of();
+        }
+
+        return recruitIds.stream()
+                .filter(recruitId -> {
+                    Long lastReadIdx = chatReadRepository.findByUser_IdxAndRecruit_Id(user.getIdx(), recruitId)
+                            .map(ChatRead::getLastReadChatIdx)
+                            .orElse(0L);
+                    return chatRepository.existsByRecruit_IdAndIdxGreaterThanAndUser_IdxNot(
+                            recruitId,
+                            lastReadIdx,
+                            user.getIdx()
+                    );
+                })
                 .toList();
     }
 
@@ -53,5 +84,17 @@ public class ChatService {
         if (!isParticipant) {
             throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
         }
+    }
+
+    private void upsertReadMarker(Long userIdx, Long recruitIdx, Long lastChatIdx) {
+        ChatRead read = chatReadRepository.findByUser_IdxAndRecruit_Id(userIdx, recruitIdx)
+                .orElseGet(() -> ChatRead.builder()
+                        .user(userRepository.findById(userIdx).orElseThrow())
+                        .recruit(recruitRepository.findById(recruitIdx).orElseThrow())
+                        .lastReadChatIdx(0L)
+                        .build());
+
+        read.setLastReadChatIdx(lastChatIdx);
+        chatReadRepository.save(read);
     }
 }
