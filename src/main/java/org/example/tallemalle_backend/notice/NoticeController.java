@@ -26,6 +26,17 @@ public class NoticeController {
     }
 
 
+    // 공지사항 수정
+    @PatchMapping("/{idx}")
+    public ResponseEntity updateNotice(
+            @PathVariable Long idx,
+            @AuthenticationPrincipal AuthUserDetails user,  // 수정 권한 확인
+            @Valid @RequestBody NoticeDto.UpdateReq dto) {
+        NoticeDto.DetailRes result = noticeService.updateNotice(idx, user, dto);
+        return ResponseEntity.ok(result);
+    }
+
+
     // 공지사항 목록 조회 (전체 조회)
     @GetMapping
     public ResponseEntity getNotices() {

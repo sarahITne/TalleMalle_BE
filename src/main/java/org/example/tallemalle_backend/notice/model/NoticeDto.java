@@ -7,7 +7,7 @@ import org.example.tallemalle_backend.user.model.AuthUserDetails;
 
 public class NoticeDto {
 
-    // 공지사항 작성 요청
+    // 공지사항 작성 요청 dto
     @Getter
     public static class CreateReq {
         @NotBlank
@@ -35,7 +35,7 @@ public class NoticeDto {
     }
 
 
-    // 공지사항 작성 응답
+    // 공지사항 작성 응답 dto
     @Builder
     @Getter
     public static class CreateRes {
@@ -83,7 +83,7 @@ public class NoticeDto {
     }
 
 
-    // 공지사항 상세 조회 응답 dto
+    // 공지사항 상세 조회, 수정 응답 dto
     @Getter
     @Builder
     public static class DetailRes {
@@ -103,6 +103,34 @@ public class NoticeDto {
                     .tag(entity.getTag())
                     .isPinned(entity.getIsPinned())
                     .writer(entity.getUser().getNickname())
+                    .build();
+        }
+    }
+
+
+    // 공지사항 수정 요청 dto
+    @Getter
+    public static class UpdateReq {
+        @NotBlank
+        private String title;
+
+        @NotBlank
+        private String contents;
+
+        @NotBlank
+        private String tag;
+
+        private Boolean isPinned;
+
+
+        // dto -> 엔티티
+        public Notice toEntity(AuthUserDetails user) {
+            return Notice.builder()
+                    .title(this.title)
+                    .contents(this.contents)
+                    .tag(this.tag)
+                    .isPinned(this.isPinned)
+                    .user(user.toEntity())
                     .build();
         }
     }

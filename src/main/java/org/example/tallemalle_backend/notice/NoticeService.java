@@ -4,7 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.notice.model.Notice;
 import org.example.tallemalle_backend.notice.model.NoticeDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +23,27 @@ public class NoticeService {
 
         // 2. 저장된 Entity를 응답 DTO로 변환하여 반환
         return NoticeDto.CreateRes.from(notice);
+    }
+
+
+    // 공지사항 수정
+    @Transactional
+    public NoticeDto.DetailRes updateNotice(Long idx, AuthUserDetails user, NoticeDto.UpdateReq dto) {
+        // 1. 게시글 조회 : idx를 통해 수정하고자 하는 공지사항을 찾음, 엔티티 형식으로 반환
+        Notice notice = noticeRepository.findById(idx).orElseThrow(
+                () -> new IllegalArgumentException("해당 idx의 게시물이 없음")
+        );
+
+        // 2. 작성자 검증 (작성자 idx와 현재 로그인한 유저 idx 비교)
+        if (!notice.getUser().getIdx().equals(user.getIdx())) {
+            throw new AccessDeniedException("수정 권한이 없습니다.");
+        }
+
+        // 3. 엔티티에 정의해둔 update 메소드 실행, 엔티티 수정 (엔티티 내용을 바꿈 -> 더티체킹)
+        notice.update(dto);
+
+        // 4. 수정된 Entity를 응답 DTO로 변환하여 반환
+        return NoticeDto.DetailRes.from(notice);
     }
 
 
