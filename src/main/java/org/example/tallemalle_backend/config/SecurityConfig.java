@@ -81,6 +81,7 @@ public class SecurityConfig {
                         .requestMatchers("/user/signup", "/user/login", "/user/verify").permitAll()
                         .requestMatchers("/notices/**").authenticated()
                         .requestMatchers("/driver/login", "/driver/signup").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
         );
 
