@@ -24,7 +24,7 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    // 회원가입
+    // 회원 가입
     @PostMapping("/signup")
     public ResponseEntity signup(@Valid @RequestBody UserDto.SignupReq dto) {
         UserDto.SignupRes result = userService.signup(dto);
