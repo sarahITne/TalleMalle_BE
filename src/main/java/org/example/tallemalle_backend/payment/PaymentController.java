@@ -50,4 +50,12 @@ public class PaymentController {
 
         return ResponseEntity.ok(BaseResponse.success(paymentService.revoke(dto)));
     }
+
+    @GetMapping("/list")
+    public ResponseEntity list(@AuthenticationPrincipal AuthUserDetails user) {
+        if (user == null) {
+            throw BaseException.from(BaseResponseStatus.PAYMENT_UNAUTHENTICATED_USER);
+        }
+        return ResponseEntity.ok(BaseResponse.success(paymentService.list(user.getIdx())));
+    }
 }

@@ -89,6 +89,17 @@ public class PaymentService {
                 .build();
     }
 
+    public PaymentDto.ListResponse list(Long userIdx) {
+
+        User user = userRepository.findById(userIdx).orElseThrow(
+                () -> BaseException.from(BaseResponseStatus.PAYMENT_BILLING_NOT_EXIST)
+        );
+
+        return PaymentDto.ListResponse.builder()
+                .billingGroup(getBillingGroup(user))
+                .build();
+    }
+
     private PaymentDto.BillingGroupRes getBillingGroup(User owner) {
         List<Billing> billings = billingRepository.findAllByOwner(owner);
 
