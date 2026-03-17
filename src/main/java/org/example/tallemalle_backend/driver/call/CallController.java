@@ -41,6 +41,20 @@ public class CallController {
         return ResponseEntity.ok("콜 수락");
     }
 
+    @PatchMapping("/complete/{callIdx}")
+    public ResponseEntity complete(@PathVariable Long callIdx, @AuthenticationPrincipal AuthDriverDetails driver){
+        Long driverIdx = driver.getIdx();
+        callService.completeCall(callIdx, driverIdx);
+        return ResponseEntity.ok("운행 완료");
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity history(@AuthenticationPrincipal AuthDriverDetails driver){
+        Long driverIdx = driver.getIdx();
+        List<CallDto.HistoryRes> result = callService.getHistory(driverIdx);
+        return ResponseEntity.ok(result);
+    }
+
     @PatchMapping("/cancel/{callIdx}")
     public ResponseEntity cancel(@PathVariable Long callIdx, @AuthenticationPrincipal AuthDriverDetails driver){
         Long driverIdx = driver.getIdx();

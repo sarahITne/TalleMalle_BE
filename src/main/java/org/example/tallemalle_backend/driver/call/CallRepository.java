@@ -22,4 +22,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
     boolean existsByDriverIdxAndStatus(Long driverIdx, CallStatus status);
 
     Optional<Call> findByDriverIdx(Long driverIdx);
+
+    List<Call> findAllByDriverIdxAndStatus(Long driverIdx, CallStatus status);
 }
