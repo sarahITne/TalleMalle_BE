@@ -10,6 +10,12 @@ public class PaymentDto {
 
     @Builder
     @Getter
+    public static class CustomerKeyResponse {
+        private String customerKey;
+    }
+
+    @Builder
+    @Getter
     public static class BillingRes {
         private Long idx;
         private String alias;
@@ -35,8 +41,8 @@ public class PaymentDto {
         private String authKey;
         private String customerKey;
 
-        public TossDto.issueBillingKeyRequest toIssueBillingKeyDto() {
-            return TossDto.issueBillingKeyRequest.builder()
+        public TossDto.IssueBillingKeyRequest toIssueBillingKeyDto() {
+            return TossDto.IssueBillingKeyRequest.builder()
                     .authKey(this.authKey)
                     .customerKey(this.customerKey)
                     .build();
@@ -66,5 +72,19 @@ public class PaymentDto {
     @Getter
     public static class ListResponse {
         BillingGroupRes billingGroup;
+    }
+
+    @Builder
+    @Getter
+    public static class ChargeRequest {
+        private Long recruitIdx;
+        private Integer commission;
+        private Integer serviceFee;
+    }
+
+    @Builder
+    @Getter
+    public static class ChargeResponse {
+
     }
 }
