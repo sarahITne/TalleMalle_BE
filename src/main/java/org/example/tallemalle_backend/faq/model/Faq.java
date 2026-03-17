@@ -17,8 +17,8 @@ public class Faq {
     private Long idx;
 
     @Column(nullable = false)
-    private String title;
+    private String question;
 
     @Column(nullable = false)
-    private String contents;
+    private String answer;
 }
