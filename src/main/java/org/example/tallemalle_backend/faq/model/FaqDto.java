@@ -10,39 +10,36 @@ public class FaqDto {
     @Getter
     public static class CreateReq {
         @NotBlank
-        private String title;
+        private String question;
 
         @NotBlank
-        private String contents;
+        private String answer;
 
         // dto -> 엔티티
         public Faq toEntity() {
             return Faq.builder()
-                    .title(this.title)
-                    .contents(this.contents)
+                    .question(this.question)
+                    .answer(this.answer)
                     .build();
         }
     }
 
 
-    // faq 작성 응답 dto
+    // faq 작성, 조회 응답 dto
     @Getter
     @Builder
-    public static class CreateRes {
+    public static class FaqRes {
         private Long idx;
-        private String title;
-        private String contents;
+        private String question;
+        private String answer;
 
         // 엔티티 -> dto
-        public static CreateRes from(Faq entity) {
-            return CreateRes.builder()
+        public static FaqRes from(Faq entity) {
+            return FaqRes.builder()
                     .idx(entity.getIdx())
-                    .title(entity.getTitle())
-                    .contents(entity.getContents())
+                    .question(entity.getQuestion())
+                    .answer(entity.getAnswer())
                     .build();
         }
     }
-
-
-    // faq 전체 조회 응답 dto
 }
