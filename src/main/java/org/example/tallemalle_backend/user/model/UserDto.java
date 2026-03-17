@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 public class UserDto {
 
@@ -65,6 +66,96 @@ public class UserDto {
 
         public static SignupRes from(User entity) {
             return SignupRes.builder()
+                    .idx(entity.getIdx())
+                    .email(entity.getEmail())
+                    .name(entity.getName())
+                    .nickname(entity.getNickname())
+                    .status(entity.getStatus())
+                    .build();
+        }
+    }
+
+
+    // 소셜 로그인 관련(OAuth) DTO
+    @Getter
+    @Builder
+    public static class OAuth {
+        private String email;
+        private String name;
+        private String provider;
+        private String role;
+
+        public static OAuth from(Map<String, Object> attributes, String provider) {
+            String providerId = null;
+            String email = null;
+            Map properties = null;
+            String name = null;
+
+            if (provider.equals("kakao")) {
+                providerId = ((Long) attributes.get("id")).toString();
+                // 받아온 정보 가공
+                email = providerId + "@kakao.social";
+                properties = (Map) attributes.get("properties");
+                name = (String) properties.get("nickname");
+
+            } else if (provider.equals("google")) {
+                email = attributes.get("email").toString();
+                name = attributes.get("name").toString();
+            }
+
+            return OAuth.builder()
+                    .email(email)
+                    .name(name)
+                    .provider(provider)
+                    .build();
+        }
+
+        public User toEntity() {
+            return User.builder()
+                    .email(email)
+                    .password("social-login")
+                    .name(name)
+                    .nickname("임시 닉네임")          // 임시 닉네임 (카카오에서 받아올 수 없음, 이후 추가 회원가입 단계에서 정보 입력)
+                    .phoneNumber("010-0000-0000")   // 임시 번호
+                    .birth(LocalDate.parse("1900-01-01"))    // 임시 생년월일
+                    .gender("PENDING")    // 임시 성별
+                    .provider(provider.toUpperCase())
+                    .role("ROLE_GUEST")   // 권한으로 추가 정보 대상자 구분
+                    .build();
+        }
+    }
+
+
+    // 소셜 로그인 사용자 회원가입 추가 정보 업데이트
+    @Getter
+    public static class ExtraInfoReq {
+        @NotBlank
+        @Pattern(message = "닉네임은 한글과 숫자만 가능합니다.", regexp = "^[가-힣0-9]+$")
+        private String nickname;
+
+        @NotBlank
+        @Pattern(message = "전화번호는 숫자만 입력 가능합니다.", regexp = "^01[0-9]-\\d{3,4}-\\d{4}$")
+        private String phoneNumber;
+
+        private LocalDate birth;
+
+        @NotBlank
+        private String gender;
+    }
+
+
+    // 소셜 로그인 사용자 회원가입 추가 정보 업데이트 응답
+    @Builder
+    @Getter
+    public static class ExtraInfoRes {
+        private Long idx;
+        private String email;
+        private String name;
+        private String nickname;
+        private String status;
+
+        public static ExtraInfoRes from(User entity) {
+            return ExtraInfoRes.builder()
                     .idx(entity.getIdx())
                     .email(entity.getEmail())
                     .name(entity.getName())

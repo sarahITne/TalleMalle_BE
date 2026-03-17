@@ -5,11 +5,15 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.UserDto;
 import org.example.tallemalle_backend.utils.JwtUtil;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.net.URI;
 
 @CrossOrigin
 @RequestMapping("/user")
@@ -20,10 +24,36 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    // 회원가입
+    // 회원 가입
     @PostMapping("/signup")
     public ResponseEntity signup(@Valid @RequestBody UserDto.SignupReq dto) {
-        UserDto.SignupRes result =  userService.signup(dto);
+        UserDto.SignupRes result = userService.signup(dto);
+        return ResponseEntity.ok(result);
+    }
+
+
+    // 이메일 인증
+    @GetMapping("/verify")
+    public ResponseEntity verify(String uuid) {
+        userService.verify(uuid);
+
+        // 인증 성공하면 프론트로 리다이렉트
+        return ResponseEntity
+                .status(HttpStatus.MOVED_PERMANENTLY)
+                .location(URI.create("http://localhost:5173/login"))
+                .build();
+    }
+
+
+    // 소셜 로그인 한 사용자 추가 정보 업데이트
+    @PatchMapping("/signup/extra")
+    public ResponseEntity extraInfo(
+            @AuthenticationPrincipal AuthUserDetails user,
+            @Valid @RequestBody UserDto.ExtraInfoReq dto
+    ) {
+        UserDto.ExtraInfoRes result = userService.extraInfo(user.getEmail(), dto);
+
+        // 추가 정보 입력 후 로그인 페이지로 리다이렉트
         return ResponseEntity.ok(result);
     }
 
@@ -32,7 +62,6 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody UserDto.LoginReq dto) {
         String prefixedEmail = "USER_" + dto.getEmail();
-
 
         UsernamePasswordAuthenticationToken token =
                 new UsernamePasswordAuthenticationToken(prefixedEmail, dto.getPassword(), null);

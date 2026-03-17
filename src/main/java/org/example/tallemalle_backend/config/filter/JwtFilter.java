@@ -24,6 +24,7 @@ import java.util.List;
 public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
 
+    // JWT 검사 제외할 URL
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getServletPath();
@@ -35,11 +36,15 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.startsWith("/driver/signup");
     }
 
+    // 핵심 로직, 실제 인증 처리 로직, SecurityContext에 유저 정보 저장
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (request.getCookies() != null) {
             for (Cookie cookie : request.getCookies()) {
+                // ATOKEN 쿠키 찾기
                 if (cookie.getName().equals("ATOKEN")) {
+
+                    // JWT에서 정보 꺼내기
                     String email = jwtUtil.getEmail(cookie.getValue());
                     Long idx = jwtUtil.getUserIdx(cookie.getValue());
                     String role = jwtUtil.getRole(cookie.getValue());
@@ -59,6 +64,11 @@ public class JwtFilter extends OncePerRequestFilter {
                                 .role(role)
                                 .build();
                     }
+                    AuthUserDetails user = AuthUserDetails.builder()
+                            .idx(idx)
+                            .email(email)
+                            .role(role)
+                            .build();
 
                     // principal 객체를 넘겨줄 때 role에 맞는 GrantedAuthority를 부여
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -71,6 +81,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
+        // 다음 필터로 넘기기
         filterChain.doFilter(request, response);
     }
 }

@@ -56,6 +56,7 @@ public class JwtUtil {
         return jwt;
     }
 
+
     // 토큰 검증 후 필요한 값 가져오기
     public Long getUserIdx(String token) {
         Claims claims = Jwts.parser()
