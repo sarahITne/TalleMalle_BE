@@ -60,9 +60,11 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity login(@Valid @RequestBody UserDto.LoginReq dto) {
+    public ResponseEntity login(@RequestBody UserDto.LoginReq dto) {
+        String prefixedEmail = "USER_" + dto.getEmail();
+
         UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(dto.getEmail(), dto.getPassword(), null);
+                new UsernamePasswordAuthenticationToken(prefixedEmail, dto.getPassword(), null);
 
         Authentication authentication = authenticationManager.authenticate(token);  // 여기서 UserService의 loadUserByUsername 메소드로 이동
         AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();     // 현재 로그인한 사용자의 객체를 꺼내는 메소드
