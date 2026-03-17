@@ -5,6 +5,8 @@ jwt:
 project:
   upload:
     path: ${UPLOAD_PATH}
+  aes:
+    key: ${AES_KEY}
 
   aes:
     key: aessecretkey01234567890123456789
@@ -82,3 +84,7 @@ logging:
   level:
     org.hibernate.SQL: debug
     org.hibernate.orm.jdbc.bind: trace
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}

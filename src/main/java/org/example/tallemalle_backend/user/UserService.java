@@ -3,6 +3,9 @@ package org.example.tallemalle_backend.user;
 import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
+import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
+import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
+import org.example.tallemalle_backend.driver.auth.model.Driver;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.EmailVerify;
 import org.example.tallemalle_backend.user.model.User;
@@ -27,6 +30,7 @@ import static org.example.tallemalle_backend.common.model.BaseResponseStatus.SIG
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final DriverUserRepository driverUserRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final EmailVerifyRepository emailVerifyRepository;
@@ -35,7 +39,7 @@ public class UserService implements UserDetailsService {
     public UserDto.SignupRes signup(UserDto.SignupReq dto) {
 
         // 1. 이메일 중복 확인
-        if(userRepository.findByEmail(dto.getEmail()).isPresent()){
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw BaseException.from(SIGNUP_DUPLICATE_EMAIL);
         }
 
@@ -61,7 +65,6 @@ public class UserService implements UserDetailsService {
 
         return UserDto.SignupRes.from(user);
     }
-
 
     // 이메일 인증 및 처리
     public void verify(String uuid) {
@@ -99,10 +102,28 @@ public class UserService implements UserDetailsService {
     // 로그인
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // 이메일로 유저 조회
-        User user = userRepository.findByEmail(username).orElseThrow();
+        // 1. 일반 유저 (USER_) 인 경우
+        if (username.startsWith("USER_")) {
+            String realEmail = username.substring(5);
 
-        return AuthUserDetails.from(user);
+            User user = userRepository.findByEmail(realEmail)
+                    .orElseThrow(() -> new UsernameNotFoundException("해당 유저를 찾을 수 없습니다: " + realEmail));
+
+            return AuthUserDetails.from(user);
+        }
+
+        // 2. 기사 (DRIVER_) 인 경우
+        else if (username.startsWith("DRIVER_")) {
+            String realEmail = username.substring(7);
+
+            Driver driver = driverUserRepository.findByEmail(realEmail)
+                    .orElseThrow(() -> new UsernameNotFoundException("해당 기사를 찾을 수 없습니다: " + realEmail));
+
+            return AuthDriverDetails.from(driver);
+        }
+        else {
+            throw new UsernameNotFoundException("유효하지 않은 로그인 타입입니다: " + username);
+        }
+
     }
-
 }
