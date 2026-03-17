@@ -20,7 +20,7 @@ public class ChatDto {
             return Chat.builder()
                     .contents(this.contents)
                     .type(this.type)
-                    .recruit(Recruit.builder().id(recruitIdx).build())
+                    .recruit(Recruit.builder().idx(recruitIdx).build())
                     .user(user.toEntity())
                     .build();
         }
@@ -50,7 +50,7 @@ public class ChatDto {
                     .senderName(entity.getUser().getName())
                     .writerIdx(entity.getUser().getIdx())
                     .writer(entity.getUser().getName())
-                    .recruitIdx(entity.getRecruit().getId())
+                    .recruitIdx(entity.getRecruit().getIdx())
                     .build();
         }
     }
@@ -79,7 +79,7 @@ public class ChatDto {
                     .senderName(entity.getUser().getName())
                     .writerIdx(entity.getUser().getIdx())
                     .writer(entity.getUser().getName())
-                    .recruitIdx(entity.getRecruit().getId())
+                    .recruitIdx(entity.getRecruit().getIdx())
                     .build();
         }
     }

@@ -89,7 +89,7 @@ public class RecruitDto {
     @Builder
     @Getter
     public static class DetailRes {
-        private Long id;
+        private Long idx;
         private String startPointName;
         private String destPointName;
         private LocalDateTime departureTime;
@@ -99,13 +99,14 @@ public class RecruitDto {
 
         public static DetailRes from(Recruit entity) {
             return DetailRes.builder()
-                    .id(entity.getId())
+                    .idx(entity.getIdx())
                     .startPointName(entity.getStartPointName())
                     .destPointName(entity.getDestPointName())
                     .departureTime(entity.getDepartureTime())
                     .maxCapacity(entity.getMaxCapacity())
                     .currentCapacity(entity.getCurrentCapacity())
                     .ownerName(entity.getOwner() != null ? entity.getOwner().getName() : null)
+                    .build();
           }
     }
 }

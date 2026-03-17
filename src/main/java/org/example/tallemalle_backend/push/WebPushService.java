@@ -40,7 +40,7 @@ public class WebPushService {
 
     public void notifyRoom(Long recruitId, User sender, String contents) {
         try {
-            List<Long> userIds = participationRepository.findAllByRecruit_Id(recruitId)
+            List<Long> userIds = participationRepository.findAllByRecruit_Idx(recruitId)
                     .stream()
                     .map(p -> p.getUser().getIdx())
                     .filter(id -> !id.equals(sender.getIdx()))

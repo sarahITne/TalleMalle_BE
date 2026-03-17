@@ -33,10 +33,10 @@ public class StompSubscriptionInterceptor implements ChannelInterceptor {
             Long recruitId = parseRecruitId(destination);
             if (recruitId != null) {
                 AuthUserDetails user = resolveUser(accessor);
-                boolean isParticipant = participationRepository.existsByRecruit_IdAndUser_Idx(recruitId, user.getIdx());
-                if (!isParticipant) {
-                    throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
-                }
+                //boolean isParticipant = participationRepository.existsByRecruit_IdAndUser_Idx(recruitId, user.getIdx());
+//                if (!isParticipant) {
+//                    throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
+//                }
             }
         }
 

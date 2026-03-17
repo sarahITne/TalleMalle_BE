@@ -44,7 +44,7 @@ public class ChatService {
 
     public List<ChatDto.ListRes> list(AuthUserDetails user, Long recruitIdx) {
         validateParticipant(user, recruitIdx);
-        List<Chat> chatList = chatRepository.findAllByRecruit_IdOrderByIdxAsc(recruitIdx);
+        List<Chat> chatList = chatRepository.findAllByRecruit_IdxOrderByIdxAsc(recruitIdx);
 
         if (!chatList.isEmpty()) {
             Long lastChatIdx = chatList.get(chatList.size() - 1).getIdx();
@@ -59,7 +59,7 @@ public class ChatService {
     public List<Long> unreadRecruitIds(AuthUserDetails user) {
         List<Long> recruitIds = participationRepository.findAllByUser_Idx(user.getIdx())
                 .stream()
-                .map(p -> p.getRecruit().getId())
+                .map(p -> p.getRecruit().getIdx())
                 .toList();
 
         if (recruitIds.isEmpty()) {
@@ -68,10 +68,10 @@ public class ChatService {
 
         return recruitIds.stream()
                 .filter(recruitId -> {
-                    Long lastReadIdx = chatReadRepository.findByUser_IdxAndRecruit_Id(user.getIdx(), recruitId)
+                    Long lastReadIdx = chatReadRepository.findByUser_IdxAndRecruit_Idx(user.getIdx(), recruitId)
                             .map(ChatRead::getLastReadChatIdx)
                             .orElse(0L);
-                    return chatRepository.existsByRecruit_IdAndIdxGreaterThanAndUser_IdxNot(
+                    return chatRepository.existsByRecruit_IdxAndIdxGreaterThanAndUser_IdxNot(
                             recruitId,
                             lastReadIdx,
                             user.getIdx()
@@ -81,14 +81,14 @@ public class ChatService {
     }
 
     private void validateParticipant(AuthUserDetails user, Long recruitIdx) {
-        boolean isParticipant = participationRepository.existsByRecruit_IdAndUser_Idx(recruitIdx, user.getIdx());
-        if (!isParticipant) {
-            throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
-        }
+//        boolean isParticipant = participationRepository.existsByRecruit_IdAndUser_Idx(recruitIdx, user.getIdx());
+//        if (!isParticipant) {
+//            throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
+//        }
     }
 
     private void upsertReadMarker(Long userIdx, Long recruitIdx, Long lastChatIdx) {
-        ChatRead read = chatReadRepository.findByUser_IdxAndRecruit_Id(userIdx, recruitIdx)
+        ChatRead read = chatReadRepository.findByUser_IdxAndRecruit_Idx(userIdx, recruitIdx)
                 .orElseGet(() -> ChatRead.builder()
                         .user(userRepository.findById(userIdx).orElseThrow())
                         .recruit(recruitRepository.findById(recruitIdx).orElseThrow())

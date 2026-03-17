@@ -9,8 +9,7 @@ import java.util.Optional;
 
 public interface ParticipationRepository extends JpaRepository<Participation, Long> {
     boolean existsByUserAndRecruit(User user, Recruit recruit);
-
     Optional<Participation> findByUserIdxAndRecruitIdx(Long UserIdx, Long recruitIdx);
-    java.util.List<Participation> findAllByRecruit_Id(Long recruitId);
+    java.util.List<Participation> findAllByRecruit_Idx(Long recruitId);
     java.util.List<Participation> findAllByUser_Idx(Long userIdx);
 }

@@ -32,7 +32,7 @@ public class PaymentService {
                 () -> BaseException.from(BaseResponseStatus.PAYMENT_ENROLL_INVALID_USER)
         );
 
-        user.validateCustomerKey(dto.getCustomerKey());
+        //user.validateCustomerKey(dto.getCustomerKey());
 
         TossDto.issueBillingKeyResponse response = tossPaymentsAdaptor.issueBillingKey(dto.toIssueBillingKeyDto());
 
@@ -40,9 +40,9 @@ public class PaymentService {
 
         billing = billingRepository.save(billing);
 
-        if (user.getDefaultBillingIdx() == null) {
-            user.setDefaultBillingIdx(billing.getIdx());
-        }
+//        if (user.getDefaultBillingIdx() == null) {
+//            user.setDefaultBillingIdx(billing.getIdx());
+//        }
 
         return PaymentDto.EnrollResponse.builder()
                 .billingGroup(getBillingGroup(user))
@@ -76,13 +76,13 @@ public class PaymentService {
 
         billingRepository.delete(billing);
 
-        if (user.getDefaultBillingIdx().equals(billing.getIdx())) {
-            Billing newDefault = allBillings.stream()
-                    .filter(b -> !b.getIdx().equals(billing.getIdx()))
-                    .findFirst()
-                    .orElseThrow(() -> BaseException.from(BaseResponseStatus.PAYMENT_BILLING_REQUIRED));
-            user.setDefaultBillingIdx(newDefault.getIdx());
-        }
+//        if (user.getDefaultBillingIdx().equals(billing.getIdx())) {
+//            Billing newDefault = allBillings.stream()
+//                    .filter(b -> !b.getIdx().equals(billing.getIdx()))
+//                    .findFirst()
+//                    .orElseThrow(() -> BaseException.from(BaseResponseStatus.PAYMENT_BILLING_REQUIRED));
+//            user.setDefaultBillingIdx(newDefault.getIdx());
+//        }
 
         return PaymentDto.RevokeResponse.builder()
                 .billingGroup(getBillingGroup(user))
@@ -107,11 +107,11 @@ public class PaymentService {
         List<PaymentDto.BillingRes> otherBillings = new ArrayList<>();
 
         for (Billing elem : billings) {
-            if (elem.getIdx().equals(owner.getDefaultBillingIdx())) {
-                defaultBilling = PaymentDto.BillingRes.fromEntity(elem);
-            } else {
-                otherBillings.add(PaymentDto.BillingRes.fromEntity(elem));
-            }
+//            if (elem.getIdx().equals(owner.getDefaultBillingIdx())) {
+//                defaultBilling = PaymentDto.BillingRes.fromEntity(elem);
+//            } else {
+//                otherBillings.add(PaymentDto.BillingRes.fromEntity(elem));
+//            }
         }
         return PaymentDto.BillingGroupRes.builder()
                 .defaultBilling(defaultBilling)

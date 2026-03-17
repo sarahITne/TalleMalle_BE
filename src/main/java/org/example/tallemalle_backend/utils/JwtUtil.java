@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,23 @@ public class JwtUtil {
 
     // 토큰 생성
     public String createToken(AuthUserDetails user) {
+        String jwt = Jwts.builder()
+                .claim("idx", user.getIdx())
+                .claim("email", user.getEmail())
+                .claim("name", user.getName())
+                .claim("nickname", user.getNickname())
+                .claim("role", user.getRole())
+                .claim("status", user.getStatus())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + expire))
+                .signWith(getEncodedKey())
+                .compact();
+
+        return jwt;
+    }
+
+    // 토큰 생성
+    public String createToken(AuthDriverDetails user) {
         String jwt = Jwts.builder()
                 .claim("idx", user.getIdx())
                 .claim("email", user.getEmail())
