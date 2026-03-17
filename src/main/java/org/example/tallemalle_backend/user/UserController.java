@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 
-@CrossOrigin
 @RequestMapping("/user")
 @RestController
 @RequiredArgsConstructor

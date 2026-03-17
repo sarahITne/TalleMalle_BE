@@ -39,6 +39,19 @@ public class AuthUserDetails implements UserDetails, OAuth2User {
                 .build();
     }
 
+    public User toEntity() {
+        return User.builder()
+                .idx(this.idx)
+                .email(this.email)
+                .password(this.password)
+                .name(this.name)
+                .nickname(this.nickname)
+                .enable(this.enable)
+                .role(this.role)
+                .status(this.status)
+                .build();
+    }
+
     // OAuth2User 관련 오버라이드
     @Override
     public Map<String, Object> getAttributes() {

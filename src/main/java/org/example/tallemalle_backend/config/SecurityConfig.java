@@ -77,9 +77,10 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
                 (auth) -> auth
                         // 접근 제어
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()    // OPTIONS 요청은 무조건 허용 (CORS Preflight 해결)
                         .requestMatchers("/user/signup", "/user/login", "/user/verify").permitAll()
+                        .requestMatchers("/notices/**").authenticated()
                         .requestMatchers("/driver/login", "/driver/signup").permitAll()
-                        .requestMatchers("/board/reg").authenticated()
                         .anyRequest().authenticated()
         );
 
