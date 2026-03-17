@@ -11,4 +11,6 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     boolean existsByUserAndRecruit(User user, Recruit recruit);
 
     Optional<Participation> findByUserIdxAndRecruitIdx(Long UserIdx, Long recruitIdx);
+    java.util.List<Participation> findAllByRecruit_Id(Long recruitId);
+    java.util.List<Participation> findAllByUser_Idx(Long userIdx);
 }

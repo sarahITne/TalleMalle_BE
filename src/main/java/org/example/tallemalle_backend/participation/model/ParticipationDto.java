@@ -19,4 +19,18 @@ public class ParticipationDto {
                     .build();
         }
     }
+  
+    @Builder
+    @Getter
+    public static class MemberRes {
+        private Long userIdx;
+        private String userName;
+
+        public static MemberRes from(User user) {
+            return MemberRes.builder()
+                    .userIdx(user.getIdx())
+                    .userName(user.getName())
+                    .build();
+        }
+    }
 }

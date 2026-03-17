@@ -2,6 +2,8 @@ package org.example.tallemalle_backend.recruit.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import org.hibernate.annotations.ColumnDefault;
 import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.user.model.User;
 
