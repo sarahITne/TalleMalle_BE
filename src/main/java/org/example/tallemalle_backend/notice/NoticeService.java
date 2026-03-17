@@ -63,7 +63,7 @@ public class NoticeService {
         noticeRepository.deleteById(idx);
     }
 
-
+  
     // 공지사항 목록 조회 (전체 조회)
     public List<NoticeDto.ListRes> getNotices() {
         // 1. 전체 조회 한 결과가 엔티티 타입의 리스트로 반환됨
