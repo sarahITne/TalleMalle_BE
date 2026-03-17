@@ -18,6 +18,9 @@ public enum BaseResponseStatus {
 
     // 4000번대 실패
     REQUEST_ERROR(false, 4001, "입력값이 잘못되었습니다."),
+    NOT_FOUND_DATA(false, 4002, "데이터를 찾을 수 없습니다."),
+    ALREADY_JOINED(false, 4003, "이미 참여 중인 모집글이 있습니다."),
+    RECRUIT_FULL(false, 4004, "모집이 마감되었거나 인원이 초과되었습니다."),
 
     // 4100번대~ 결제 관련
     PAYMENT_UNAUTHENTICATED_USER(false, 4100, "인증받지 않은 사용자입니다."),
