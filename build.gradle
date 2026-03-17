@@ -21,9 +21,11 @@ repositories {
 dependencies {
     // --- 스타터팩 ---
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.boot:spring-boot-starter-security'      // 스프링 시큐리티
-    implementation 'org.springframework.boot:spring-boot-starter-mail'          // 이메일 인증
+    implementation 'org.springframework.boot:spring-boot-starter-security'    // 스프링 시큐리티
+    implementation 'org.springframework.boot:spring-boot-starter-mail'        // 이메일 인증
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // --- OAuth(소셜 로그인 관련) ---
     implementation 'org.springframework.security:spring-security-oauth2-client'
@@ -53,6 +55,12 @@ dependencies {
     // --- 테스트 관련 ---
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    // 알림 관련
+    implementation 'nl.martijndwars:web-push:5.1.1'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
 }
 
 tasks.named('test') {

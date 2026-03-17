@@ -5,14 +5,17 @@ jwt:
 project:
   upload:
     path: ${UPLOAD_PATH}
-
+    
+  payment:
+    toss: ${TOSS_SECRET_KEY}
+    
   aes:
-    key: aessecretkey01234567890123456789
+    key: ${AES_KEY}
+
 
 spring:
   application:
     name: tallemalle_backend
-
   security:
     oauth2:
       client:
@@ -74,7 +77,7 @@ spring:
         access-key: ${AWS_ACCESS_KEY}
         secret-key: ${AWS_SECRET_KEY}
       s3:
-        bucket: be24-s3
+        bucket: bbsso
       region:
         static: ap-northeast-2
 
@@ -83,3 +86,7 @@ logging:
     org.hibernate.SQL: debug
     org.springframework.security: debug
     org.hibernate.orm.jdbc.bind: trace
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
