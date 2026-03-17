@@ -3,9 +3,13 @@ package org.example.tallemalle_backend.user.model;
 import jakarta.persistence.*;
 import lombok.*;
 import org.example.tallemalle_backend.common.model.BaseEntity;
+import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.ArrayList;
 import java.time.LocalDate;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -50,6 +54,11 @@ public class User extends BaseEntity {
     @ColumnDefault(value = "'ROLE_USER'")
     private String role = "ROLE_USER";
 
+    @Builder.Default
+    @OneToMany(mappedBy = "user")
+    private List<Participation> participations = new ArrayList<>();
+
+    @Setter
     @Builder.Default
     @Column(nullable = false, length = 20)
     @ColumnDefault(value = "'IDLE'")
