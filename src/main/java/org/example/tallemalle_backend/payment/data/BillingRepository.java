@@ -1,4 +1,4 @@
-package org.example.tallemalle_backend.payment;
+package org.example.tallemalle_backend.payment.data;
 
 import org.example.tallemalle_backend.payment.data.entity.Billing;
 import org.example.tallemalle_backend.user.model.User;

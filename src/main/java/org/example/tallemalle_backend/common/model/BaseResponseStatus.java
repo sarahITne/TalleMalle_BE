@@ -30,6 +30,7 @@ public enum BaseResponseStatus {
     PAYMENT_BILLING_NOT_EXIST(false, 4103, "존재하지 않는 결제 수단입니다."),
     PAYMENT_BILLING_INVALID_OWNER(false, 4104, "결제 수단의 소유자가 아닙니다."),
     PAYMENT_BILLING_REQUIRED(false, 4105, "최소 1개의 결제 수단이 필요합니다."),
+    PAYMENT_DEFAULT_BILLING_REQUIRED(false, 4106, "기본 결제 수단이 존재하지 않습니다."),
     // 5000번대 실패
     FAIL(false, 5000, "요청 실패");
 

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.tallemalle_backend.common.model.BaseEntity;
 import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.payment.data.entity.Billing;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -74,8 +75,10 @@ public class User extends BaseEntity {
     @Builder.Default
     private String customerKey = UUID.randomUUID().toString();
 
+    @OneToOne(fetch = FetchType.LAZY)
     @Setter
-    private Long defaultBillingIdx;
+    @JoinColumn(name = "defaultBillingIdx", referencedColumnName = "idx")
+    private Billing defaultBilling;
 
     // 소셜 로그인 후 유저 추가 정보 업데이트
     public void updateExtraInfo(String nickname, String phoneNumber, LocalDate birth, String gender) {
