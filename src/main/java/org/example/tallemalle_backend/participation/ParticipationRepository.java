@@ -1,10 +1,16 @@
 package org.example.tallemalle_backend.participation;
 
 import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.recruit.model.Recruit;
+import org.example.tallemalle_backend.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface ParticipationRepository extends JpaRepository<Participation, Long> {
-    boolean existsByRecruit_IdAndUser_Idx(Long recruitId, Long userIdx);
+    boolean existsByUserAndRecruit(User user, Recruit recruit);
+
+    Optional<Participation> findByUserIdxAndRecruitIdx(Long UserIdx, Long recruitIdx);
     java.util.List<Participation> findAllByRecruit_Id(Long recruitId);
     java.util.List<Participation> findAllByUser_Idx(Long userIdx);
 }

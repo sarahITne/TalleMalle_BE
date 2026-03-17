@@ -2,8 +2,10 @@ package org.example.tallemalle_backend.recruit.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.example.tallemalle_backend.user.model.User;
+
 import org.hibernate.annotations.ColumnDefault;
+import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -20,11 +22,16 @@ public class Recruit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "recruit_idx")
-    private Long id;
+    private Long idx;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
+
+    @Builder.Default
+    @Setter
+    @OneToMany(mappedBy = "recruit", cascade = CascadeType.ALL)
+    private List<Participation> participations = new ArrayList<>();
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -54,9 +61,20 @@ public class Recruit {
     private Integer maxCapacity;
 
     @Column(name = "current_capacity", nullable = false)
+    @Setter
     private Integer currentCapacity;
+
+    @Enumerated(EnumType.STRING)
+    @Setter
+    @Column(length = 20, nullable = false)
+    private RecruitStatus status;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    public void decreaseCapacity() {
+        if (this.currentCapacity > 1) {
+            this.currentCapacity--;
+        }
+    }
 }

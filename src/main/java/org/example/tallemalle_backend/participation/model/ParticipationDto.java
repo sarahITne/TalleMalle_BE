@@ -2,9 +2,24 @@ package org.example.tallemalle_backend.participation.model;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.example.tallemalle_backend.user.model.User;
 
 public class ParticipationDto {
+    @Getter
+    @Builder
+    public static class ReadRes {
+        private Long idx;
+        private Long useridx;
+        private String status;
+
+        public static ReadRes from(Participation entity) {
+            return ReadRes.builder()
+                    .idx(entity.getIdx())
+                    .useridx(entity.getUser().getIdx())
+                    .status(entity.getStatus())
+                    .build();
+        }
+    }
+  
     @Builder
     @Getter
     public static class MemberRes {
