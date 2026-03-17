@@ -5,11 +5,13 @@ jwt:
 project:
   upload:
     path: ${UPLOAD_PATH}
+    
+  payment:
+    toss: ${TOSS_SECRET_KEY}
+    
   aes:
     key: ${AES_KEY}
 
-  aes:
-    key: aessecretkey01234567890123456789
 
 spring:
   application:

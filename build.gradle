@@ -25,6 +25,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-mail'        // 이메일 인증
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
     // --- OAuth(소셜 로그인 관련) ---
     implementation 'org.springframework.security:spring-security-oauth2-client'
