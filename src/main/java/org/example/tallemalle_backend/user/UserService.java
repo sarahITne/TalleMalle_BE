@@ -66,6 +66,25 @@ public class UserService implements UserDetailsService {
         return UserDto.SignupRes.from(user);
     }
 
+    // 이메일 중복 확인
+    public boolean emailCheck(String email) {
+        if (userRepository.findByEmail(email).isPresent()) {
+            return false;   // 중복된 이메일
+        } else {
+            return true;    // 사용 가능한 이메일
+        }
+    }
+
+    // 닉네임 중복 확인
+    public boolean nicknameCheck(String nickname) {
+        if (userRepository.findByNickname(nickname).isPresent()) {
+            return false;   // 중복된 닉네임
+        } else {
+            return true;    // 사용 가능한 닉네임
+        }
+    }
+
+
     // 이메일 인증 및 처리
     public void verify(String uuid) {
         // 1. uuid로 이메일 찾기

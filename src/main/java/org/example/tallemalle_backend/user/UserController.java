@@ -31,6 +31,33 @@ public class UserController {
     }
 
 
+    // 이메일 중복 확인
+    @GetMapping("/signup/check-email")
+    public ResponseEntity emailCheck(String email) {
+        // true - 사용 가능한 이메일, false - 중복된 이메일
+        boolean available = userService.emailCheck(email);
+
+        String message = available
+                ? "사용 가능한 이메일입니다."
+                : "이미 사용 중인 이메일입니다.";
+
+        return ResponseEntity.ok(message);
+    }
+
+    // 닉네임 중복 확인
+    @GetMapping("/signup/check-nickname")
+    public ResponseEntity nicknameCheck(String nickname) {
+        // true - 사용 가능한 닉네임, false - 중복된 닉네임
+        boolean available = userService.nicknameCheck(nickname);
+
+        String message = available
+                ? "사용 가능한 닉네임입니다."
+                : "이미 사용 중인 닉네임입니다.";
+
+        return ResponseEntity.ok(message);
+    }
+
+
     // 이메일 인증
     @GetMapping("/verify")
     public ResponseEntity verify(String uuid) {
