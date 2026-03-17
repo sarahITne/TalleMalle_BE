@@ -2,17 +2,20 @@ package org.example.tallemalle_backend.user.model;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 
 @Getter
 @Builder
-public class AuthUserDetails implements UserDetails {
+public class AuthUserDetails implements UserDetails, OAuth2User {
     private Long idx;
     private String email;
     private String password;
@@ -21,6 +24,7 @@ public class AuthUserDetails implements UserDetails {
     private boolean enable;
     private String role;
     private String status;
+    private Map<String, Object> attributes;
 
     public static AuthUserDetails from(User entity) {
         return AuthUserDetails.builder()
@@ -35,6 +39,13 @@ public class AuthUserDetails implements UserDetails {
                 .build();
     }
 
+    // OAuth2User 관련 오버라이드
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Map.of();
+    }
+
+    // UserDetails 관련 오버라이드
     @Override
     public boolean isEnabled() {
         return enable;
