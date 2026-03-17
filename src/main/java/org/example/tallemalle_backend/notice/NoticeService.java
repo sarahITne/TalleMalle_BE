@@ -47,6 +47,23 @@ public class NoticeService {
     }
 
 
+    // 공지사항 삭제
+    public void deleteNotice(Long idx, AuthUserDetails user) {
+        // 1. 게시글 조회 : idx를 통해 수정하고자 하는 공지사항을 찾음, 엔티티 형식으로 반환
+        Notice notice = noticeRepository.findById(idx).orElseThrow(
+                () -> new IllegalArgumentException("해당 idx의 게시물이 없음")
+        );
+
+        // 2. 작성자 검증 (작성자 idx와 현재 로그인한 유저 idx 비교)
+        if (!notice.getUser().getIdx().equals(user.getIdx())) {
+            throw new AccessDeniedException("삭제 권한이 없습니다.");
+        }
+
+        // 3. 게시글 삭제
+        noticeRepository.deleteById(idx);
+    }
+
+  
     // 공지사항 목록 조회 (전체 조회)
     public List<NoticeDto.ListRes> getNotices() {
         // 1. 전체 조회 한 결과가 엔티티 타입의 리스트로 반환됨

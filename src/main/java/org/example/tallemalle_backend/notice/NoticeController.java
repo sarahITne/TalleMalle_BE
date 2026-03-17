@@ -37,6 +37,16 @@ public class NoticeController {
     }
 
 
+    // 공지사항 삭제
+    @DeleteMapping("/{idx}")
+    public ResponseEntity deleteNotice(
+            @PathVariable Long idx,
+            @AuthenticationPrincipal AuthUserDetails user) {  // 삭제 권한 확인
+        noticeService.deleteNotice(idx, user);
+        return ResponseEntity.ok(idx + "번 공지사항이 삭제 완료 되었습니다.");
+    }
+  
+  
     // 공지사항 목록 조회 (전체 조회)
     @GetMapping
     public ResponseEntity getNotices() {

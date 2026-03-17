@@ -62,6 +62,34 @@ public class NoticeDto {
     }
 
 
+    // 공지사항 수정 요청 dto
+    @Getter
+    public static class UpdateReq {
+        @NotBlank
+        private String title;
+
+        @NotBlank
+        private String contents;
+
+        @NotBlank
+        private String tag;
+
+        private Boolean isPinned;
+
+
+        // dto -> 엔티티
+        public Notice toEntity(AuthUserDetails user) {
+            return Notice.builder()
+                    .title(this.title)
+                    .contents(this.contents)
+                    .tag(this.tag)
+                    .isPinned(this.isPinned)
+                    .user(user.toEntity())
+                    .build();
+        }
+    }
+
+
     // 공지 사항 목록 조회 응답 dto
     @Getter
     @Builder
