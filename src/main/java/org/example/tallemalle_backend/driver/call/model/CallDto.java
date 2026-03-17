@@ -22,7 +22,28 @@ public class CallDto {
         }
     }
 
-    // 2. 단일 상세 조회
+    // 2. 운행내역 목록 조회
+    @Getter
+    @Builder
+    public static class HistoryRes {
+        private Long callIdx;
+        private String startLocation;
+        private String endLocation;
+        private int estimatedFare;
+        private CallStatus status;
+
+        public static HistoryRes from(Call entity) {
+            return HistoryRes.builder()
+                    .callIdx(entity.getId())
+                    .startLocation(entity.getStartLocation())
+                    .endLocation(entity.getEndLocation())
+                    .estimatedFare(entity.getEstimatedFare())
+                    .status(entity.getStatus())
+                    .build();
+        }
+    }
+
+    // 3. 단일 상세 조회
     @Getter
     @Builder
     public static class DetailRes {

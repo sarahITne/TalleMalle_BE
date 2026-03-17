@@ -60,6 +60,23 @@ public class CallService {
     }
 
     @Transactional
+    public void completeCall(Long callIdx, Long driverIdx) {
+        Call call = callRepository.findByIdWithLock(callIdx)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콜입니다."));
+
+        if (!driverIdx.equals(call.getDriverIdx())) {
+            throw new IllegalStateException("본인이 배정된 콜만 완료 처리할 수 있습니다.");
+        }
+
+        call.complete();
+    }
+
+    public List<CallDto.HistoryRes> getHistory(Long driverIdx) {
+        List<Call> callList = callRepository.findAllByDriverIdxAndStatus(driverIdx, CallStatus.COMPLETED);
+        return callList.stream().map(CallDto.HistoryRes::from).toList();
+    }
+
+    @Transactional
     public void cancelCall(Long callIdx, Long driverIdx) {
         Call call = callRepository.findByIdWithLock(callIdx)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콜입니다."));

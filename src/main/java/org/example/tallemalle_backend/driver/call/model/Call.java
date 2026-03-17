@@ -46,6 +46,13 @@ public class Call {
         this.status = CallStatus.ACCEPTED;
     }
 
+    public void complete() {
+        if (this.status != CallStatus.ACCEPTED) {
+            throw new IllegalStateException("수락된 콜만 완료 처리할 수 있습니다.");
+        }
+        this.status = CallStatus.COMPLETED;
+    }
+
     public void cancel() {
         if (this.status == CallStatus.COMPLETED) {
             throw new IllegalStateException("이미 운행이 완료된 콜은 취소할 수 없습니다.");
