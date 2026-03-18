@@ -16,8 +16,10 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(name = "payment_uid")
-    private String paymentUid;
+    private String paymentKey;
+
+    @OneToOne
+    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billing_idx")
