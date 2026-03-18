@@ -17,7 +17,7 @@ public class ParticipationController {
 
     @GetMapping("/{recruitId}/participants")
     public ResponseEntity participants(@PathVariable Long recruitId) {
-        List<ParticipationDto.MemberRes> members = participationRepository.findAllByRecruit_Idx(recruitId)
+        List<ParticipationDto.MemberRes> members = participationRepository.findAllByRecruit_IdxAndStatus(recruitId, "ACTIVE")
                 .stream()
                 .map(Participation::getUser)
                 .map(ParticipationDto.MemberRes::from)
