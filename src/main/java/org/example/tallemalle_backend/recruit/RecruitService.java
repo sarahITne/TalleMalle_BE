@@ -191,7 +191,11 @@ public class RecruitService {
             recruit.getParticipations().forEach(p -> {
                 User pUser = p.getUser();
                 pUser.setStatus("IDLE");
+                // participtions 테이블에 status CANCELED로 변경
+                p.setStatus("CANCELED");
             });
+
+
 
             // Soft Delete로 처리
             recruit.setStatus(RecruitStatus.END);
