@@ -80,6 +80,13 @@ public class ChatService {
                 .toList();
     }
 
+    public List<ChatDto.RoomRes> rooms(AuthUserDetails user) {
+        return participationRepository.findAllByUser_Idx(user.getIdx())
+                .stream()
+                .map(p -> ChatDto.RoomRes.from(p.getRecruit()))
+                .toList();
+    }
+
     private void validateParticipant(AuthUserDetails user, Long recruitIdx) {
         boolean isParticipant = participationRepository
                 .findByUserIdxAndRecruitIdx(user.getIdx(), recruitIdx)
