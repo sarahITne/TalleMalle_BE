@@ -1,14 +1,17 @@
 package org.example.tallemalle_backend.driver.call;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.infrastructure.KakaoMobilityService;
 import org.example.tallemalle_backend.driver.call.model.Call;
 import org.example.tallemalle_backend.driver.call.model.CallDto;
 import org.example.tallemalle_backend.driver.call.model.CallStatus;
 import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
+import org.example.tallemalle_backend.recruit.model.Recruit;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -16,6 +19,7 @@ import java.util.List;
 public class CallService {
     private final CallRepository callRepository;
     private final KakaoMobilityService kakaoMobilityService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
 
     public List<CallDto.ListRes> list() {
@@ -86,6 +90,26 @@ public class CallService {
         }
 
         call.cancel();
+    }
+
+    @Transactional
+    public void createCallFromRecruit(Recruit recruit) {
+        Call newCall = Call.builder()
+                .recruit(recruit)
+                .startLocation(recruit.getStartPointName())
+                .endLocation(recruit.getDestPointName())
+                .startLat(BigDecimal.valueOf(recruit.getStartLat()))
+                .startLng(BigDecimal.valueOf(recruit.getStartLng()))
+                .endLat(BigDecimal.valueOf(recruit.getDestLat()))
+                .endLng(BigDecimal.valueOf(recruit.getDestLng()))
+                .status(CallStatus.WAITING)
+                .estimatedFare(0)
+                .build();
+        callRepository.save(newCall);
+    }
+
+    public void notifyNewCall() {
+        simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
     }
 
     // 예상 금액 계산 로직

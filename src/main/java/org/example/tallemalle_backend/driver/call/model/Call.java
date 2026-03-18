@@ -2,6 +2,7 @@ package org.example.tallemalle_backend.driver.call.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.tallemalle_backend.recruit.model.Recruit;
 
 import java.math.BigDecimal;
 
@@ -16,7 +17,10 @@ public class Call {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long userIdx;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recruit_idx")
+    private Recruit recruit;
+
     private Long driverIdx;
 
     private String startLocation;

@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.recruit;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.common.model.BaseResponseStatus;
+import org.example.tallemalle_backend.driver.call.CallService;
 import org.example.tallemalle_backend.notification.NotificationService;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
@@ -31,6 +32,7 @@ public class RecruitService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ParticipationRepository participationRepository;
     private final NotificationService notificationService;
+    private final CallService callService;
 
     // TODO: Socket 통신 연결 필요
     @Transactional
@@ -252,8 +254,13 @@ public class RecruitService {
         for (Recruit r : readyToCallList) {
             // 다음 1분 뒤에 또 호출하는 것 방지
             r.setStatus(RecruitStatus.CALLING);
-            // 기사님 호출
-            simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
+            // Call DB 저장
+            callService.createCallFromRecruit(r);
+        }
+
+        // 트랜잭션 커밋 이후 소켓 전송 (저장 실패 시 소켓이 안 나가도록 분리)
+        if (!readyToCallList.isEmpty()) {
+            callService.notifyNewCall();
         }
 
         // 출발 시간 기준 20분이 지났는데 출발하지 못한 방 찾기
