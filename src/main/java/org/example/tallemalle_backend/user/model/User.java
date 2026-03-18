@@ -10,6 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import java.util.ArrayList;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -69,6 +70,12 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     @ColumnDefault("false")
     private Boolean enable = false;
+
+    @Builder.Default
+    private String customerKey = UUID.randomUUID().toString();
+
+    @Setter
+    private Long defaultBillingIdx;
 
     // 소셜 로그인 후 유저 추가 정보 업데이트
     public void updateExtraInfo(String nickname, String phoneNumber, LocalDate birth, String gender) {
