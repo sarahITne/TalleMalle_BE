@@ -90,3 +90,7 @@ logging:
 kakao:
   api:
     key: ${KAKAO_API_KEY}
+
+portone:
+  api:
+    secret: ${PORTONE_SECRET_API}

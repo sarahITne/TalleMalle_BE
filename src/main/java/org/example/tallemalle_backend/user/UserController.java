@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Map;
 
 @RequestMapping("/user")
 @RestController
@@ -31,6 +32,25 @@ public class UserController {
     }
 
 
+    // 본인 인증
+    @PostMapping("/verify-identity")
+    public ResponseEntity verifyIdentity(@RequestBody Map<String, String> request) {
+        String identityVerificationId = request.get("identityVerificationId");
+
+        // 서비스 호출 (본인인증 성공 여부 반환)
+        Map<String, Object> userInfo = userService.confirmIdentity(identityVerificationId);
+
+        if (userInfo != null) {
+            return ResponseEntity.ok(Map.of(
+                    "message", "본인인증 성공",
+                    "userInfo", userInfo // 인증된 사용자 정보 포함
+            ));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "본인인증 실패"));
+        }
+    }
+
+
     // 이메일 중복 확인
     @GetMapping("/signup/check-email")
     public ResponseEntity emailCheck(String email) {
@@ -41,7 +61,7 @@ public class UserController {
                 ? "사용 가능한 이메일입니다."
                 : "이미 사용 중인 이메일입니다.";
 
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok(available);
     }
 
     // 닉네임 중복 확인
@@ -54,7 +74,7 @@ public class UserController {
                 ? "사용 가능한 닉네임입니다."
                 : "이미 사용 중인 닉네임입니다.";
 
-        return ResponseEntity.ok(message);
+        return ResponseEntity.ok(available);
     }
 
 
