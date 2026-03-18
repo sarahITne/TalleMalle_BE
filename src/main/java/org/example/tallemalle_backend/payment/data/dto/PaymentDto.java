@@ -52,7 +52,7 @@ public class PaymentDto {
     @Builder
     @Getter
     public static class EnrollResponse {
-        BillingGroupRes billingGroup;
+        private BillingGroupRes billingGroup;
     }
 
     @Builder
@@ -65,13 +65,13 @@ public class PaymentDto {
     @Builder
     @Getter
     public static class RevokeResponse {
-        BillingGroupRes billingGroup;
+        private BillingGroupRes billingGroup;
     }
 
     @Builder
     @Getter
     public static class ListResponse {
-        BillingGroupRes billingGroup;
+        private BillingGroupRes billingGroup;
     }
 
     @Builder

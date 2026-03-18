@@ -60,7 +60,7 @@ public class TossDto {
     @Builder
     @Getter
     public static class RevokeBillingKeyResponse {
-        private String billingKey;
+
     }
 
     @Builder
@@ -95,8 +95,30 @@ public class TossDto {
     @Builder
     @Getter
     public static class ChargePerUserResponse {
-        public Transaction toEntity() {
-            return Transaction.builder().build();
+        public Transaction toEntity(Order order) {
+            return Transaction.builder()
+                    .billing(order.getBilling())
+                    .order(order)
+                    .build();
         }
+    }
+
+    @Builder
+    @Getter
+    public static class RefundTransactionRequest{
+        private String paymentKey;
+        private String cancelReason;
+
+        public Map<String, Object> toRequestBody() {
+            return Map.of(
+                    "cancelReason", this.cancelReason
+            );
+        }
+    }
+
+    @Builder
+    @Getter
+    public static class RefundTransactionResponse {
+
     }
 }

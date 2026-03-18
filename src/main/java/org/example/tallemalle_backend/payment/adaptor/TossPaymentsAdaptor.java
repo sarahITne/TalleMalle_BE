@@ -46,4 +46,13 @@ public class TossPaymentsAdaptor {
                 .bodyToMono(TossDto.ChargePerUserResponse.class)
                 .block();
     }
+
+    public TossDto.RefundTransactionResponse refundTransaction(TossDto.RefundTransactionRequest dto) {
+        return webClient.post()
+                .uri("/payments/{paymentKey}/cancel", dto.getPaymentKey())
+                .bodyValue(dto.toRequestBody())
+                .retrieve()
+                .bodyToMono(TossDto.RefundTransactionResponse.class)
+                .block();
+    }
 }

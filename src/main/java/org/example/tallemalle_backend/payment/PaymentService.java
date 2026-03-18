@@ -149,15 +149,21 @@ public class PaymentService {
 
                 TossDto.ChargePerUserResponse res = tossPaymentsAdaptor.chargePerUser(TossDto.ChargePerUserRequest.fromEntity(order));
                 // 결제 내역 생성
-                successTransaction.add(res.toEntity());
+                successTransaction.add(res.toEntity(order));
             }
         } catch (Exception e) {
             for (Transaction transaction : successTransaction) {
-                // TODO: 환불 로직 추가
+                TossDto.RefundTransactionRequest request = TossDto.RefundTransactionRequest.builder()
+                        .paymentKey(transaction.getPaymentKey())
+                        .cancelReason("결제 실패로 인한 환불")
+                        .build();
+                tossPaymentsAdaptor.refundTransaction(request);
             }
         }
         return PaymentDto.ChargeResponse.builder().build();
     }
+
+
 
     private PaymentDto.BillingGroupRes getBillingGroup(User owner) {
         List<Billing> billings = billingRepository.findAllByOwner(owner);
