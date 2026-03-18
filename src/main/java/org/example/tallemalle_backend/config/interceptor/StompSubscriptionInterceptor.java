@@ -34,8 +34,7 @@ public class StompSubscriptionInterceptor implements ChannelInterceptor {
             if (recruitId != null) {
                 AuthUserDetails user = resolveUser(accessor);
                 boolean isParticipant = participationRepository
-                        .findByUserIdxAndRecruitIdx(user.getIdx(), recruitId)
-                        .isPresent();
+                        .existsByRecruit_IdxAndUser_IdxAndStatus(recruitId, user.getIdx(), "ACTIVE");
                 if (!isParticipant) {
                     throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
                 }

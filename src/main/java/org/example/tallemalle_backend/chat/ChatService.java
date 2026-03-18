@@ -57,7 +57,7 @@ public class ChatService {
     }
 
     public List<Long> unreadRecruitIds(AuthUserDetails user) {
-        List<Long> recruitIds = participationRepository.findAllByUser_Idx(user.getIdx())
+        List<Long> recruitIds = participationRepository.findAllByUser_IdxAndStatus(user.getIdx(), "ACTIVE")
                 .stream()
                 .map(p -> p.getRecruit().getIdx())
                 .toList();
@@ -81,7 +81,7 @@ public class ChatService {
     }
 
     public List<ChatDto.RoomRes> rooms(AuthUserDetails user) {
-        return participationRepository.findAllByUser_Idx(user.getIdx())
+        return participationRepository.findAllByUser_IdxAndStatus(user.getIdx(), "ACTIVE")
                 .stream()
                 .map(p -> ChatDto.RoomRes.from(p.getRecruit()))
                 .toList();
@@ -89,8 +89,7 @@ public class ChatService {
 
     private void validateParticipant(AuthUserDetails user, Long recruitIdx) {
         boolean isParticipant = participationRepository
-                .findByUserIdxAndRecruitIdx(user.getIdx(), recruitIdx)
-                .isPresent();
+                .existsByRecruit_IdxAndUser_IdxAndStatus(recruitIdx, user.getIdx(), "ACTIVE");
         if (!isParticipant) {
             throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
         }
