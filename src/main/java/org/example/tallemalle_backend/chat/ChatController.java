@@ -55,6 +55,14 @@ public class ChatController {
         return ResponseEntity.ok(BaseResponse.success(dto));
     }
 
+    @GetMapping("/rooms")
+    public ResponseEntity rooms(
+            @AuthenticationPrincipal AuthUserDetails user
+    ) {
+        List<ChatDto.RoomRes> dto = chatService.rooms(user);
+        return ResponseEntity.ok(BaseResponse.success(dto));
+    }
+
     // 이미지 전송
     private final UploadService uploadService;
 
