@@ -78,6 +78,14 @@ public class RecruitService {
         return recruitList.stream().map(RecruitDto.ListRes::from).toList();
     }
 
+    // 모집글 상세 조회
+    public RecruitDto.DetailRes detail(Long recruitId) {
+        Recruit recruit = recruitRepository.findById(recruitId).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
+        return RecruitDto.DetailRes.from(recruit);
+    }
+
     // TODO: Slice로 페이징 처리 필요
     public List<RecruitDto.ListRes> search(Double swLat, Double swLng, Double neLat, Double neLng) {
         List<Recruit> recruitList = recruitRepository.findRecruitsInBounds(swLat, swLng, neLat, neLng);
