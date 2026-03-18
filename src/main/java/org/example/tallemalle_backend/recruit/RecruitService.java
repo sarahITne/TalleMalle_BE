@@ -77,7 +77,7 @@ public class RecruitService {
     // TODO: Slice로 페이징 처리 필요
     public List<RecruitDto.ListRes> list() {
         List<Recruit> recruitList = recruitRepository.findAll();
-        return recruitList.stream().map(RecruitDto.ListRes::from).toList();
+        return recruitList.stream().filter(r -> r.getStatus() != RecruitStatus.END).map(RecruitDto.ListRes::from).toList();
     }
 
     // 모집글 상세 조회
@@ -91,7 +91,7 @@ public class RecruitService {
     // TODO: Slice로 페이징 처리 필요
     public List<RecruitDto.ListRes> search(Double swLat, Double swLng, Double neLat, Double neLng) {
         List<Recruit> recruitList = recruitRepository.findRecruitsInBounds(swLat, swLng, neLat, neLng);
-        return recruitList.stream().map(RecruitDto.ListRes::from).toList();
+        return recruitList.stream().filter(r -> r.getStatus() != RecruitStatus.END).map(RecruitDto.ListRes::from).toList();
     }
 
     // TODO: 예외 처리
