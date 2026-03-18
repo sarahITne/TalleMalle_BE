@@ -30,7 +30,7 @@ public class ParticipationDto {
         public static MemberRes from(User user) {
             return MemberRes.builder()
                     .userIdx(user.getIdx())
-                    .userName(user.getName())
+                    .userName(user.getNickname())
                     .build();
         }
     }

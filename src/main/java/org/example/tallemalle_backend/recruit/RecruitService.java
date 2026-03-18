@@ -255,8 +255,8 @@ public class RecruitService {
         payload.put("type", "leave");
         payload.put("recruitId", recruitIdx);
         payload.put("senderId", user.getIdx());
-        payload.put("senderName", user.getName());
-        payload.put("contents", user.getName() + "님이 나갔습니다.");
+        payload.put("senderName", user.getNickname());
+        payload.put("contents", user.getNickname() + "님이 나갔습니다.");
 
         simpMessagingTemplate.convertAndSend("/topic/chat/" + recruitIdx, payload);
     }
