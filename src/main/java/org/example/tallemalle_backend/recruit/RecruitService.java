@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.recruit;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.common.model.BaseResponseStatus;
+import org.example.tallemalle_backend.notification.NotificationService;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.recruit.model.Recruit;
@@ -29,6 +30,7 @@ public class RecruitService {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ParticipationRepository participationRepository;
+    private final NotificationService notificationService;
 
     // TODO: Socket 통신 연결 필요
     @Transactional
@@ -75,7 +77,7 @@ public class RecruitService {
     // TODO: Slice로 페이징 처리 필요
     public List<RecruitDto.ListRes> list() {
         List<Recruit> recruitList = recruitRepository.findAll();
-        return recruitList.stream().map(RecruitDto.ListRes::from).toList();
+        return recruitList.stream().filter(r -> r.getStatus() != RecruitStatus.END).map(RecruitDto.ListRes::from).toList();
     }
 
     // 모집글 상세 조회
@@ -89,7 +91,7 @@ public class RecruitService {
     // TODO: Slice로 페이징 처리 필요
     public List<RecruitDto.ListRes> search(Double swLat, Double swLng, Double neLat, Double neLng) {
         List<Recruit> recruitList = recruitRepository.findRecruitsInBounds(swLat, swLng, neLat, neLng);
-        return recruitList.stream().map(RecruitDto.ListRes::from).toList();
+        return recruitList.stream().filter(r -> r.getStatus() != RecruitStatus.END).map(RecruitDto.ListRes::from).toList();
     }
 
     // TODO: 예외 처리
@@ -146,6 +148,17 @@ public class RecruitService {
         if (recruit.getCurrentCapacity().equals(recruit.getMaxCapacity())) {
             // 모집 마감
             recruit.setStatus(RecruitStatus.FULL);
+
+            // 모집 확정 알림 생성 (해당 모집 유저들에게 모두 전송)
+            String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 모집 인원이 다 차 모집이 확정되었습니다!";
+            participationRepository.findAllByRecruit_Idx(recruitIdx).stream()
+                    .filter(p -> "ACTIVE".equals(p.getStatus()))
+                    .forEach(p -> notificationService.createNotification(
+                            p.getUser(),
+                            "matching",
+                            "모집 확정",
+                            notificationContents
+                    ));
         }
 
         // 소켓 전송 Dto 생성

@@ -25,6 +25,16 @@ public class PaymentController {
         return ResponseEntity.ok(BaseResponse.success(paymentService.customerKey(user)));
     }
 
+    @PostMapping("/default-billing")
+    public ResponseEntity defaultBilling(
+            @AuthenticationPrincipal AuthUserDetails user,
+            @RequestParam Long billingIdx) {
+        if (user == null) {
+            throw BaseException.from(BaseResponseStatus.PAYMENT_UNAUTHENTICATED_USER);
+        }
+        return ResponseEntity.ok(BaseResponse.success(paymentService.defaultBilling(user, billingIdx)));
+    }
+
     @GetMapping("/enroll")
     public ResponseEntity enroll(
             @AuthenticationPrincipal AuthUserDetails user,

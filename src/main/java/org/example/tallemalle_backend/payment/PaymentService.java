@@ -42,6 +42,25 @@ public class PaymentService {
                 .customerKey(user.getCustomerKey())
                 .build();
     }
+
+    @Transactional
+    public PaymentDto.DefaultBillingResponse defaultBilling(AuthUserDetails userDetails, Long billingIdx) {
+        User user = userRepository.findById(userDetails.getIdx()).orElseThrow(
+                () -> BaseException.from(BaseResponseStatus.PAYMENT_ENROLL_INVALID_USER)
+        );
+
+        Billing billing = billingRepository.findById(billingIdx).orElseThrow(
+                () -> BaseException.from(BaseResponseStatus.PAYMENT_BILLING_NOT_EXIST)
+        );
+
+        if (!billing.getOwner().equals(user)) {
+            throw BaseException.from(BaseResponseStatus.PAYMENT_BILLING_INVALID_OWNER);
+        }
+
+        user.setDefaultBilling(billing);
+        return PaymentDto.DefaultBillingResponse.builder().build();
+    }
+
     @Transactional
     public PaymentDto.EnrollResponse enroll(AuthUserDetails userDetails, PaymentDto.EnrollRequest dto) {
 
