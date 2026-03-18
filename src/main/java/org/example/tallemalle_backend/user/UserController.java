@@ -99,7 +99,7 @@ public class UserController {
         // 인증 성공하면 프론트로 리다이렉트
         return ResponseEntity
                 .status(HttpStatus.MOVED_PERMANENTLY)
-                .location(URI.create("http://localhost:5173/login"))
+                .location(URI.create("http://localhost:5173/email/verify-success"))
                 .build();
     }
 
