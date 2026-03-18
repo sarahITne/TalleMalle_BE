@@ -51,6 +51,17 @@ public class UserDto {
                     .gender(this.gender)
                     .build();
         }
+        public User toEntity(String encodedPassword) {
+            return User.builder()
+                    .email(this.email)
+                    .password(encodedPassword)
+                    .name(this.name)
+                    .nickname(this.nickname)
+                    .phoneNumber(this.phoneNumber)
+                    .birth(this.birth)
+                    .gender(this.gender)
+                    .build();
+        }
     }
 
 
