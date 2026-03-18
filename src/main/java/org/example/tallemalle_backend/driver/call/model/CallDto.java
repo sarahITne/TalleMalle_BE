@@ -92,6 +92,8 @@ public class CallDto {
                     .driverIdx(entity.getDriverIdx())
                     .startLocation(entity.getStartLocation())
                     .endLocation(entity.getEndLocation())
+                    .distance(entity.getEstimatedDistance())
+                    .duration((int) entity.getEstimatedDuration())
                     .estimatedFare(estimatedFare)
                     .status(entity.getStatus())
                     .build();

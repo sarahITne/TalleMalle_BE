@@ -16,11 +16,6 @@ public class Call {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruit_idx")
-    private Recruit recruit;
-
     private Long driverIdx;
 
     private String startLocation;
@@ -42,8 +37,20 @@ public class Call {
     @Setter
     private int estimatedFare = 0;
 
+    @Builder.Default
+    @Setter
+    private double estimatedDistance = 0;
+
+    @Builder.Default
+    @Setter
+    private double estimatedDuration = 0;
+
     @Enumerated(EnumType.STRING)
     private CallStatus status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recruit_idx")
+    private Recruit recruit;
 
     public void accept(Long driverId) {
         this.driverIdx = driverId;

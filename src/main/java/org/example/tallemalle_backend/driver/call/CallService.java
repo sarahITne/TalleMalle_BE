@@ -34,6 +34,9 @@ public class CallService {
             DirectionInfo direction = kakaoMobilityService.getDirections(call);
             int fare = calculateTaxiFare(direction.getDistance() / 1000.0, direction.getDuration() / 60);
             call.setEstimatedFare(fare);
+            call.setEstimatedDistance(direction.getDistance() / 1000.0);
+            call.setEstimatedDuration(direction.getDuration() / 60);
+
             callRepository.save(call);
         }
 
@@ -41,7 +44,7 @@ public class CallService {
     }
 
     public CallDto.DetailRes readMyCall(Long driverIdx) {
-        Call call = callRepository.findByDriverIdx(driverIdx).orElseThrow();
+        Call call = callRepository.findByDriverIdxAndStatus(driverIdx, CallStatus.ACCEPTED).orElseThrow();
 
         return CallDto.DetailRes.from(call);
     }
