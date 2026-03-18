@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.driver.call.model;
 import lombok.Builder;
 import lombok.Getter;
 import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
+import org.example.tallemalle_backend.participation.model.Participation;
 
 import java.util.List;
 
@@ -47,7 +48,53 @@ public class CallDto {
         }
     }
 
-    // 3. 단일 상세 조회
+    // 3. 운행 완료 정산 조회
+    @Getter
+    @Builder
+    public static class SettlementRes {
+        private Long callIdx;
+        private String startLocation;
+        private String endLocation;
+        private int totalFare;
+        private int farePerPerson;
+        private List<ParticipantInfo> participants;
+
+        @Getter
+        @Builder
+        public static class ParticipantInfo {
+            private String nickname;
+            private String phoneNumber;
+        }
+
+        public static SettlementRes from(Call call) {
+            List<Participation> active = call.getRecruit() != null
+                    ? call.getRecruit().getParticipations().stream()
+                            .filter(p -> "ACTIVE".equals(p.getStatus()) || "CANCELED".equals(p.getStatus()))
+                            .toList()
+                    : List.of();
+
+            int count = active.isEmpty() ? 1 : active.size();
+            int farePerPerson = call.getEstimatedFare() / count;
+
+            List<ParticipantInfo> participants = active.stream()
+                    .map(p -> ParticipantInfo.builder()
+                            .nickname(p.getUser().getNickname())
+                            .phoneNumber(p.getUser().getPhoneNumber())
+                            .build())
+                    .toList();
+
+            return SettlementRes.builder()
+                    .callIdx(call.getId())
+                    .startLocation(call.getStartLocation())
+                    .endLocation(call.getEndLocation())
+                    .totalFare(call.getEstimatedFare())
+                    .farePerPerson(farePerPerson)
+                    .participants(participants)
+                    .build();
+        }
+    }
+
+    // 4. 단일 상세 조회
     @Getter
     @Builder
     public static class DetailRes {

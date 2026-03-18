@@ -48,6 +48,12 @@ public class CallController {
         return ResponseEntity.ok("운행 완료");
     }
 
+    @GetMapping("/settlement/{callIdx}")
+    public ResponseEntity settlement(@PathVariable Long callIdx){
+        CallDto.SettlementRes result = callService.getSettlement(callIdx);
+        return ResponseEntity.ok(result);
+    }
+
     @GetMapping("/history")
     public ResponseEntity history(@AuthenticationPrincipal AuthDriverDetails driver){
         Long driverIdx = driver.getIdx();
