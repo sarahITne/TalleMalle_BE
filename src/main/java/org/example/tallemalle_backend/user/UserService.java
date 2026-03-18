@@ -1,6 +1,5 @@
 package org.example.tallemalle_backend.user;
 
-import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
@@ -10,10 +9,6 @@ import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.EmailVerify;
 import org.example.tallemalle_backend.user.model.User;
 import org.example.tallemalle_backend.user.model.UserDto;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -21,7 +16,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.example.tallemalle_backend.common.model.BaseResponseStatus.SIGNUP_DUPLICATE_EMAIL;
@@ -34,6 +29,7 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final EmailVerifyRepository emailVerifyRepository;
+    private final IdentityService identityService;
 
     // 회원가입
     public UserDto.SignupRes signup(UserDto.SignupReq dto) {
@@ -64,6 +60,11 @@ public class UserService implements UserDetailsService {
         emailVerifyRepository.save(emailVerify);
 
         return UserDto.SignupRes.from(user);
+    }
+
+    // 본인 인증
+    public Map<String, Object> confirmIdentity(String identityVerificationId) {
+        return identityService.confirmIdentity(identityVerificationId);
     }
 
     // 이메일 중복 확인

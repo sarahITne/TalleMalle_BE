@@ -14,6 +14,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.Map;
 
 @RequestMapping("/user")
 @RestController
@@ -28,6 +29,25 @@ public class UserController {
     public ResponseEntity signup(@Valid @RequestBody UserDto.SignupReq dto) {
         UserDto.SignupRes result = userService.signup(dto);
         return ResponseEntity.ok(result);
+    }
+
+
+    // 본인 인증
+    @PostMapping("/verify-identity")
+    public ResponseEntity verifyIdentity(@RequestBody Map<String, String> request) {
+        String identityVerificationId = request.get("identityVerificationId");
+
+        // 서비스 호출 (본인인증 성공 여부 반환)
+        Map<String, Object> userInfo = userService.confirmIdentity(identityVerificationId);
+
+        if (userInfo != null) {
+            return ResponseEntity.ok(Map.of(
+                    "message", "본인인증 성공",
+                    "userInfo", userInfo // 인증된 사용자 정보 포함
+            ));
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", "본인인증 실패"));
+        }
     }
 
 
