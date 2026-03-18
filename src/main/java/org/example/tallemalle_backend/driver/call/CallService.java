@@ -83,6 +83,13 @@ public class CallService {
         return callList.stream().map(CallDto.HistoryRes::from).toList();
     }
 
+    @Transactional(readOnly = true)
+    public CallDto.SettlementRes getSettlement(Long callIdx) {
+        Call call = callRepository.findById(callIdx)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콜입니다."));
+        return CallDto.SettlementRes.from(call);
+    }
+
     @Transactional
     public void cancelCall(Long callIdx, Long driverIdx) {
         Call call = callRepository.findByIdWithLock(callIdx)
