@@ -53,7 +53,7 @@ public class RecruitScheduler {
             // 방에 있던 유저들 전부 대기 상태(IDLE)로 방출
             r.getParticipations().forEach(p -> {
                 p.getUser().changeToIdle();
-                p.setStatus("CANCELED");
+                p.cancel();
             });
 
             // 소켓으로 해당 방이 폭파되었음을 클라이언트에 알림

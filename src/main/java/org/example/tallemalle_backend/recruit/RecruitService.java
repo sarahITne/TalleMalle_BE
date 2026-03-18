@@ -5,6 +5,7 @@ import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.common.model.BaseResponseStatus;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
 import org.example.tallemalle_backend.recruit.event.RecruitEvents;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.recruit.model.RecruitDto;
@@ -38,8 +39,7 @@ public class RecruitService {
         Recruit recruit = dto.toEntity(realUser);
 
         // 이미 방에 접속 중이면 반환
-        boolean isAlreadyJoined = realUser.getParticipations().stream()
-                .anyMatch(p -> "ACTIVE".equals(p.getStatus()));
+        boolean isAlreadyJoined = realUser.getParticipations().stream().anyMatch(Participation::isActive);
 
         if (isAlreadyJoined) {
             throw new BaseException(BaseResponseStatus.ALREADY_JOINED);
@@ -49,7 +49,7 @@ public class RecruitService {
         Participation participation = Participation.builder()
                 .user(realUser)
                 .recruit(recruit)
-                .status("ACTIVE")
+                .status(ParticipationStatus.ACTIVE)
                 .build();
 
         recruit.getParticipations().add(participation);
@@ -116,15 +116,16 @@ public class RecruitService {
                 return false;
             } else {
                 // 과거에 나갔다가 다시 들어오는 경우 상태만 Update
-                existingParticipation.setStatus("ACTIVE");
+                existingParticipation.activate();
             }
         } else {
             // 아예 처음 참여하는 경우 새로 만들어서 저장
             Participation newParticipation = Participation.builder()
                     .user(realUser)
                     .recruit(recruit)
-                    .status("ACTIVE")
+                    .status(ParticipationStatus.ACTIVE)
                     .build();
+
             participationRepository.save(newParticipation);
         }
 
@@ -161,7 +162,7 @@ public class RecruitService {
             recruit.getParticipations().forEach(p -> {
                 p.getUser().changeToIdle();
                 // participtions 테이블에 status CANCELED로 변경
-                p.setStatus("CANCELED");
+                p.cancel();
             });
 
             // Soft Delete로 처리
@@ -184,7 +185,7 @@ public class RecruitService {
         }
 
         // 모집 참여 취소로 상태 변경
-        participation.setStatus("CANCELED");
+        participation.cancel();
 
         // 모집글 내부 인원 감소
         recruit.removeParticipant();
