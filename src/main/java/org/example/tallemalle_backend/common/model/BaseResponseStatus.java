@@ -21,6 +21,7 @@ public enum BaseResponseStatus {
     NOT_FOUND_DATA(false, 4002, "데이터를 찾을 수 없습니다."),
     ALREADY_JOINED(false, 4003, "이미 참여 중인 모집글이 있습니다."),
     RECRUIT_FULL(false, 4004, "모집이 마감되었거나 인원이 초과되었습니다."),
+    ALREADY_CALLED(false, 4005, "이미 기사님 호출이 완료되어 나갈 수 없습니다."),
 
     // 4100번대~ 결제 관련
     PAYMENT_UNAUTHENTICATED_USER(false, 4100, "인증받지 않은 사용자입니다."),
@@ -29,6 +30,7 @@ public enum BaseResponseStatus {
     PAYMENT_BILLING_NOT_EXIST(false, 4103, "존재하지 않는 결제 수단입니다."),
     PAYMENT_BILLING_INVALID_OWNER(false, 4104, "결제 수단의 소유자가 아닙니다."),
     PAYMENT_BILLING_REQUIRED(false, 4105, "최소 1개의 결제 수단이 필요합니다."),
+    PAYMENT_DEFAULT_BILLING_REQUIRED(false, 4106, "기본 결제 수단이 존재하지 않습니다."),
     // 5000번대 실패
     FAIL(false, 5000, "요청 실패");
 

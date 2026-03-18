@@ -81,10 +81,12 @@ public class ChatService {
     }
 
     private void validateParticipant(AuthUserDetails user, Long recruitIdx) {
-//        boolean isParticipant = participationRepository.existsByRecruit_IdAndUser_Idx(recruitIdx, user.getIdx());
-//        if (!isParticipant) {
-//            throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
-//        }
+        boolean isParticipant = participationRepository
+                .findByUserIdxAndRecruitIdx(user.getIdx(), recruitIdx)
+                .isPresent();
+        if (!isParticipant) {
+            throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
+        }
     }
 
     private void upsertReadMarker(Long userIdx, Long recruitIdx, Long lastChatIdx) {

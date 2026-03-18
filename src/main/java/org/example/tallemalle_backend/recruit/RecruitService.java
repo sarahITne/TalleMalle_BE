@@ -12,9 +12,11 @@ import org.example.tallemalle_backend.user.UserRepository;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.User;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,6 +78,14 @@ public class RecruitService {
         return recruitList.stream().map(RecruitDto.ListRes::from).toList();
     }
 
+    // 모집글 상세 조회
+    public RecruitDto.DetailRes detail(Long recruitId) {
+        Recruit recruit = recruitRepository.findById(recruitId).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
+        return RecruitDto.DetailRes.from(recruit);
+    }
+
     // TODO: Slice로 페이징 처리 필요
     public List<RecruitDto.ListRes> search(Double swLat, Double swLng, Double neLat, Double neLng) {
         List<Recruit> recruitList = recruitRepository.findRecruitsInBounds(swLat, swLng, neLat, neLng);
@@ -101,7 +111,7 @@ public class RecruitService {
         }
 
         // 모집글 인원이 FULL인데 입장하려는 경우
-        if(recruit.getStatus().equals(RecruitStatus.FULL)) {
+        if(recruit.getStatus().equals(RecruitStatus.FULL) || recruit.getCurrentCapacity() >= recruit.getMaxCapacity()) {
             throw new BaseException(BaseResponseStatus.RECRUIT_FULL);
         }
 
@@ -132,12 +142,10 @@ public class RecruitService {
 
         realUser.setStatus("JOINED");
 
-        // 인원이 다 차면 소켓으로 기사님한테 전송 및 모집 마감
+        // 인원이 다 차면
         if (recruit.getCurrentCapacity().equals(recruit.getMaxCapacity())) {
             // 모집 마감
             recruit.setStatus(RecruitStatus.FULL);
-            // 기사님들 한테 모집 완료 되어 콜 잡으라고 전송
-            simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
         }
 
         // 소켓 전송 Dto 생성
@@ -170,13 +178,8 @@ public class RecruitService {
                 pUser.setStatus("IDLE");
             });
 
-            // TODO: Soft 삭제로 변경해야 함
-            // DB에서 모집글 삭제
-            try {
-                recruitRepository.delete(recruit);
-            } catch (Exception e) {
-                System.out.println("방 폭파 중 오류 발생 (무시됨)");
-            }
+            // Soft Delete로 처리
+            recruit.setStatus(RecruitStatus.END);
 
             // 소켓 통신으로 방이 없어졌다고 알림
             Map<String, Object> message = new HashMap<>();
@@ -188,16 +191,19 @@ public class RecruitService {
             return true;
 
         }
+
         Participation participation = participationRepository.findByUserIdxAndRecruitIdx(realUser.getIdx(), recruit.getIdx()).orElseThrow(
                 () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
         );
 
+        // 진짜 방을 못 나가는 경우
+        if (recruit.getStatus() == RecruitStatus.CALLING || recruit.getStatus() == RecruitStatus.DRIVING) {
+            throw new BaseException(BaseResponseStatus.ALREADY_CALLED);
+        }
 
-        // 방이 가득차면 나갈 수 없음
-        if(recruit.getStatus() == RecruitStatus.FULL) {
-            throw new BaseException(BaseResponseStatus.RECRUIT_FULL);
-            // 꽉 찬 모집 방에서 나가기
-            // recruit.setStatus(RecruitStatus.RECRUITING);
+        // 꽉 찬 방(FULL)에서 누군가 나가는 경우 다시 누군가 들어올 수 있게 모집 중(RECRUITING)으로 변경
+        if (recruit.getStatus() == RecruitStatus.FULL) {
+            recruit.setStatus(RecruitStatus.RECRUITING);
         }
 
         // 모집 참여 취소로 상태 변경
@@ -219,5 +225,43 @@ public class RecruitService {
         simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
 
         return true;
+    }
+
+    // 60초(1분)마다 실행
+    @Scheduled(cron = "0 * * * * *")
+    @Transactional
+    public void recruitTimeCheckScheduler() {
+        LocalDateTime now = LocalDateTime.now();
+
+        // 출발 시간이 지났고, 인원이 꽉 찬(FULL) 방 찾기
+        List<Recruit> readyToCallList = recruitRepository.findReadyToCall(now);
+
+        for (Recruit r : readyToCallList) {
+            // 다음 1분 뒤에 또 호출하는 것 방지
+            r.setStatus(RecruitStatus.CALLING);
+            // 기사님 호출
+            simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
+        }
+
+        // 출발 시간 기준 20분이 지났는데 출발하지 못한 방 찾기
+        LocalDateTime limitTime = now.minusMinutes(20);
+        List<Recruit> expiredList = recruitRepository.findExpiredRecruits(limitTime);
+
+        for (Recruit r : expiredList) {
+            // Soft Delete 처리
+            r.setStatus(RecruitStatus.END);
+
+            // 방에 있던 유저들 전부 대기 상태(IDLE)로 방출
+            r.getParticipations().forEach(p -> {
+                p.getUser().setStatus("IDLE");
+                p.setStatus("CANCELED");
+            });
+
+            // 소켓으로 해당 방이 폭파되었음을 클라이언트에 알림
+            Map<String, Object> message = new HashMap<>();
+            message.put("type", "deleteRecruit");
+            message.put("payload", r.getIdx());
+            simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
+        }
     }
 }

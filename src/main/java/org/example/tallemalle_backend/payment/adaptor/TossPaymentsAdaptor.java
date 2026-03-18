@@ -21,21 +21,38 @@ public class TossPaymentsAdaptor {
                 .build();
     }
 
-    public TossDto.issueBillingKeyResponse issueBillingKey(TossDto.issueBillingKeyRequest dto) {
+    public TossDto.IssueBillingKeyResponse issueBillingKey(TossDto.IssueBillingKeyRequest dto) {
         return webClient.post()
                 .uri("/billing/authorizations/issue")
                 .bodyValue(dto)
                 .retrieve()
-                .bodyToMono(TossDto.issueBillingKeyResponse.class)
+                .bodyToMono(TossDto.IssueBillingKeyResponse.class)
                 .block();
     }
 
-    public TossDto.revokeBillingKeyResponse revokeBillingKey(TossDto.revokeBillingKeyRequest dto) {
-        String uri = "/billing/" + dto.getBillingKey();
+    public TossDto.RevokeBillingKeyResponse revokeBillingKey(TossDto.RevokeBillingKeyRequest dto) {
         return webClient.delete()
-                .uri(uri)
+                .uri("/billing/{billingKey}", dto.getBillingKey())
                 .retrieve()
-                .bodyToMono(TossDto.revokeBillingKeyResponse.class)
+                .bodyToMono(TossDto.RevokeBillingKeyResponse.class)
+                .block();
+    }
+
+    public TossDto.ChargePerUserResponse chargePerUser(TossDto.ChargePerUserRequest dto) {
+        return webClient.post()
+                .uri("/billing/{billingKey}", dto.getBillingKey())
+                .bodyValue(dto.toRequestBody())
+                .retrieve()
+                .bodyToMono(TossDto.ChargePerUserResponse.class)
+                .block();
+    }
+
+    public TossDto.RefundTransactionResponse refundTransaction(TossDto.RefundTransactionRequest dto) {
+        return webClient.post()
+                .uri("/payments/{paymentKey}/cancel", dto.getPaymentKey())
+                .bodyValue(dto.toRequestBody())
+                .retrieve()
+                .bodyToMono(TossDto.RefundTransactionResponse.class)
                 .block();
     }
 }
