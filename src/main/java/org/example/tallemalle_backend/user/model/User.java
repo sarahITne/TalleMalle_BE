@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.tallemalle_backend.common.model.BaseEntity;
 import org.example.tallemalle_backend.participation.model.Participation;
-import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.hibernate.annotations.ColumnDefault;
 
 import java.util.ArrayList;

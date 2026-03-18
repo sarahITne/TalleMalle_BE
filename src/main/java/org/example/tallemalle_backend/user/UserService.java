@@ -47,17 +47,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);  // 저장 후 user에 idx 세팅됨
 
         // 4. 이메일 인증 메일 보내기
-        String uuid = UUID.randomUUID().toString();     // 이메일 인증에 사용할 고유 토큰 (UUID) 생성
-        emailService.sendWelcomeMail(uuid, dto.getEmail());
-
-        // 4-1. 이메일 전송 내역 저장
-        EmailVerify emailVerify =
-                EmailVerify.builder()
-                        .email(dto.getEmail())
-                        .uuid(uuid)
-                        .build();
-
-        emailVerifyRepository.save(emailVerify);
+        sendVerificationMail(dto.getEmail());
 
         return UserDto.SignupRes.from(user);
     }
@@ -83,6 +73,40 @@ public class UserService implements UserDetailsService {
         } else {
             return true;    // 사용 가능한 닉네임
         }
+    }
+
+    // 이메일 인증 메일 전송 (회원가입과 재전송에서 공통으로 사용)
+    public void sendVerificationMail(String email) {
+        // 1. 이메일 인증 메일 보내기
+        String uuid = UUID.randomUUID().toString();     // 이메일 인증에 사용할 고유 토큰 (UUID) 생성
+        emailService.sendWelcomeMail(uuid, email);
+
+        // 2. 이메일 전송 내역 저장
+        EmailVerify emailVerify = EmailVerify.builder()
+                .email(email)
+                .uuid(uuid)
+                .build();
+        emailVerifyRepository.save(emailVerify);
+    }
+
+
+    // 이메일 인증 메일 재전송
+    @Transactional
+    public void resendVerificationMail(String email) {
+        // 1. 해당 이메일로 가입된 유저가 있는지 확인
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("가입되지 않은 이메일입니다."));
+
+        // 2. 이미 인증된 유저인지 확인 (선택 사항)
+        if (user.getEnable()) {
+            throw new RuntimeException("이미 인증이 완료된 계정입니다.");
+        }
+
+        // 3. 기존 이메일 인증 토큰 내역이 있다면 삭제 (새로운 토큰 발행을 위해)
+        emailVerifyRepository.findByEmail(email).ifPresent(emailVerifyRepository::delete);
+
+        // 4. 메일 발송 및 내역 저장 로직 호출
+        sendVerificationMail(email);
     }
 
 
