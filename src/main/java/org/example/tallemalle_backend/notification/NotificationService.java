@@ -4,17 +4,23 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.notification.model.Notification;
 import org.example.tallemalle_backend.notification.model.NotificationDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.example.tallemalle_backend.user.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 public class NotificationService {
     private final NotificationRepository notificationRepository;
+    private final SimpMessagingTemplate simpMessagingTemplate;
 
     public NotificationDto.PageRes list(Long idx, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("idx").descending());
@@ -42,5 +48,26 @@ public class NotificationService {
             entity.setRead(true);
             notificationRepository.save(entity);
         }
+    }
+
+    public void createNotification(User user, String type, String title, String contents) {
+        // 1. 모집 확정되면 알림 DB에 INSERT
+        Notification notification = Notification.builder()
+                .user(user)
+                .type(type)
+                .title(title)
+                .contents(contents)
+                .isRead(false)
+                .createdAt(LocalDateTime.now())
+                .build();
+        notificationRepository.save(notification);
+
+        // 2. 소켓 전송 로직
+        Map<String, Object> message = new HashMap<>();
+        message.put("type", "PUSH_NOTIFICATION");
+        message.put("title", title);
+        message.put("contents", contents);
+
+        simpMessagingTemplate.convertAndSend("/topic/user/" + user.getIdx() + "/notifications", message);
     }
 }
