@@ -43,7 +43,7 @@ public class PaymentController {
         return ResponseEntity.ok(BaseResponse.success(paymentService.enroll(user, dto)));
     }
 
-    @GetMapping("/revoke/{idx}")
+    @PostMapping("/revoke/{idx}")
     public ResponseEntity revoke(
             @AuthenticationPrincipal AuthUserDetails user,
             @PathVariable Long idx) {

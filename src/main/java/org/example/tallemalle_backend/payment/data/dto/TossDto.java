@@ -60,7 +60,7 @@ public class TossDto {
     @Builder
     @Getter
     public static class RevokeBillingKeyResponse {
-        private String billingKey;
+
     }
 
     @Builder
