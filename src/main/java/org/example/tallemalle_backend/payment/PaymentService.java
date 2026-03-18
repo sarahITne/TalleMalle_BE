@@ -182,8 +182,6 @@ public class PaymentService {
         return PaymentDto.ChargeResponse.builder().build();
     }
 
-
-
     private PaymentDto.BillingGroupRes getBillingGroup(User owner) {
         List<Billing> billings = billingRepository.findAllByOwner(owner);
 
