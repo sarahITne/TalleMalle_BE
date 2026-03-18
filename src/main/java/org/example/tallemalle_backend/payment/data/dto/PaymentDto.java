@@ -16,6 +16,12 @@ public class PaymentDto {
 
     @Builder
     @Getter
+    public static class DefaultBillingResponse {
+
+    }
+
+    @Builder
+    @Getter
     public static class BillingRes {
         private Long idx;
         private String alias;
