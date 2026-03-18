@@ -2,7 +2,9 @@ package org.example.tallemalle_backend.payment.data.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.example.tallemalle_backend.payment.data.TransactionRepository;
 import org.example.tallemalle_backend.payment.data.entity.Billing;
+import org.example.tallemalle_backend.payment.data.entity.Transaction;
 
 import java.util.List;
 
@@ -39,6 +41,30 @@ public class PaymentDto {
     public static class BillingGroupRes {
         private BillingRes defaultBilling;
         private List<BillingRes> otherBillings;
+    }
+
+    @Builder
+    @Getter
+    public static class TransactionResponse {
+        private Long userIdx;
+        private String name;
+        private String alias;
+        private Integer amount;
+
+        public static TransactionResponse from(Transaction entity) {
+            return TransactionResponse.builder()
+                    .userIdx(entity.getBilling().getOwner().getIdx())
+                    .amount(entity.getOrder().getAmount())
+                    .name(entity.getOrder().getName())
+                    .alias(entity.getBilling().getAlias())
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    public static class TransactionGroupResponse {
+        List<TransactionResponse> transactions;
     }
 
     @Builder
@@ -91,6 +117,6 @@ public class PaymentDto {
     @Builder
     @Getter
     public static class ChargeResponse {
-
+        private TransactionGroupResponse transactionGroup;
     }
 }
