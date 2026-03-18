@@ -205,6 +205,8 @@ public class RecruitService {
 
             simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
 
+            sendLeaveChatNotice(recruitIdx, realUser);
+
             return true;
 
         }
@@ -241,7 +243,20 @@ public class RecruitService {
 
         simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
 
+        sendLeaveChatNotice(recruitIdx, realUser);
+
         return true;
+    }
+
+    private void sendLeaveChatNotice(Long recruitIdx, User user) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("type", "leave");
+        payload.put("recruitId", recruitIdx);
+        payload.put("senderId", user.getIdx());
+        payload.put("senderName", user.getName());
+        payload.put("contents", user.getName() + "님이 나갔습니다.");
+
+        simpMessagingTemplate.convertAndSend("/topic/chat/" + recruitIdx, payload);
     }
 
     // 60초(1분)마다 실행
