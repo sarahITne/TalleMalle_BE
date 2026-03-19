@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails; // 🌟 기사 객체 import (경로 확인해주세요)
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.example.tallemalle_backend.user.model.UserStatus;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -50,7 +51,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     String name = jwtUtil.getName(cookie.getValue());
                     String nickname = jwtUtil.getNickname(cookie.getValue());
                     String role = jwtUtil.getRole(cookie.getValue());
-                    String status = jwtUtil.getStatus(cookie.getValue());
+                    UserStatus status = jwtUtil.getStatus(cookie.getValue());
 
                     // 권한(role)에 따라 Principal 객체를 다르게 생성
                     Object principal;
