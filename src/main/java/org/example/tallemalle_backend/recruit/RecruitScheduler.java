@@ -2,24 +2,24 @@ package org.example.tallemalle_backend.recruit;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.call.CallService;
+import org.example.tallemalle_backend.recruit.event.RecruitEvents;
 import org.example.tallemalle_backend.recruit.model.Recruit;
+import org.example.tallemalle_backend.recruit.model.RecruitDto;
 import org.example.tallemalle_backend.recruit.model.RecruitStatus;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
 public class RecruitScheduler {
     private final RecruitRepository recruitRepository;
-    private final SimpMessagingTemplate simpMessagingTemplate;
     private final CallService callService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // 60초(1분)마다 실행
     @Scheduled(cron = "0 * * * * *")
@@ -35,6 +35,9 @@ public class RecruitScheduler {
             r.setStatus(RecruitStatus.CALLING);
             // 기사님 호출
             callService.createCallFromRecruit(r);
+
+            // 모집글 업데이트 이벤트 발행
+            eventPublisher.publishEvent(new RecruitEvents.UpdatedEvent(RecruitDto.ListRes.from(r)));
         }
 
         // 트랜잭션 커밋 이후 소켓 전송 (저장 실패 시 소켓이 안 나가도록 분리)
@@ -56,11 +59,8 @@ public class RecruitScheduler {
                 p.cancel();
             });
 
-            // 소켓으로 해당 방이 폭파되었음을 클라이언트에 알림
-            Map<String, Object> message = new HashMap<>();
-            message.put("type", "deleteRecruit");
-            message.put("payload", r.getIdx());
-            simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
+            // 모집글 삭제 이벤트 발행
+            eventPublisher.publishEvent(new RecruitEvents.DeletedEvent(r.getIdx()));
         }
     }
 }
