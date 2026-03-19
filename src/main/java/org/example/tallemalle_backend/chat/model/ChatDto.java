@@ -47,9 +47,9 @@ public class ChatDto {
                     .contents(entity.getContents())
                     .senderId(entity.getUser().getIdx())
                     .createdAt(entity.getCreatedAt())
-                    .senderName(entity.getUser().getName())
+                    .senderName(entity.getUser().getNickname())
                     .writerIdx(entity.getUser().getIdx())
-                    .writer(entity.getUser().getName())
+                    .writer(entity.getUser().getNickname())
                     .recruitIdx(entity.getRecruit().getIdx())
                     .build();
         }
@@ -76,9 +76,9 @@ public class ChatDto {
                     .contents(entity.getContents())
                     .createdAt(entity.getCreatedAt())
                     .senderId(entity.getUser().getIdx())
-                    .senderName(entity.getUser().getName())
+                    .senderName(entity.getUser().getNickname())
                     .writerIdx(entity.getUser().getIdx())
-                    .writer(entity.getUser().getName())
+                    .writer(entity.getUser().getNickname())
                     .recruitIdx(entity.getRecruit().getIdx())
                     .build();
         }
