@@ -31,7 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
 
         return path.startsWith("/user/login") ||
-                path.startsWith("/user/signup") ||
+                path.equals("/user/signup") ||
                 path.startsWith("/user/verify") ||
                 path.startsWith("/driver/login") ||
                 path.startsWith("/driver/signup");
@@ -65,17 +65,21 @@ public class JwtFilter extends OncePerRequestFilter {
                         principal = AuthUserDetails.builder()
                                 .idx(idx)
                                 .email(email)
+                                .name(name)
+                                .nickname(nickname)
                                 .role(role)
+                                .status(status)
                                 .build();
                     }
-                    AuthUserDetails user = AuthUserDetails.builder()
-                            .idx(idx)
-                            .email(email)
-                            .name(name)
-                            .nickname(nickname)
-                            .role(role)
-                            .status(status)
-                            .build();
+
+//                    AuthUserDetails user = AuthUserDetails.builder()
+//                            .idx(idx)
+//                            .email(email)
+//                            .name(name)
+//                            .nickname(nickname)
+//                            .role(role)
+//                            .status(status)
+//                            .build();
 
                     // principal 객체를 넘겨줄 때 role에 맞는 GrantedAuthority를 부여
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
