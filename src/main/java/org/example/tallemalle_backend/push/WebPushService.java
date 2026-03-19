@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
 import org.example.tallemalle_backend.push.model.PushSubscription;
 import org.example.tallemalle_backend.user.model.User;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,7 +41,7 @@ public class WebPushService {
 
     public void notifyRoom(Long recruitId, User sender, String contents) {
         try {
-            List<Long> userIds = participationRepository.findAllByRecruit_Idx(recruitId)
+            List<Long> userIds = participationRepository.findAllByRecruit_IdxAndStatus(recruitId, ParticipationStatus.ACTIVE)
                     .stream()
                     .map(p -> p.getUser().getIdx())
                     .filter(id -> !id.equals(sender.getIdx()))

@@ -1,14 +1,21 @@
 package org.example.tallemalle_backend.driver.call;
 
-import jakarta.transaction.Transactional;
+import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
+import org.example.tallemalle_backend.driver.auth.model.Driver;
+import org.example.tallemalle_backend.notification.NotificationService;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.infrastructure.KakaoMobilityService;
 import org.example.tallemalle_backend.driver.call.model.Call;
 import org.example.tallemalle_backend.driver.call.model.CallDto;
 import org.example.tallemalle_backend.driver.call.model.CallStatus;
 import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
+import org.example.tallemalle_backend.recruit.model.Recruit;
+import org.example.tallemalle_backend.participation.model.Participation;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -16,6 +23,9 @@ import java.util.List;
 public class CallService {
     private final CallRepository callRepository;
     private final KakaoMobilityService kakaoMobilityService;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+    private final NotificationService notificationService;
+    private final DriverUserRepository driverUserRepository;
 
 
     public List<CallDto.ListRes> list() {
@@ -30,6 +40,9 @@ public class CallService {
             DirectionInfo direction = kakaoMobilityService.getDirections(call);
             int fare = calculateTaxiFare(direction.getDistance() / 1000.0, direction.getDuration() / 60);
             call.setEstimatedFare(fare);
+            call.setEstimatedDistance(direction.getDistance() / 1000.0);
+            call.setEstimatedDuration(direction.getDuration() / 60);
+
             callRepository.save(call);
         }
 
@@ -37,7 +50,7 @@ public class CallService {
     }
 
     public CallDto.DetailRes readMyCall(Long driverIdx) {
-        Call call = callRepository.findByDriverIdx(driverIdx).orElseThrow();
+        Call call = callRepository.findByDriverIdxAndStatus(driverIdx, CallStatus.ACCEPTED).orElseThrow();
 
         return CallDto.DetailRes.from(call);
     }
@@ -57,6 +70,23 @@ public class CallService {
         }
 
         call.accept(driverIdx);
+
+        // Notification에 알림 저장 로직
+        Recruit recruit = call.getRecruit();
+        Driver driver = driverUserRepository.findById(driverIdx).orElseThrow();
+        String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 운행에 " + driver.getName() + " 기사님이 배정되었습니다.";
+
+        // 참여 중(ACTIVE)인 모든 유저에게 알림 보내기
+        for (Participation participation : recruit.getParticipations()) {
+            if (participation.isActive()) {
+                notificationService.createNotification(
+                        participation.getUser(),
+                        "matching",
+                        "운행 확정",
+                        notificationContents
+                );
+            }
+        }
     }
 
     @Transactional
@@ -69,11 +99,34 @@ public class CallService {
         }
 
         call.complete();
+
+        // Notification에 알림 저장 로직
+        Recruit recruit = call.getRecruit();
+        String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 운행이 종료되었습니다!";
+
+        // 참여 중(ACTIVE)인 모든 유저에게 알림 보내기
+        for (Participation participation : recruit.getParticipations()) {
+            if (participation.isActive()) {
+                notificationService.createNotification(
+                        participation.getUser(),
+                        "matching",
+                        "운행 종료",
+                        notificationContents
+                );
+            }
+        }
     }
 
     public List<CallDto.HistoryRes> getHistory(Long driverIdx) {
         List<Call> callList = callRepository.findAllByDriverIdxAndStatus(driverIdx, CallStatus.COMPLETED);
         return callList.stream().map(CallDto.HistoryRes::from).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public CallDto.SettlementRes getSettlement(Long callIdx) {
+        Call call = callRepository.findById(callIdx)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콜입니다."));
+        return CallDto.SettlementRes.from(call);
     }
 
     @Transactional
@@ -86,6 +139,26 @@ public class CallService {
         }
 
         call.cancel();
+    }
+
+    @Transactional
+    public void createCallFromRecruit(Recruit recruit) {
+        Call newCall = Call.builder()
+                .recruit(recruit)
+                .startLocation(recruit.getStartPointName())
+                .endLocation(recruit.getDestPointName())
+                .startLat(BigDecimal.valueOf(recruit.getStartLat()))
+                .startLng(BigDecimal.valueOf(recruit.getStartLng()))
+                .endLat(BigDecimal.valueOf(recruit.getDestLat()))
+                .endLng(BigDecimal.valueOf(recruit.getDestLng()))
+                .status(CallStatus.WAITING)
+                .estimatedFare(0)
+                .build();
+        callRepository.save(newCall);
+    }
+
+    public void notifyNewCall() {
+        simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
     }
 
     // 예상 금액 계산 로직

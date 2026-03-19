@@ -2,11 +2,25 @@ package org.example.tallemalle_backend.payment.data.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import org.example.tallemalle_backend.payment.data.TransactionRepository;
 import org.example.tallemalle_backend.payment.data.entity.Billing;
+import org.example.tallemalle_backend.payment.data.entity.Transaction;
 
 import java.util.List;
 
 public class PaymentDto {
+
+    @Builder
+    @Getter
+    public static class CustomerKeyResponse {
+        private String customerKey;
+    }
+
+    @Builder
+    @Getter
+    public static class DefaultBillingResponse {
+
+    }
 
     @Builder
     @Getter
@@ -31,12 +45,36 @@ public class PaymentDto {
 
     @Builder
     @Getter
+    public static class TransactionResponse {
+        private Long userIdx;
+        private String name;
+        private String alias;
+        private Integer amount;
+
+        public static TransactionResponse from(Transaction entity) {
+            return TransactionResponse.builder()
+                    .userIdx(entity.getBilling().getOwner().getIdx())
+                    .amount(entity.getOrder().getAmount())
+                    .name(entity.getOrder().getName())
+                    .alias(entity.getBilling().getAlias())
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    public static class TransactionGroupResponse {
+        List<TransactionResponse> transactions;
+    }
+
+    @Builder
+    @Getter
     public static class EnrollRequest {
         private String authKey;
         private String customerKey;
 
-        public TossDto.issueBillingKeyRequest toIssueBillingKeyDto() {
-            return TossDto.issueBillingKeyRequest.builder()
+        public TossDto.IssueBillingKeyRequest toIssueBillingKeyDto() {
+            return TossDto.IssueBillingKeyRequest.builder()
                     .authKey(this.authKey)
                     .customerKey(this.customerKey)
                     .build();
@@ -46,7 +84,7 @@ public class PaymentDto {
     @Builder
     @Getter
     public static class EnrollResponse {
-        BillingGroupRes billingGroup;
+        private BillingGroupRes billingGroup;
     }
 
     @Builder
@@ -59,12 +97,26 @@ public class PaymentDto {
     @Builder
     @Getter
     public static class RevokeResponse {
-        BillingGroupRes billingGroup;
+        private BillingGroupRes billingGroup;
     }
 
     @Builder
     @Getter
     public static class ListResponse {
-        BillingGroupRes billingGroup;
+        private BillingGroupRes billingGroup;
+    }
+
+    @Builder
+    @Getter
+    public static class ChargeRequest {
+        private Long recruitIdx;
+        private Integer commission;
+        private Integer serviceFee;
+    }
+
+    @Builder
+    @Getter
+    public static class ChargeResponse {
+        private TransactionGroupResponse transactionGroup;
     }
 }

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
+import org.example.tallemalle_backend.profile.data.entity.Profile;
 
 import java.time.LocalDate;
 import java.util.Map;
@@ -41,15 +42,22 @@ public class UserDto {
         private String gender;
 
         public User toEntity(String encodedPassword) {
-            return User.builder()
+            User user = User.builder()
                     .email(this.email)
                     .password(encodedPassword)
                     .name(this.name)
+                    .build();
+            
+            Profile profile = Profile.builder()
+                    .user(user)
                     .nickname(this.nickname)
                     .phoneNumber(this.phoneNumber)
                     .birth(this.birth)
                     .gender(this.gender)
                     .build();
+            
+            user.setProfile(profile);
+            return user;
         }
     }
 
@@ -62,14 +70,14 @@ public class UserDto {
         private String email;
         private String name;
         private String nickname;
-        private String status;
+        private UserStatus status;
 
         public static SignupRes from(User entity) {
             return SignupRes.builder()
                     .idx(entity.getIdx())
                     .email(entity.getEmail())
                     .name(entity.getName())
-                    .nickname(entity.getNickname())
+                    .nickname(entity.getProfile() != null ? entity.getProfile().getNickname() : null)
                     .status(entity.getStatus())
                     .build();
         }
@@ -111,17 +119,24 @@ public class UserDto {
         }
 
         public User toEntity() {
-            return User.builder()
+            User user = User.builder()
                     .email(email)
                     .password("social-login")
                     .name(name)
-                    .nickname("임시 닉네임")          // 임시 닉네임 (카카오에서 받아올 수 없음, 이후 추가 회원가입 단계에서 정보 입력)
-                    .phoneNumber("010-0000-0000")   // 임시 번호
-                    .birth(LocalDate.parse("1900-01-01"))    // 임시 생년월일
-                    .gender("PENDING")    // 임시 성별
                     .provider(provider.toUpperCase())
                     .role("ROLE_GUEST")   // 권한으로 추가 정보 대상자 구분
                     .build();
+
+            Profile profile = Profile.builder()
+                    .user(user)
+                    .nickname("임시 닉네임")          // 임시 닉네임
+                    .phoneNumber("010-0000-0000")   // 임시 번호
+                    .birth(LocalDate.parse("1900-01-01"))    // 임시 생년월일
+                    .gender("PENDING")    // 임시 성별
+                    .build();
+
+            user.setProfile(profile);
+            return user;
         }
     }
 
@@ -152,14 +167,14 @@ public class UserDto {
         private String email;
         private String name;
         private String nickname;
-        private String status;
+        private UserStatus status;
 
         public static ExtraInfoRes from(User entity) {
             return ExtraInfoRes.builder()
                     .idx(entity.getIdx())
                     .email(entity.getEmail())
                     .name(entity.getName())
-                    .nickname(entity.getNickname())
+                    .nickname(entity.getProfile() != null ? entity.getProfile().getNickname() : null)
                     .status(entity.getStatus())
                     .build();
         }
@@ -187,7 +202,7 @@ public class UserDto {
         private String name;
         private String nickname;
         private String role;
-        private String status;
+        private UserStatus status;
 
         public static LoginRes from(AuthUserDetails authUserDetails) {
             return LoginRes.builder()

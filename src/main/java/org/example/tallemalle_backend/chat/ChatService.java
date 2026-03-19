@@ -5,6 +5,7 @@ import org.example.tallemalle_backend.chat.model.Chat;
 import org.example.tallemalle_backend.chat.model.ChatDto;
 import org.example.tallemalle_backend.chat.model.ChatRead;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
 import org.example.tallemalle_backend.push.WebPushService;
 import org.example.tallemalle_backend.recruit.RecruitRepository;
 import org.example.tallemalle_backend.recruit.model.Recruit;
@@ -57,7 +58,7 @@ public class ChatService {
     }
 
     public List<Long> unreadRecruitIds(AuthUserDetails user) {
-        List<Long> recruitIds = participationRepository.findAllByUser_Idx(user.getIdx())
+        List<Long> recruitIds = participationRepository.findAllByUser_IdxAndStatus(user.getIdx(), ParticipationStatus.ACTIVE)
                 .stream()
                 .map(p -> p.getRecruit().getIdx())
                 .toList();
@@ -80,12 +81,20 @@ public class ChatService {
                 .toList();
     }
 
+    public List<ChatDto.RoomRes> rooms(AuthUserDetails user) {
+        return participationRepository.findAllByUser_IdxAndStatus(user.getIdx(), ParticipationStatus.ACTIVE)
+                .stream()
+                .map(p -> ChatDto.RoomRes.from(p.getRecruit()))
+                .toList();
+    }
+
     private void validateParticipant(AuthUserDetails user, Long recruitIdx) {
         boolean isParticipant = participationRepository
-                .findByUserIdxAndRecruitIdx(user.getIdx(), recruitIdx)
-                .isPresent();
+                .existsByRecruit_IdxAndUser_IdxAndStatus(recruitIdx, user.getIdx(), ParticipationStatus.ACTIVE);
         if (!isParticipant) {
-            throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
+            throw new org.example.tallemalle_backend.common.exception.BaseException(
+                    org.example.tallemalle_backend.common.model.BaseResponseStatus.REQUEST_ERROR
+            );
         }
     }
 

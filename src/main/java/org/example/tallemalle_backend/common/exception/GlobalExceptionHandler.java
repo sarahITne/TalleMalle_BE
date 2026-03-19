@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
         int statusCode = statusCodeMapper(errorCode);
         BaseResponse response = BaseResponse.fail(status);
 
-        return ResponseEntity.status(errorCode).body(response);
+        return ResponseEntity.status(statusCode).body(response);
     }
 
     private int statusCodeMapper(int errorCode){

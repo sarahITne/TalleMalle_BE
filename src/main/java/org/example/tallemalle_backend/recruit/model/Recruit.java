@@ -72,9 +72,26 @@ public class Recruit {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    public void decreaseCapacity() {
+    // 유저 입장 시: 인원 증가 및 FULL 상태 검사
+    public void addParticipant() {
+        this.currentCapacity++;
+        if (this.currentCapacity >= this.maxCapacity) {
+            this.status = RecruitStatus.FULL;
+        }
+    }
+
+    // 유저 퇴장 시: 인원 감소 및 RECRUITING 상태 복구
+    public void removeParticipant() {
         if (this.currentCapacity > 1) {
             this.currentCapacity--;
         }
+        if (this.status == RecruitStatus.FULL) {
+            this.status = RecruitStatus.RECRUITING;
+        }
+    }
+
+    // 방 폭파 시: 상태를 END(Soft Delete)로 변경
+    public void cancelRecruit() {
+        this.status = RecruitStatus.END;
     }
 }

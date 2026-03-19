@@ -22,7 +22,7 @@ public class AuthUserDetails implements UserDetails, OAuth2User {
     private String nickname;
     private boolean enable;
     private String role;
-    private String status;
+    private UserStatus status;
     private Map<String, Object> attributes;
 
     public static AuthUserDetails from(User entity) {
@@ -31,7 +31,7 @@ public class AuthUserDetails implements UserDetails, OAuth2User {
                 .email(entity.getEmail())
                 .password(entity.getPassword())
                 .name(entity.getName())
-                .nickname(entity.getNickname())
+                .nickname(entity.getProfile() != null ? entity.getProfile().getNickname() : null)
                 .enable(entity.getEnable())
                 .role(entity.getRole())
                 .status(entity.getStatus())
@@ -44,7 +44,6 @@ public class AuthUserDetails implements UserDetails, OAuth2User {
                 .email(this.email)
                 .password(this.password)
                 .name(this.name)
-                .nickname(this.nickname)
                 .enable(this.enable)
                 .role(this.role)
                 .status(this.status)

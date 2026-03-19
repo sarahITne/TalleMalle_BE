@@ -15,7 +15,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 public class RecruitController {
-    private final RecruitRepository recruitRepository;
     private final RecruitService recruitService;
 
     @PostMapping
@@ -52,12 +51,11 @@ public class RecruitController {
         boolean result = recruitService.leave(user, recruitIdx);
         return ResponseEntity.ok(BaseResponse.success(result));
     }
-      
-     @GetMapping("/{recruitId}")
-     public ResponseEntity detail(@PathVariable Long recruitId) {
-        Recruit recruit = recruitRepository.findById(recruitId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 recruitId 입니다."));
-        RecruitDto.DetailRes dto = RecruitDto.DetailRes.from(recruit);
+
+    // 게시글 상세 조회
+    @GetMapping("/{recruitId}")
+    public ResponseEntity detail(@PathVariable Long recruitId) {
+        RecruitDto.DetailRes dto = recruitService.detail(recruitId);
         return ResponseEntity.ok(BaseResponse.success(dto));
     }
 }

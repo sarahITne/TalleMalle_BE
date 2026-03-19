@@ -47,9 +47,9 @@ public class ChatDto {
                     .contents(entity.getContents())
                     .senderId(entity.getUser().getIdx())
                     .createdAt(entity.getCreatedAt())
-                    .senderName(entity.getUser().getName())
+                    .senderName(entity.getUser().getNickname())
                     .writerIdx(entity.getUser().getIdx())
-                    .writer(entity.getUser().getName())
+                    .writer(entity.getUser().getNickname())
                     .recruitIdx(entity.getRecruit().getIdx())
                     .build();
         }
@@ -76,10 +76,34 @@ public class ChatDto {
                     .contents(entity.getContents())
                     .createdAt(entity.getCreatedAt())
                     .senderId(entity.getUser().getIdx())
-                    .senderName(entity.getUser().getName())
+                    .senderName(entity.getUser().getNickname())
                     .writerIdx(entity.getUser().getIdx())
-                    .writer(entity.getUser().getName())
+                    .writer(entity.getUser().getNickname())
                     .recruitIdx(entity.getRecruit().getIdx())
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    public static class RoomRes {
+        private Long recruitIdx;
+        private String status;
+        private String startPointName;
+        private String destPointName;
+        private java.time.LocalDateTime departureTime;
+        private Integer currentCapacity;
+        private Integer maxCapacity;
+
+        public static RoomRes from(org.example.tallemalle_backend.recruit.model.Recruit entity) {
+            return RoomRes.builder()
+                    .recruitIdx(entity.getIdx())
+                    .status(entity.getStatus().name())
+                    .startPointName(entity.getStartPointName())
+                    .destPointName(entity.getDestPointName())
+                    .departureTime(entity.getDepartureTime())
+                    .currentCapacity(entity.getCurrentCapacity())
+                    .maxCapacity(entity.getMaxCapacity())
                     .build();
         }
     }

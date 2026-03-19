@@ -68,7 +68,7 @@ public class UserService implements UserDetailsService {
 
     // 닉네임 중복 확인
     public boolean nicknameCheck(String nickname) {
-        if (userRepository.findByNickname(nickname).isPresent()) {
+        if (userRepository.findByProfileNickname(nickname).isPresent()) {
             return false;   // 중복된 닉네임
         } else {
             return true;    // 사용 가능한 닉네임

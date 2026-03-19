@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.common.model.BaseResponse;
 import org.example.tallemalle_backend.common.model.BaseResponseStatus;
+import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
 import org.example.tallemalle_backend.payment.data.dto.PaymentDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +16,24 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/payment")
 public class PaymentController {
     private final PaymentService paymentService;
+
+    @GetMapping("/key")
+    public ResponseEntity customerKey(@AuthenticationPrincipal AuthUserDetails user) {
+        if (user == null) {
+            throw BaseException.from(BaseResponseStatus.PAYMENT_UNAUTHENTICATED_USER);
+        }
+        return ResponseEntity.ok(BaseResponse.success(paymentService.customerKey(user)));
+    }
+
+    @PostMapping("/default-billing")
+    public ResponseEntity defaultBilling(
+            @AuthenticationPrincipal AuthUserDetails user,
+            @RequestParam Long billingIdx) {
+        if (user == null) {
+            throw BaseException.from(BaseResponseStatus.PAYMENT_UNAUTHENTICATED_USER);
+        }
+        return ResponseEntity.ok(BaseResponse.success(paymentService.defaultBilling(user, billingIdx)));
+    }
 
     @GetMapping("/enroll")
     public ResponseEntity enroll(
@@ -34,7 +53,7 @@ public class PaymentController {
         return ResponseEntity.ok(BaseResponse.success(paymentService.enroll(user, dto)));
     }
 
-    @GetMapping("/revoke/{idx}")
+    @PostMapping("/revoke/{idx}")
     public ResponseEntity revoke(
             @AuthenticationPrincipal AuthUserDetails user,
             @PathVariable Long idx) {
@@ -57,5 +76,17 @@ public class PaymentController {
             throw BaseException.from(BaseResponseStatus.PAYMENT_UNAUTHENTICATED_USER);
         }
         return ResponseEntity.ok(BaseResponse.success(paymentService.list(user.getIdx())));
+    }
+
+    @PostMapping("/charge")
+    public ResponseEntity charge(
+            @AuthenticationPrincipal AuthDriverDetails driver,
+            @RequestBody PaymentDto.ChargeRequest dto) {
+
+        if (driver == null) {
+            throw BaseException.from(BaseResponseStatus.PAYMENT_UNAUTHENTICATED_USER);
+        }
+
+        return ResponseEntity.ok(BaseResponse.success(paymentService.charge(driver.getIdx(), dto)));
     }
 }

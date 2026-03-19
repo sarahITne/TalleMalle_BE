@@ -6,6 +6,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.example.tallemalle_backend.user.model.UserStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -89,7 +90,11 @@ public class JwtUtil {
         return extractAllClaims(token).get("role", String.class);
     }
 
-    public String getStatus(String token) {
-        return extractAllClaims(token).get("status", String.class);
+    public UserStatus getStatus(String token) {
+        String statusStr = extractAllClaims(token).get("status", String.class);
+        if (statusStr != null) {
+            return UserStatus.valueOf(statusStr);
+        }
+        return null;
     }
 }
