@@ -92,7 +92,9 @@ public class ChatService {
         boolean isParticipant = participationRepository
                 .existsByRecruit_IdxAndUser_IdxAndStatus(recruitIdx, user.getIdx(), ParticipationStatus.ACTIVE);
         if (!isParticipant) {
-            throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
+            throw new org.example.tallemalle_backend.common.exception.BaseException(
+                    org.example.tallemalle_backend.common.model.BaseResponseStatus.REQUEST_ERROR
+            );
         }
     }
 
