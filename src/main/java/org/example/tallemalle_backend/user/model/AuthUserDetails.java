@@ -23,7 +23,7 @@ public class AuthUserDetails implements UserDetails, OAuth2User {
     private String nickname;
     private boolean enable;
     private String role;
-    private String status;
+    private UserStatus status;
     private Map<String, Object> attributes;
 
     public static AuthUserDetails from(User entity) {
