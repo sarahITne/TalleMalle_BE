@@ -5,6 +5,8 @@ import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.common.model.BaseResponseStatus;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
+import org.example.tallemalle_backend.recruit.event.RecruitEvents;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.recruit.model.RecruitDto;
 import org.example.tallemalle_backend.recruit.model.RecruitStatus;
