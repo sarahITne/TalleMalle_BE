@@ -5,6 +5,7 @@ import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
 import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
 import org.example.tallemalle_backend.driver.auth.model.Driver;
+import org.example.tallemalle_backend.profile.ProfileRepository;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.EmailVerify;
 import org.example.tallemalle_backend.user.model.User;
@@ -30,6 +31,7 @@ public class UserService implements UserDetailsService {
     private final EmailService emailService;
     private final EmailVerifyRepository emailVerifyRepository;
     private final IdentityService identityService;
+    private final ProfileRepository profileRepository;
 
     // 회원가입
     public UserDto.SignupRes signup(UserDto.SignupReq dto) {
@@ -68,7 +70,7 @@ public class UserService implements UserDetailsService {
 
     // 닉네임 중복 확인
     public boolean nicknameCheck(String nickname) {
-        if (userRepository.findByProfileNickname(nickname).isPresent()) {
+        if (profileRepository.findByNickname(nickname).isPresent()) {
             return false;   // 중복된 닉네임
         } else {
             return true;    // 사용 가능한 닉네임
