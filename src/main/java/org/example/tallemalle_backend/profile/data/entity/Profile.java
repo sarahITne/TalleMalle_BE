@@ -41,10 +41,16 @@ public class Profile {
     @Column()
     private String imageUrl;
 
-    public void update(String nickname, String phoneNumber, String introduction, String imageUrl) {
+    public void update(String nickname, String introduction, String imageUrl) {
         this.nickname = nickname;
-        this.phoneNumber = phoneNumber;
         this.introduction = introduction;
         this.imageUrl = imageUrl;
+    }
+
+    public void updateExtraInfo(String nickname, String phoneNumber, LocalDate birth, String gender) {
+        this.nickname = nickname;
+        this.phoneNumber = phoneNumber;
+        this.birth = birth;
+        this.gender = gender;
     }
 }

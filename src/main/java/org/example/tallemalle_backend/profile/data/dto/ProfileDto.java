@@ -35,9 +35,7 @@ public class ProfileDto {
     @Builder
     @Getter
     public static class UpdateRequest {
-        private Long idx;
         private String nickname;
-        private String phoneNumber;
         private String introduction;
         private String imageUrl;
     }

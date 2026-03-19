@@ -16,9 +16,10 @@ public class ProfileService {
         return ProfileDto.ProfileResponse.fromEntity(profile);
     }
 
-    public void update(ProfileDto.UpdateRequest dto) {
-        Profile profile = profileRepository.findById(dto.getIdx()).orElseThrow();
-        profile.update(dto.getNickname(), dto.getPhoneNumber(), dto.getIntroduction(), dto.getImageUrl());
+    public ProfileDto.ProfileResponse update(AuthUserDetails user, ProfileDto.UpdateRequest dto) {
+        Profile profile = profileRepository.findById(user.getIdx()).orElseThrow();
+        profile.update(dto.getNickname(), dto.getIntroduction(), dto.getImageUrl());
         profileRepository.save(profile);
+        return ProfileDto.ProfileResponse.fromEntity(profile);
     }
 }

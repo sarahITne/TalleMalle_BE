@@ -5,6 +5,7 @@ import lombok.*;
 import org.example.tallemalle_backend.common.model.BaseEntity;
 import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.payment.data.entity.Billing;
+import org.example.tallemalle_backend.profile.data.entity.Profile;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.hibernate.annotations.ColumnDefault;
 
@@ -26,24 +27,12 @@ public class User extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false, length = 50)
-    private String nickname;
-
     @Column(nullable = false, length = 100, unique = true)
     private String email;
 
     @Setter
     @Column(nullable = false)
     private String password;
-
-    @Column(nullable = false, length = 20)
-    private String phoneNumber;
-
-    @Column(nullable = false)
-    private LocalDate birth;
-
-    @Column(nullable = false, length = 10)
-    private String gender;
 
     @Builder.Default
     @Column(nullable = false, length = 20)
@@ -79,12 +68,40 @@ public class User extends BaseEntity {
     @JoinColumn(name = "defaultBillingIdx", referencedColumnName = "idx")
     private Billing defaultBilling;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Setter
+    private Profile profile;
+
+    // Profile 필드에 대한 Wrapper Getters (기존 시스템 호환성 유지)
+    public String getNickname() {
+        return profile != null ? profile.getNickname() : null;
+    }
+
+    public String getPhoneNumber() {
+        return profile != null ? profile.getPhoneNumber() : null;
+    }
+
+    public LocalDate getBirth() {
+        return profile != null ? profile.getBirth() : null;
+    }
+
+    public String getGender() {
+        return profile != null ? profile.getGender() : null;
+    }
+
     // 소셜 로그인 후 유저 추가 정보 업데이트
     public void updateExtraInfo(String nickname, String phoneNumber, LocalDate birth, String gender) {
-        this.nickname = nickname; // 닉네임을 이름 필드에 저장하거나 별도 필드 사용
-        this.phoneNumber = phoneNumber;
-        this.birth = birth;
-        this.gender = gender;
+        if (this.profile == null) {
+            this.profile = Profile.builder()
+                    .user(this)
+                    .nickname(nickname)
+                    .phoneNumber(phoneNumber)
+                    .birth(birth)
+                    .gender(gender)
+                    .build();
+        } else {
+            this.profile.updateExtraInfo(nickname, phoneNumber, birth, gender);
+        }
         this.role = "ROLE_USER";   // 권한 승격
         this.enable = true;      // 계정 활성화
     }
