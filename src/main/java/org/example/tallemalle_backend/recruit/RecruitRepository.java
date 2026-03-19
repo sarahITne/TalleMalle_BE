@@ -17,6 +17,6 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
     List<Recruit> findReadyToCall(@Param("now") LocalDateTime now);
 
     // 출발 시간 20분 초과한 미출발 방 찾기 (RECRUITING, FULL만 — CALLING은 운행 진행 중이므로 제외)
-    @Query("SELECT r FROM Recruit r WHERE r.status IN ('RECRUITING', 'FULL') AND r.departureTime <= :limitTime")
+    @Query("SELECT r FROM Recruit r WHERE r.status IN ('RECRUITING', 'FULL', 'CALLING') AND r.departureTime <= :limitTime")
     List<Recruit> findExpiredRecruits(@Param("limitTime") LocalDateTime limitTime);
 }
