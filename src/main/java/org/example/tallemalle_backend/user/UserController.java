@@ -77,8 +77,21 @@ public class UserController {
         return ResponseEntity.ok(available);
     }
 
+    // 이메일 인증 메일 재전송
+    @PostMapping("/resend-verify")
+    public ResponseEntity resendVerify(String email) {
+        if (email == null || email.isEmpty()) {
+            return ResponseEntity.badRequest().body("이메일 주소가 필요합니다.");
+        }
 
-    // 이메일 인증
+        System.out.println("재전송 요청 이메일: " + email); // null이 찍히는지 확인
+
+        userService.resendVerificationMail(email);
+        return ResponseEntity.ok(Map.of("message", "인증 메일이 재전송되었습니다."));
+    }
+
+
+    // 이메일 인증 (완료)
     @GetMapping("/verify")
     public ResponseEntity verify(String uuid) {
         userService.verify(uuid);
@@ -86,7 +99,7 @@ public class UserController {
         // 인증 성공하면 프론트로 리다이렉트
         return ResponseEntity
                 .status(HttpStatus.MOVED_PERMANENTLY)
-                .location(URI.create("http://localhost:5173/login"))
+                .location(URI.create("http://localhost:5173/email/verify-success"))
                 .build();
     }
 

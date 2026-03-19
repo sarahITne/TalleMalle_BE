@@ -2,7 +2,6 @@ package org.example.tallemalle_backend.user.model;
 
 import lombok.Builder;
 import lombok.Getter;
-import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
