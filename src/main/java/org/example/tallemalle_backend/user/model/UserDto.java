@@ -73,7 +73,7 @@ public class UserDto {
         private String email;
         private String name;
         private String nickname;
-        private String status;
+        private UserStatus status;
 
         public static SignupRes from(User entity) {
             return SignupRes.builder()
@@ -163,7 +163,7 @@ public class UserDto {
         private String email;
         private String name;
         private String nickname;
-        private String status;
+        private UserStatus status;
 
         public static ExtraInfoRes from(User entity) {
             return ExtraInfoRes.builder()
@@ -198,7 +198,7 @@ public class UserDto {
         private String name;
         private String nickname;
         private String role;
-        private String status;
+        private UserStatus status;
 
         public static LoginRes from(AuthUserDetails authUserDetails) {
             return LoginRes.builder()
