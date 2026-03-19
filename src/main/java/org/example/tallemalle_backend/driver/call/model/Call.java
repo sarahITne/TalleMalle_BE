@@ -57,9 +57,16 @@ public class Call {
         this.status = CallStatus.ACCEPTED;
     }
 
-    public void complete() {
+    public void startDriving() {
         if (this.status != CallStatus.ACCEPTED) {
-            throw new IllegalStateException("수락된 콜만 완료 처리할 수 있습니다.");
+            throw new IllegalStateException("수락된 콜만 운행 시작할 수 있습니다.");
+        }
+        this.status = CallStatus.DRIVING;
+    }
+
+    public void complete() {
+        if (this.status != CallStatus.DRIVING) {
+            throw new IllegalStateException("운행 중인 콜만 완료 처리할 수 있습니다.");
         }
         this.status = CallStatus.COMPLETED;
     }

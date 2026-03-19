@@ -50,14 +50,14 @@ public class CallService {
     }
 
     public CallDto.DetailRes readMyCall(Long driverIdx) {
-        Call call = callRepository.findByDriverIdxAndStatus(driverIdx, CallStatus.ACCEPTED).orElseThrow();
+        Call call = callRepository.findByDriverIdxAndStatusIn(driverIdx, List.of(CallStatus.ACCEPTED, CallStatus.DRIVING)).orElseThrow();
 
         return CallDto.DetailRes.from(call);
     }
 
     @Transactional
     public void acceptCall(Long callIdx, Long driverIdx) {
-        boolean alreadyAccepted = callRepository.existsByDriverIdxAndStatus(driverIdx, CallStatus.ACCEPTED);
+        boolean alreadyAccepted = callRepository.findByDriverIdxAndStatusIn(driverIdx, List.of(CallStatus.ACCEPTED, CallStatus.DRIVING)).isPresent();
         if (alreadyAccepted) {
             throw new IllegalStateException("이미 진행 중인 운행이 있습니다.");
         }
@@ -83,6 +83,33 @@ public class CallService {
                         participation.getUser(),
                         "matching",
                         "운행 확정",
+                        notificationContents
+                );
+            }
+        }
+    }
+
+    @Transactional
+    public void startDrivingCall(Long callIdx, Long driverIdx) {
+        Call call = callRepository.findByIdWithLock(callIdx)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콜입니다."));
+
+        if (!driverIdx.equals(call.getDriverIdx())) {
+            throw new IllegalStateException("본인이 배정된 콜만 운행 시작할 수 있습니다.");
+        }
+
+        call.startDriving();
+
+        // 참여 중(ACTIVE)인 모든 유저에게 알림 보내기
+        Recruit recruit = call.getRecruit();
+        String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 운행이 시작되었습니다!";
+
+        for (Participation participation : recruit.getParticipations()) {
+            if (participation.isActive()) {
+                notificationService.createNotification(
+                        participation.getUser(),
+                        "matching",
+                        "운행 시작",
                         notificationContents
                 );
             }
