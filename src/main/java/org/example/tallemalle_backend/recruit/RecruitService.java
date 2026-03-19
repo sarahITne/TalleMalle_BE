@@ -3,8 +3,6 @@ package org.example.tallemalle_backend.recruit;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.common.model.BaseResponseStatus;
-import org.example.tallemalle_backend.driver.call.CallService;
-import org.example.tallemalle_backend.notification.NotificationService;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.recruit.model.Recruit;
@@ -13,15 +11,11 @@ import org.example.tallemalle_backend.recruit.model.RecruitStatus;
 import org.example.tallemalle_backend.user.UserRepository;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.User;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -29,10 +23,8 @@ import java.util.Optional;
 public class RecruitService {
     private final RecruitRepository recruitRepository;
     private final UserRepository userRepository;
-    private final SimpMessagingTemplate simpMessagingTemplate;
     private final ParticipationRepository participationRepository;
-    private final NotificationService notificationService;
-    private final CallService callService;
+    private final ApplicationEventPublisher eventPublisher;
 
     // TODO: Socket 통신 연결 필요
     @Transactional
@@ -45,8 +37,7 @@ public class RecruitService {
         Recruit recruit = dto.toEntity(realUser);
 
         // 이미 방에 접속 중이면 반환
-        boolean isAlreadyJoined = realUser.getParticipations().stream()
-                .anyMatch(p -> "ACTIVE".equals(p.getStatus()));
+        boolean isAlreadyJoined = realUser.getParticipations().stream().anyMatch(Participation::isActive);
 
         if (isAlreadyJoined) {
             throw new BaseException(BaseResponseStatus.ALREADY_JOINED);
@@ -56,24 +47,18 @@ public class RecruitService {
         Participation participation = Participation.builder()
                 .user(realUser)
                 .recruit(recruit)
-                .status("ACTIVE")
+                .status(ParticipationStatus.ACTIVE)
                 .build();
 
         recruit.getParticipations().add(participation);
-        realUser.setStatus("OWNER");
+
+        realUser.changeToOwner();
 
         // DB에 모집글 저장
         Recruit savedRecruit = recruitRepository.save(recruit);
 
-        // 소켓으로 보낼 DTO 생성
-        RecruitDto.ListRes responseDto = RecruitDto.ListRes.from(savedRecruit);
-
-        Map<String, Object> message = new HashMap<>();
-        message.put("type", "newRecruit");
-        message.put("payload", responseDto);
-
-        // 소켓으로 전송
-        simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
+        // 소켓 발송 이벤트 발행
+        eventPublisher.publishEvent(new RecruitEvents.CreatedEvent(RecruitDto.ListRes.from(savedRecruit)));
     }
 
     // TODO: Slice로 페이징 처리 필요
@@ -129,48 +114,32 @@ public class RecruitService {
                 return false;
             } else {
                 // 과거에 나갔다가 다시 들어오는 경우 상태만 Update
-                existingParticipation.setStatus("ACTIVE");
+                existingParticipation.activate();
             }
         } else {
             // 아예 처음 참여하는 경우 새로 만들어서 저장
             Participation newParticipation = Participation.builder()
                     .user(realUser)
                     .recruit(recruit)
-                    .status("ACTIVE")
+                    .status(ParticipationStatus.ACTIVE)
                     .build();
+
             participationRepository.save(newParticipation);
         }
 
-        // 모집 인원 + 1
-        recruit.setCurrentCapacity(recruit.getCurrentCapacity() + 1);
+        realUser.changeToJoined();
 
-        realUser.setStatus("JOINED");
+        // 모집 인원 + 1
+        recruit.addParticipant();
 
         // 인원이 다 차면
-        if (recruit.getCurrentCapacity().equals(recruit.getMaxCapacity())) {
-            // 모집 마감
-            recruit.setStatus(RecruitStatus.FULL);
-
-            // 모집 확정 알림 생성 (해당 모집 유저들에게 모두 전송)
-            String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 모집 인원이 다 차 모집이 확정되었습니다!";
-            participationRepository.findAllByRecruit_Idx(recruitIdx).stream()
-                    .filter(p -> "ACTIVE".equals(p.getStatus()))
-                    .forEach(p -> notificationService.createNotification(
-                            p.getUser(),
-                            "matching",
-                            "모집 확정",
-                            notificationContents
-                    ));
+        if (recruit.getStatus() == RecruitStatus.FULL) {
+            // 모집 확정 알림 소켓 발생 이벤트 발행
+            eventPublisher.publishEvent(new RecruitEvents.FullEvent(recruit.getIdx(), recruit.getStartPointName(), recruit.getDestPointName()));
         }
 
-        // 소켓 전송 Dto 생성
-        RecruitDto.ListRes updatedDto = RecruitDto.ListRes.from(recruit);
-
-        Map<String, Object> message = new HashMap<>();
-        message.put("type", "updateRecruit");
-        message.put("payload", updatedDto);
-
-        simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
+        // 소켓 발생 이벤트 발행
+        eventPublisher.publishEvent(new RecruitEvents.UpdatedEvent(RecruitDto.ListRes.from(recruit)));
 
         // 성공 반환
         return true;
@@ -189,25 +158,16 @@ public class RecruitService {
         if(recruit.getOwner().getIdx().equals(user.getIdx())) {
             // 방에 참여 중인 모든 유저의 상태를 IDLE로 변경
             recruit.getParticipations().forEach(p -> {
-                User pUser = p.getUser();
-                pUser.setStatus("IDLE");
+                p.getUser().changeToIdle();
                 // participtions 테이블에 status CANCELED로 변경
-                p.setStatus("CANCELED");
+                p.cancel();
             });
-
-
 
             // Soft Delete로 처리
             recruit.setStatus(RecruitStatus.END);
 
-            // 소켓 통신으로 방이 없어졌다고 알림
-            Map<String, Object> message = new HashMap<>();
-            message.put("type", "deleteRecruit");
-            message.put("payload", recruitIdx);
-
-            simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
-
-            sendLeaveChatNotice(recruitIdx, realUser);
+            // 방 폭파 소켓 발송 로직 교체
+            eventPublisher.publishEvent(new RecruitEvents.DeletedEvent(recruitIdx));
 
             return true;
 
@@ -222,85 +182,20 @@ public class RecruitService {
             throw new BaseException(BaseResponseStatus.ALREADY_CALLED);
         }
 
-        // 꽉 찬 방(FULL)에서 누군가 나가는 경우 다시 누군가 들어올 수 있게 모집 중(RECRUITING)으로 변경
-        if (recruit.getStatus() == RecruitStatus.FULL) {
-            recruit.setStatus(RecruitStatus.RECRUITING);
-        }
-
         // 모집 참여 취소로 상태 변경
-        participation.setStatus("CANCELED");
+        participation.cancel();
 
         // 모집글 내부 인원 감소
-        recruit.decreaseCapacity();
+        recruit.removeParticipant();
 
         // 유저 상태 다시 IDLE로 변경
-        realUser.setStatus("IDLE");
+        realUser.changeToIdle();
 
-        // 변경된 모집글 정보를 소켓으로 전송
-        RecruitDto.ListRes updatedDto = RecruitDto.ListRes.from(recruit);
+        eventPublisher.publishEvent(new RecruitEvents.UpdatedEvent(RecruitDto.ListRes.from(recruit)));
 
-        Map<String, Object> message = new HashMap<>();
-        message.put("type", "updateRecruit");
-        message.put("payload", updatedDto);
-
-        simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
-
-        sendLeaveChatNotice(recruitIdx, realUser);
+        // 퇴장 이벤트 발행
+        eventPublisher.publishEvent(new RecruitEvents.UserLeftEvent(recruitIdx, realUser.getIdx(), realUser.getName()));
 
         return true;
-    }
-
-    private void sendLeaveChatNotice(Long recruitIdx, User user) {
-        Map<String, Object> payload = new HashMap<>();
-        payload.put("type", "leave");
-        payload.put("recruitId", recruitIdx);
-        payload.put("senderId", user.getIdx());
-        payload.put("senderName", user.getNickname());
-        payload.put("contents", user.getNickname() + "님이 나갔습니다.");
-
-        simpMessagingTemplate.convertAndSend("/topic/chat/" + recruitIdx, payload);
-    }
-
-    // 60초(1분)마다 실행
-    @Scheduled(cron = "0 * * * * *")
-    @Transactional
-    public void recruitTimeCheckScheduler() {
-        LocalDateTime now = LocalDateTime.now();
-
-        // 출발 시간이 지났고, 인원이 꽉 찬(FULL) 방 찾기
-        List<Recruit> readyToCallList = recruitRepository.findReadyToCall(now);
-
-        for (Recruit r : readyToCallList) {
-            // 다음 1분 뒤에 또 호출하는 것 방지
-            r.setStatus(RecruitStatus.CALLING);
-            // Call DB 저장
-            callService.createCallFromRecruit(r);
-        }
-
-        // 트랜잭션 커밋 이후 소켓 전송 (저장 실패 시 소켓이 안 나가도록 분리)
-        if (!readyToCallList.isEmpty()) {
-            callService.notifyNewCall();
-        }
-
-        // 출발 시간 기준 20분이 지났는데 출발하지 못한 방 찾기
-        LocalDateTime limitTime = now.minusMinutes(20);
-        List<Recruit> expiredList = recruitRepository.findExpiredRecruits(limitTime);
-
-        for (Recruit r : expiredList) {
-            // Soft Delete 처리
-            r.setStatus(RecruitStatus.END);
-
-            // 방에 있던 유저들 전부 대기 상태(IDLE)로 방출
-            r.getParticipations().forEach(p -> {
-                p.getUser().setStatus("IDLE");
-                p.setStatus("CANCELED");
-            });
-
-            // 소켓으로 해당 방이 폭파되었음을 클라이언트에 알림
-            Map<String, Object> message = new HashMap<>();
-            message.put("type", "deleteRecruit");
-            message.put("payload", r.getIdx());
-            simpMessagingTemplate.convertAndSend("/topic/all-calls", message);
-        }
     }
 }

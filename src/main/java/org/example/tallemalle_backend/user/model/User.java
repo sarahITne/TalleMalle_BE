@@ -60,11 +60,10 @@ public class User extends BaseEntity {
     @OneToMany(mappedBy = "user")
     private List<Participation> participations = new ArrayList<>();
 
-    @Setter
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     @Column(nullable = false, length = 20)
-    @ColumnDefault(value = "'IDLE'")
-    private String status = "IDLE";
+    private UserStatus status = UserStatus.IDLE;
 
     @Setter
     @Builder.Default
@@ -88,5 +87,17 @@ public class User extends BaseEntity {
         this.gender = gender;
         this.role = "ROLE_USER";   // 권한 승격
         this.enable = true;      // 계정 활성화
+    }
+
+    public void changeToOwner() {
+        this.status = UserStatus.OWNER;
+    }
+
+    public void changeToJoined() {
+        this.status = UserStatus.JOINED;
+    }
+
+    public void changeToIdle() {
+        this.status = UserStatus.IDLE;
     }
 }

@@ -67,7 +67,7 @@ public class RecruitDto {
                     .idx(entity.getIdx())
                     .ownerId(entity.getOwner().getIdx())
                     .participationList(entity.getParticipations().stream()
-                            .filter(p -> "ACTIVE".equals(p.getStatus()))
+                            .filter(p -> p.isActive())
                             .map(ParticipationDto.ReadRes::from)
                             .toList())
                     .description(entity.getDescription())

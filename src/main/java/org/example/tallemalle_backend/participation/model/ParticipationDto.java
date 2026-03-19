@@ -9,13 +9,13 @@ public class ParticipationDto {
     @Builder
     public static class ReadRes {
         private Long idx;
-        private Long useridx;
-        private String status;
+        private Long userIdx;
+        private ParticipationStatus status;
 
         public static ReadRes from(Participation entity) {
             return ReadRes.builder()
                     .idx(entity.getIdx())
-                    .useridx(entity.getUser().getIdx())
+                    .userIdx(entity.getUser().getIdx())
                     .status(entity.getStatus())
                     .build();
         }
