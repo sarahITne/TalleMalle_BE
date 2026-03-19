@@ -1,5 +1,7 @@
 package org.example.tallemalle_backend.driver.call;
 
+import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
+import org.example.tallemalle_backend.driver.auth.model.Driver;
 import org.example.tallemalle_backend.notification.NotificationService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +25,7 @@ public class CallService {
     private final KakaoMobilityService kakaoMobilityService;
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final NotificationService notificationService;
+    private final DriverUserRepository driverUserRepository;
 
 
     public List<CallDto.ListRes> list() {
@@ -67,6 +70,23 @@ public class CallService {
         }
 
         call.accept(driverIdx);
+
+        // Notification에 알림 저장 로직
+        Recruit recruit = call.getRecruit();
+        Driver driver = driverUserRepository.findById(driverIdx).orElseThrow();
+        String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 운행에 " + driver.getName() + " 기사님이 배정되었습니다.";
+
+        // 참여 중(ACTIVE)인 모든 유저에게 알림 보내기
+        for (Participation participation : recruit.getParticipations()) {
+            if (participation.isActive()) {
+                notificationService.createNotification(
+                        participation.getUser(),
+                        "matching",
+                        "운행 확정",
+                        notificationContents
+                );
+            }
+        }
     }
 
     @Transactional
