@@ -62,9 +62,6 @@ public class User extends BaseEntity {
 
     @Builder.Default
     private String customerKey = UUID.randomUUID().toString();
-
-    @Setter
-    private Long defaultBillingIdx;
   
     @OneToOne(fetch = FetchType.LAZY)
     @Setter
