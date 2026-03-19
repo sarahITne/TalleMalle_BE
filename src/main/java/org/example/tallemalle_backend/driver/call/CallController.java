@@ -41,6 +41,13 @@ public class CallController {
         return ResponseEntity.ok("콜 수락");
     }
 
+    @PatchMapping("/driving/{callIdx}")
+    public ResponseEntity driving(@PathVariable Long callIdx, @AuthenticationPrincipal AuthDriverDetails driver){
+        Long driverIdx = driver.getIdx();
+        callService.startDrivingCall(callIdx, driverIdx);
+        return ResponseEntity.ok("운행 시작");
+    }
+
     @PatchMapping("/complete/{callIdx}")
     public ResponseEntity complete(@PathVariable Long callIdx, @AuthenticationPrincipal AuthDriverDetails driver){
         Long driverIdx = driver.getIdx();

@@ -23,5 +23,8 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
     Optional<Call> findByDriverIdxAndStatus(Long driverIdx, CallStatus status);
 
+    @Query("SELECT c FROM Call c WHERE c.driverIdx = :driverIdx AND c.status IN :statuses")
+    Optional<Call> findByDriverIdxAndStatusIn(@Param("driverIdx") Long driverIdx, @Param("statuses") List<CallStatus> statuses);
+
     List<Call> findAllByDriverIdxAndStatus(Long driverIdx, CallStatus status);
 }
