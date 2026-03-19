@@ -1,5 +1,6 @@
 package org.example.tallemalle_backend.driver.call;
 
+import org.example.tallemalle_backend.notification.NotificationService;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.infrastructure.KakaoMobilityService;
@@ -8,6 +9,7 @@ import org.example.tallemalle_backend.driver.call.model.CallDto;
 import org.example.tallemalle_backend.driver.call.model.CallStatus;
 import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
 import org.example.tallemalle_backend.recruit.model.Recruit;
+import org.example.tallemalle_backend.participation.model.Participation;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,7 @@ public class CallService {
     private final CallRepository callRepository;
     private final KakaoMobilityService kakaoMobilityService;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final NotificationService notificationService;
 
 
     public List<CallDto.ListRes> list() {
@@ -76,6 +79,22 @@ public class CallService {
         }
 
         call.complete();
+
+        // Notification에 알림 저장 로직
+        Recruit recruit = call.getRecruit();
+        String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 운행이 종료되었습니다!";
+
+        // 참여 중(ACTIVE)인 모든 유저에게 알림 보내기
+        for (Participation participation : recruit.getParticipations()) {
+            if (participation.isActive()) {
+                notificationService.createNotification(
+                        participation.getUser(),
+                        "matching",
+                        "운행 종료",
+                        notificationContents
+                );
+            }
+        }
     }
 
     public List<CallDto.HistoryRes> getHistory(Long driverIdx) {
