@@ -2,6 +2,7 @@ package org.example.tallemalle_backend.config.interceptor;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -34,7 +35,7 @@ public class StompSubscriptionInterceptor implements ChannelInterceptor {
             if (recruitId != null) {
                 AuthUserDetails user = resolveUser(accessor);
                 boolean isParticipant = participationRepository
-                        .existsByRecruit_IdxAndUser_IdxAndStatus(recruitId, user.getIdx(), "ACTIVE");
+                        .existsByRecruit_IdxAndUser_IdxAndStatus(recruitId, user.getIdx(), ParticipationStatus.ACTIVE);
                 if (!isParticipant) {
                     throw new IllegalArgumentException("채팅방에 참여하지 않은 사용자입니다.");
                 }

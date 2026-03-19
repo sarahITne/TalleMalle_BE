@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.recruit.event;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.notification.NotificationService;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -46,8 +47,7 @@ public class RecruitEventListener {
     public void handleRecruitFull(RecruitEvents.FullEvent event) {
         String notificationContents = event.getStartPointName() + " → " + event.getDestPointName() + " 모집 인원이 다 차 모집이 확정되었습니다!";
 
-        participationRepository.findAllByRecruit_Idx(event.getRecruitIdx()).stream()
-                .filter(p -> "ACTIVE".equals(p.getStatus()))
+        participationRepository.findAllByRecruit_IdxAndStatus(event.getRecruitIdx(), ParticipationStatus.ACTIVE).stream()
                 .forEach(p -> notificationService.createNotification(
                         p.getUser(),
                         "matching",
