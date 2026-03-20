@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.UserDto;
 import org.example.tallemalle_backend.utils.JwtUtil;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +26,12 @@ public class UserController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
+    @Value("${app.cookie-domain}")
+    private String cookieDomain;
+
+    @Value("${app.front-url}")
+    private String frontUrl;
 
     // 회원 가입
     @PostMapping("/signup")
@@ -99,7 +108,7 @@ public class UserController {
         // 인증 성공하면 프론트로 리다이렉트
         return ResponseEntity
                 .status(HttpStatus.MOVED_PERMANENTLY)
-                .location(URI.create("http://localhost:5173/email/verify-success"))
+                .location(URI.create(frontUrl + "/email/verify-success"))
                 .build();
     }
 
@@ -130,9 +139,19 @@ public class UserController {
 
         if(user != null) {
             String jwt = jwtUtil.createToken(user);
+
+            ResponseCookie cookie = ResponseCookie.from("ATOKEN", jwt)
+                    .path("/")
+                    .httpOnly(true)       // JS에서 쿠키 탈취 불가 (보안)
+                    .secure(true)         // HTTPS 환경에서만 전송 (현재 yml에 ssl: true 니까 true로 설정)
+                    .sameSite("None")     // 프론트와 백엔드 도메인이 다를 때 필수 (CORS)
+                    .domain(cookieDomain) // yml에서 주입받은 도메인
+                    .maxAge(60 * 60 * 24) // 쿠키 만료 시간 (예: 하루)
+                    .build();
+
             return ResponseEntity.ok()
-                    .header("Set-Cookie", "ATOKEN=" + jwt + "; path=/")   // JWT 토큰을 헤더로 설정해서 응답 (쿠키)
-                    .body(UserDto.LoginRes.from(user));  // 응답 결과로 로그인한 사용자 정보 같이 반환
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(UserDto.LoginRes.from(user));
         }
 
         return ResponseEntity.ok("로그인 실패");
