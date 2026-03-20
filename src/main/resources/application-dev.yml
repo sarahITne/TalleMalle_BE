@@ -1,0 +1,112 @@
+jwt:
+  secret: ${JWT_SECRET}
+  expire: ${JWT_EXPIRE}
+
+project:
+  upload:
+    path: ${UPLOAD_PATH}
+
+  payment:
+    toss: ${TOSS_SECRET_KEY}
+
+  aes:
+    key: ${AES_KEY}
+
+app:
+  front-url: ${FRONT_URL}
+  cookie-domain: ${COOKIE_DOMAIN}
+  api-url: ${API_URL}
+
+server:
+  port: 8080
+  error:
+    whitelabel:
+      enabled: false  # 기본 whitelabel 에러 페이지 비활성화
+    path: /error
+  ssl:
+    enabled: false # http 환경에서 개발하려면 false, https 환경에서 개별하려면 true
+    key-store: "keystore.p12"
+    key-store-type: "PKCS12"
+    key-store-password: ${SSL_KEY_PASS}
+
+spring:
+  application:
+    name: tallemalle_backend
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            redirect-uri: ${GOOGLE_REDIRECT_URI}
+            scope:
+              - email
+              - profile
+          kakao:
+            client-id: ${KAKAO_CLIENT_ID}
+            client-secret: ${KAKAO_CLIENT_SECRET}
+            client-name: kakao
+            redirect-uri: ${KAKAO_REDIRECT_URI}
+            authorization-grant-type: authorization_code  # 카카오 문서 보면 이렇게 지정하라고 함
+            scope:
+              - profile_nickname   # 받아올 항목
+            client-authentication-method: client_secret_post  # 통신 방식
+        provider:
+          kakao:
+            authorization-uri: https://kauth.kakao.com/oauth/authorize  # 인가 코드 받기 요청 uri
+            token-uri: https://kauth.kakao.com/oauth/token    # 토큰 받기 요청 uri
+            user-info-uri: https://kapi.kakao.com/v2/user/me  # 사용자 정보 조회하기 요청 uri
+            user-name-attribute: id
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_ADDR}
+    password: ${MAIL_PASS}
+    properties:
+      mail:
+        smtp:
+          starttls:
+            enable: true
+            required : true
+          auth: true
+          timeout: 5000
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDBDialect
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      s3:
+        bucket: bbsso
+      region:
+        static: ap-northeast-2
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.springframework.security: debug
+    org.hibernate.orm.jdbc.bind: trace
+
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
+
+portone:
+  api:
+    secret: ${PORTONE_SECRET_API}

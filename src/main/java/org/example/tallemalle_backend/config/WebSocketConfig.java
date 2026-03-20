@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.config.interceptor.JwtHandshakeInterceptor;
 import org.example.tallemalle_backend.config.interceptor.StompSubscriptionInterceptor;
 import org.example.tallemalle_backend.config.websocket.WebSocketHandler;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.messaging.simp.config.ChannelRegistration;
@@ -17,11 +18,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     private final JwtHandshakeInterceptor jwtHandshakeInterceptor;
     private final StompSubscriptionInterceptor stompSubscriptionInterceptor;
 
+    @Value("${app.front-url}")
+    private String frontUrl;
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
                 .addInterceptors(jwtHandshakeInterceptor)
-                .setAllowedOrigins("http://localhost:5173"); // 정확한 프론트엔드 주소 명시 TODO: 배포할 때 바꿔야 함
+                .setAllowedOriginPatterns(frontUrl); // 정확한 프론트엔드 주소 명시
     }
 
     @Override

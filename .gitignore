@@ -38,7 +38,11 @@ out/
 
 .env
 env
+.env-dev
+.env-prod
 .env2
 
 # Local Deployment Script
 local_deploy.sh
+
+keystore.p12

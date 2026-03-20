@@ -6,6 +6,7 @@ import org.example.tallemalle_backend.config.filter.JwtFilter;
 import org.example.tallemalle_backend.config.oauth2.OAuth2AuthenticationSuccessHandler;
 import org.example.tallemalle_backend.config.oauth2.OAuth2AuthorizationRequestRepository;
 import org.example.tallemalle_backend.user.OAuth2UserService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -32,6 +33,9 @@ public class SecurityConfig {
     private final OAuth2UserService oAuth2UserService;  // 소셜 로그인 관련 Service 클래스
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthorizationRequestRepository oAuth2AuthorizationRequestRepository;
+
+    @Value("${app.front-url}")
+    private String frontUrl;
 
     // 비밀번호 인코딩을 위한 객체
     @Bean
@@ -98,7 +102,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // 프론트엔드 주소
+        configuration.setAllowedOrigins(List.of(frontUrl)); // 프론트엔드 주소
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
