@@ -26,10 +26,10 @@ public class WebPushService {
     private final PushSubscriptionRepository pushSubscriptionRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @Value("${VAPID_PUBLIC_KEY}")
+    @Value("${webpush.vapid.public-key}")
     private String publicKey;
 
-    @Value("${VAPID_PRIVATE_KEY}")
+    @Value("${webpush.vapid.private-key}")
     private String privateKey;
 
     @PostConstruct
@@ -41,6 +41,11 @@ public class WebPushService {
 
     public void notifyRoom(Long recruitId, User sender, String contents) {
         try {
+            if (publicKey == null || publicKey.isBlank() || privateKey == null || privateKey.isBlank()) {
+                log.info("웹푸시 비활성화: VAPID 키가 설정되지 않았습니다.");
+                return;
+            }
+
             List<Long> userIds = participationRepository.findAllByRecruit_IdxAndStatus(recruitId, ParticipationStatus.ACTIVE)
                     .stream()
                     .map(p -> p.getUser().getIdx())

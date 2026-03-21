@@ -131,3 +131,8 @@ kakao:
 portone:
   api:
     secret: ${PORTONE_SECRET_API}
+
+webpush:
+  vapid:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}
