@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.utils.JwtUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,12 @@ import java.io.IOException;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;
 
+    @Value("${app.front-url}")
+    private String frontUrl;
+
+    @Value("${app.cookie-domain}")
+    private String cookieDomain;
+
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         System.out.println("OAuth 2.0 로그인 성공");
@@ -34,7 +41,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         String role = user.getAuthorities().iterator().next().getAuthority();
 
         // 로그인 성공 시 프론트엔드로 리다이렉트
-        String redirectUrl = UriComponentsBuilder.fromUriString("http://localhost:5173/social/success")
+        String redirectUrl = UriComponentsBuilder.fromUriString(frontUrl + "/social/success")
                 .queryParam("idx", user.getIdx())
                 .queryParam("email", user.getEmail())
                 .queryParam("name", user.getName())

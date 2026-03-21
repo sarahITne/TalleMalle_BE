@@ -44,7 +44,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok'
 
     // --- env 관련 ---
-    implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
     // --- AWS S3 파일 업로드 관련 ---
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3:3.4.2'

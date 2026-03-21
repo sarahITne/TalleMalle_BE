@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.UserDto;
 import org.example.tallemalle_backend.utils.JwtUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,6 +24,12 @@ public class UserController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
+
+    @Value("${app.cookie-domain}")
+    private String cookieDomain;
+
+    @Value("${app.front-url}")
+    private String frontUrl;
 
     // 회원 가입
     @PostMapping("/signup")
@@ -99,7 +106,7 @@ public class UserController {
         // 인증 성공하면 프론트로 리다이렉트
         return ResponseEntity
                 .status(HttpStatus.MOVED_PERMANENTLY)
-                .location(URI.create("http://localhost:5173/email/verify-success"))
+                .location(URI.create(frontUrl + "/email/verify-success"))
                 .build();
     }
 
