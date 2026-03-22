@@ -17,8 +17,8 @@ app:
   cookie:
     domain: ${COOKIE_DOMAIN}  # 예: tallemalle.com 또는 192.168.x.x
     max-age: 86400            # 하루 (쿠키 삭제 시간)
-    secure: false              # HTTPS(ssl) 환경 X
-    same-site: "Lax"         # 개발 환경에서는 포트 차이 허용
+    secure: false             # HTTPS(ssl) 환경 X
+    same-site: "Lax"          # 개발 환경에서는 포트 차이 허용
   front-url: ${FRONT_URL}
   api-url: ${API_URL}
 

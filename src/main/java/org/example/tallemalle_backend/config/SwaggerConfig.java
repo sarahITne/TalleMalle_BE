@@ -25,7 +25,7 @@ public class SwaggerConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("탈래말래 API 명세서")
-                        .description("탈래말래 프로젝트의 실시간 택시/카풀 매칭 백엔드 API 문서입니다.")
+                        .description("탈래말래 프로젝트의 실시간 택시 동승 매칭 백엔드 API 문서입니다.")
                         .version("1.0.0"))
                 .addSecurityItem(securityRequirement)
                 .components(components);
