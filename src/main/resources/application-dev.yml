@@ -13,8 +13,12 @@ project:
     key: ${AES_KEY}
 
 app:
+  cookie:
+    domain: ${COOKIE_DOMAIN}  # 예: tallemalle.com 또는 192.168.x.x
+    max-age: 86400            # 하루 (쿠키 삭제 시간)
+    secure: false              # HTTPS(ssl) 환경 X
+    same-site: "Lax"         # 개발 환경에서는 포트 차이 허용
   front-url: ${FRONT_URL}
-  cookie-domain: ${COOKIE_DOMAIN}
   api-url: ${API_URL}
 
 server:
@@ -32,6 +36,11 @@ server:
 spring:
   application:
     name: tallemalle_backend
+
+  config:
+    import:
+      - optional:file:.env[.properties]   # 프로필이 'dev'일 때, .env를 읽게 설정
+
   security:
     oauth2:
       client:
@@ -102,6 +111,8 @@ logging:
     org.hibernate.SQL: debug
     org.springframework.security: debug
     org.hibernate.orm.jdbc.bind: trace
+    org.springframework.security.web.access.intercept.AuthorizationFilter: trace
+    org.springframework.web.cors.CorsFilter: debug
 
 kakao:
   api:

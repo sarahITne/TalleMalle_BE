@@ -101,8 +101,10 @@ public class SecurityConfig {
     // CORS 설정 정보
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        System.out.println("====== [CHECK] Configured Front URL: '" + frontUrl + "' ======");
+
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(frontUrl)); // 프론트엔드 주소
+        configuration.setAllowedOriginPatterns(List.of(frontUrl)); // 프론트엔드 주소
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
