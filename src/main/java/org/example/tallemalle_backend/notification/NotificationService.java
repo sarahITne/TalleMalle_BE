@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -42,12 +43,10 @@ public class NotificationService {
         return NotificationDto.ReadOnlyRes.from(result);
     }
 
+    // Refactor : @Modifying 쿼리가 같은 트랜잭션에서 실행되도록 함
+    @Transactional
     public void readAll(AuthUserDetails user) {
-        List<Notification> entities = notificationRepository.findAllByUserIdx(user.getIdx());
-        for(Notification entity : entities){
-            entity.setRead(true);
-            notificationRepository.save(entity);
-        }
+        notificationRepository.markAllReadByUserIdx(user.getIdx());
     }
 
     public void createNotification(User user, String type, String title, String contents) {
