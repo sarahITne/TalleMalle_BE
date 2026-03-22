@@ -2,6 +2,7 @@ package org.example.tallemalle_backend.recruit;
 
 import jakarta.persistence.LockModeType;
 import org.example.tallemalle_backend.recruit.model.Recruit;
+import org.example.tallemalle_backend.recruit.model.RecruitStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
@@ -26,10 +27,10 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
     Optional<Recruit> findByIdForUpdate(@Param("idx") Long idx);
 
     // 시간 다 되고 인원이 꽉 찬 방 찾기 (FULL 상태이면서 출발 시간이 현재 이전)
-    @Query("SELECT r FROM Recruit r WHERE r.status = 'FULL' AND r.departureTime <= :now")
-    List<Recruit> findReadyToCall(@Param("now") LocalDateTime now);
+    @Query("SELECT r FROM Recruit r WHERE r.status = :status AND r.departureTime <= :now")
+    List<Recruit> findReadyToCall(@Param("status") RecruitStatus status, @Param("now") LocalDateTime now);
 
-    // 출발 시간 20분 초과한 미출발 방 찾기 (RECRUITING, FULL만 — CALLING은 운행 진행 중이므로 제외)
-    @Query("SELECT r FROM Recruit r WHERE r.status IN ('RECRUITING', 'FULL', 'CALLING') AND r.departureTime <= :limitTime")
-    List<Recruit> findExpiredRecruits(@Param("limitTime") LocalDateTime limitTime);
+    // 출발 시간 20분 초과한 미출발 방 찾기
+    @Query("SELECT r FROM Recruit r WHERE r.status IN :statuses AND r.departureTime <= :limitTime")
+    List<Recruit> findExpiredRecruits(@Param("statuses") List<RecruitStatus> statuses, @Param("limitTime") LocalDateTime limitTime);
 }

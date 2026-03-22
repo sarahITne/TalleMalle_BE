@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @Component
@@ -25,10 +26,10 @@ public class RecruitScheduler {
     @Scheduled(cron = "0 * * * * *")
     @Transactional
     public void recruitTimeCheckScheduler() {
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
 
         // 출발 시간이 지났고, 인원이 꽉 찬(FULL) 방 찾기
-        List<Recruit> readyToCallList = recruitRepository.findReadyToCall(now);
+        List<Recruit> readyToCallList = recruitRepository.findReadyToCall(RecruitStatus.FULL, now);
 
         for (Recruit r : readyToCallList) {
             // 다음 1분 뒤에 또 호출하는 것 방지
@@ -46,8 +47,9 @@ public class RecruitScheduler {
         }
 
         // 출발 시간 기준 20분이 지났는데 출발하지 못한 방 찾기
-        LocalDateTime limitTime = now.minusMinutes(20);
-        List<Recruit> expiredList = recruitRepository.findExpiredRecruits(limitTime);
+        LocalDateTime limitTime = now.minusMinutes(12);
+        List<RecruitStatus> targetStatuses = List.of(RecruitStatus.RECRUITING, RecruitStatus.FULL, RecruitStatus.CALLING);
+        List<Recruit> expiredList = recruitRepository.findExpiredRecruits(targetStatuses, limitTime);
 
         for (Recruit r : expiredList) {
             // Soft Delete 처리
