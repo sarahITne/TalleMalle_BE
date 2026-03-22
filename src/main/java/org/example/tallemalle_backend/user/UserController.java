@@ -7,6 +7,7 @@ import org.example.tallemalle_backend.user.model.UserDto;
 import org.example.tallemalle_backend.utils.CookieUtil;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;

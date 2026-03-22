@@ -22,6 +22,21 @@ app:
   front-url: ${FRONT_URL}       # 예: https://tallemalle.com 또는 http://192.168.x.x:5173
   api-url: ${API_URL}
 
+# Jaeger 추가 시 주석 헤재 ======================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health, info
+  metrics:
+    tags:
+      application: ${spring.application.name}
+#  tracing:
+#    sampling:
+#      probability: 1.0  # 모든 요청을 트래킹 (데모용, 운영은 0.1 권장)
+#  otlp:
+#    tracing:
+#      endpoint: http://<예거-서버-IP>:4318/v1/traces # 예거 수집 서버 주소
 
 server:
   port: 443
@@ -125,3 +140,8 @@ kakao:
 portone:
   api:
     secret: ${PORTONE_SECRET_API}
+
+webpush:
+  vapid:
+    public-key: ${VAPID_PUBLIC_KEY:}
+    private-key: ${VAPID_PRIVATE_KEY:}

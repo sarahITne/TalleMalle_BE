@@ -9,6 +9,7 @@ import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.utils.CookieUtil;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -33,7 +34,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         System.out.println("OAuth 2.0 로그인 성공");
 
         AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();
-
         String jwt = jwtUtil.createToken(user);
 
         // 쿠키 세팅 : CookieUtil 클래스에 구현해놓은 메소드 이용
