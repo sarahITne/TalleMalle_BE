@@ -38,6 +38,7 @@ public class NotificationService {
         return entitiesTop5.stream().map(NotificationDto.ReadTop5Res::from).toList();
     }
 
+    @Transactional
     public NotificationDto.ReadOnlyRes readOnly(AuthUserDetails user, Long idx) {
         Notification entity = notificationRepository.findByUserIdxAndIdx(user.getIdx(), idx).orElseThrow();
         entity.setRead(true);

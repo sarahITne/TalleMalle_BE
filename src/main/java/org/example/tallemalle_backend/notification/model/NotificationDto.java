@@ -1,10 +1,9 @@
 package org.example.tallemalle_backend.notification.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Locked;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Slice;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +36,7 @@ public class NotificationDto {
         private String title;
         private String contents;
         private String type;
+        @JsonProperty("isRead")
         private boolean isRead;
 
         public static ReadRes from(Notification entity) {
@@ -55,6 +55,7 @@ public class NotificationDto {
     public static class ReadTop5Res{
         private Long idx;
         private String title;
+        @JsonProperty("isRead")
         private boolean isRead;
         private LocalDateTime created_at;
 
@@ -72,6 +73,7 @@ public class NotificationDto {
     @Builder
     public static class ReadOnlyRes{
         private Long idx;
+        @JsonProperty("isRead")
         private boolean isRead;
 
         public static ReadOnlyRes from(Notification entity){

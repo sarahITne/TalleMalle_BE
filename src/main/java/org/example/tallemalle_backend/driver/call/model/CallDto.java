@@ -7,6 +7,7 @@ import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.participation.model.ParticipationStatus;
 import org.example.tallemalle_backend.user.model.User;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -145,10 +146,18 @@ public class CallDto {
         private Long driverIdx;
         private String startLocation;
         private String endLocation;
+        private Double startLat;
+        private Double startLng;
+        private Double endLat;
+        private Double endLng;
         private Double distance;
         private Integer duration;
         private int estimatedFare;
         private CallStatus status;
+
+        private static Double coord(BigDecimal v) {
+            return v == null ? null : v.doubleValue();
+        }
 
         public static DetailRes from(Call entity) {
             return DetailRes.builder()
@@ -163,6 +172,10 @@ public class CallDto {
                     .driverIdx(entity.getDriverIdx())
                     .startLocation(entity.getStartLocation())
                     .endLocation(entity.getEndLocation())
+                    .startLat(coord(entity.getStartLat()))
+                    .startLng(coord(entity.getStartLng()))
+                    .endLat(coord(entity.getEndLat()))
+                    .endLng(coord(entity.getEndLng()))
                     .status(entity.getStatus())
                     .build();
         }
@@ -180,6 +193,10 @@ public class CallDto {
                     .driverIdx(entity.getDriverIdx())
                     .startLocation(entity.getStartLocation())
                     .endLocation(entity.getEndLocation())
+                    .startLat(coord(entity.getStartLat()))
+                    .startLng(coord(entity.getStartLng()))
+                    .endLat(coord(entity.getEndLat()))
+                    .endLng(coord(entity.getEndLng()))
                     .distance(entity.getEstimatedDistance())
                     .duration((int) entity.getEstimatedDuration())
                     .estimatedFare(estimatedFare)
@@ -200,6 +217,10 @@ public class CallDto {
                     .driverIdx(call.getDriverIdx())
                     .startLocation(call.getStartLocation())
                     .endLocation(call.getEndLocation())
+                    .startLat(coord(call.getStartLat()))
+                    .startLng(coord(call.getStartLng()))
+                    .endLat(coord(call.getEndLat()))
+                    .endLng(coord(call.getEndLng()))
                     .status(call.getStatus())
                     .distance(direction.getDistance() / 1000.0) // m -> km
                     .duration(direction.getDuration() / 60)     // 초 -> 분
