@@ -34,14 +34,14 @@ public class CookieUtil {
     }
 
     // 로그아웃 시 쿠키 삭제 (Max-Age를 0으로 설정)
-    public ResponseCookie removeAccessTokenCookie() {
+    public ResponseCookie removeCookie() {
         return ResponseCookie.from("ATOKEN", "")
                 .path("/")
                 .httpOnly(true)
                 .secure(isSecure)
                 .sameSite(sameSite)
                 .domain(cookieDomain)
-                .maxAge(0) // 핵심: 즉시 삭제
+                .maxAge(0) // 핵심: maxAge를 0으로 설정 : 즉시 삭제
                 .build();
     }
 }
