@@ -125,6 +125,51 @@ class ChatServiceTest {
         assertEquals(recruit, savedRead.getRecruit());
     }
 
+    @Test
+    void unreadRecruitIds() {
+        // given: 참여중 방 2개, 한 방만 읽지 않은 메시지 존재
+        Long userId = 1L;
+        AuthUserDetails authUser = AuthUserDetails.builder().idx(userId).build();
+        User user = buildUser(userId, "sender", "nick");
+
+        Recruit recruit1 = buildRecruit(10L, user);
+        Recruit recruit2 = buildRecruit(20L, user);
+
+        Participation p1 = buildParticipation(1L, user, recruit1);
+        Participation p2 = buildParticipation(2L, user, recruit2);
+
+        when(participationRepository.findAllByUser_IdxAndStatus(userId, ParticipationStatus.ACTIVE))
+                .thenReturn(List.of(p1, p2));
+
+        ChatRead read = ChatRead.builder()
+                .user(user)
+                .recruit(recruit1)
+                .lastReadChatIdx(5L)
+                .build();
+
+        when(chatReadRepository.findByUser_IdxAndRecruit_Idx(userId, 10L)).thenReturn(Optional.of(read));
+        when(chatReadRepository.findByUser_IdxAndRecruit_Idx(userId, 20L)).thenReturn(Optional.empty());
+        when(chatRepository.existsByRecruit_IdxAndIdxGreaterThanAndUser_IdxNot(10L, 5L, userId)).thenReturn(true);
+        when(chatRepository.existsByRecruit_IdxAndIdxGreaterThanAndUser_IdxNot(20L, 0L, userId)).thenReturn(false);
+
+        // when
+        List<Long> result = chatService.unreadRecruitIds(authUser);
+        // then: 읽지 않은 방만 반환
+        assertEquals(List.of(10L), result);
+
+        // given: 참여중 방이 없는 경우
+        reset(participationRepository, chatReadRepository, chatRepository);
+        when(participationRepository.findAllByUser_IdxAndStatus(userId, ParticipationStatus.ACTIVE))
+                .thenReturn(List.of());
+
+        // when
+        List<Long> empty = chatService.unreadRecruitIds(authUser);
+        // then: 빈 리스트 반환 + 추가 조회 없음
+        assertTrue(empty.isEmpty());
+        verifyNoInteractions(chatReadRepository, chatRepository);
+    }
+
+
     private User buildUser(Long id, String name, String nickname) {
         User user = User.builder()
                 .idx(id)
@@ -174,6 +219,15 @@ class ChatServiceTest {
                 .type(type)
                 .user(user)
                 .recruit(recruit)
+                .build();
+    }
+
+    private Participation buildParticipation(Long id, User user, Recruit recruit) {
+        return Participation.builder()
+                .idx(id)
+                .user(user)
+                .recruit(recruit)
+                .status(ParticipationStatus.ACTIVE)
                 .build();
     }
 }
