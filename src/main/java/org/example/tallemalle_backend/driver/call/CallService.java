@@ -11,13 +11,17 @@ import org.example.tallemalle_backend.driver.call.model.CallDto;
 import org.example.tallemalle_backend.driver.call.model.CallStatus;
 import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
 import org.example.tallemalle_backend.recruit.model.Recruit;
+import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
+import org.example.tallemalle_backend.user.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -28,7 +32,7 @@ public class CallService {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final NotificationService notificationService;
     private final DriverUserRepository driverUserRepository;
-
+    private final ParticipationRepository participationRepository;
 
     public Page<CallDto.ListRes> list(Pageable pageable) {
         return callRepository
@@ -171,7 +175,16 @@ public class CallService {
     public CallDto.SettlementRes getSettlement(Long callIdx) {
         Call call = callRepository.findById(callIdx)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 콜입니다."));
-        return CallDto.SettlementRes.from(call);
+        Recruit recruit = call.getRecruit();
+        if (recruit == null) {
+            return CallDto.SettlementRes.from(call, List.of(), null);
+        }
+        List<Participation> billable = participationRepository.findAllByRecruit_Idx(recruit.getIdx()).stream()
+                .filter(p -> p.getStatus() != ParticipationStatus.CANCELED)
+                .sorted(Comparator.comparing(Participation::getIdx))
+                .toList();
+        User fallback = billable.isEmpty() ? recruit.getOwner() : null;
+        return CallDto.SettlementRes.from(call, billable, fallback);
     }
 
     @Transactional
