@@ -3,6 +3,7 @@ package org.example.tallemalle_backend.notification;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.notification.model.Notification;
 import org.example.tallemalle_backend.notification.model.NotificationDto;
+import org.example.tallemalle_backend.push.WebPushService;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.User;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final WebPushService webPushService;
 
     public NotificationDto.PageRes list(Long idx, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by("idx").descending());
@@ -50,7 +52,12 @@ public class NotificationService {
     }
 
     public void createNotification(User user, String type, String title, String contents) {
-        // 1. 모집 확정되면 알림 DB에 INSERT
+        createNotification(user, type, title, contents, null);
+    }
+
+
+    // @param recruitIdx 모집(채팅방) ID. {@code matching} 타입이고 값이 있으면 브라우저 Web Push도 전송
+    public void createNotification(User user, String type, String title, String contents, Long recruitIdx) {
         Notification notification = Notification.builder()
                 .user(user)
                 .type(type)
@@ -61,12 +68,15 @@ public class NotificationService {
                 .build();
         notificationRepository.save(notification);
 
-        // 2. 소켓 전송 로직
         Map<String, Object> message = new HashMap<>();
         message.put("type", "PUSH_NOTIFICATION");
         message.put("title", title);
         message.put("contents", contents);
 
         simpMessagingTemplate.convertAndSend("/topic/user/" + user.getIdx() + "/notifications", message);
+
+        if ("matching".equals(type) && recruitIdx != null) {
+            webPushService.notifyMatching(user.getIdx(), recruitIdx, title, contents);
+        }
     }
 }

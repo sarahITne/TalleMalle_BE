@@ -3,11 +3,13 @@ package org.example.tallemalle_backend.driver.call;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
 import org.example.tallemalle_backend.driver.call.model.CallDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,9 +18,9 @@ public class CallController {
     private final CallService callService;
 
     @GetMapping("/list")
-    public ResponseEntity list(){
-        List<CallDto.ListRes> result = callService.list();
-        return ResponseEntity.ok(result);
+    public ResponseEntity<Page<CallDto.ListRes>> list(
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(callService.list(pageable));
     }
 
     @GetMapping("/read/{callIdx}")
@@ -62,10 +64,10 @@ public class CallController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity history(@AuthenticationPrincipal AuthDriverDetails driver){
-        Long driverIdx = driver.getIdx();
-        List<CallDto.HistoryRes> result = callService.getHistory(driverIdx);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<CallDto.HistoryPageRes> history(
+            @AuthenticationPrincipal AuthDriverDetails driver,
+            @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(callService.getHistory(driver.getIdx(), pageable));
     }
 
     @PatchMapping("/cancel/{callIdx}")

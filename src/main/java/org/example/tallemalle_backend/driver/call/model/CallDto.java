@@ -48,6 +48,20 @@ public class CallDto {
         }
     }
 
+    /** 운행 이력 페이징 + 기사 전체 완료 건 예상 요금 합계 */
+    @Getter
+    @Builder
+    public static class HistoryPageRes {
+        private List<HistoryRes> content;
+        private long totalElements;
+        private int totalPages;
+        private int number;
+        private int size;
+        private boolean first;
+        private boolean last;
+        private long totalEstimatedFare;
+    }
+
     // 3. 운행 완료 정산 조회
     @Getter
     @Builder

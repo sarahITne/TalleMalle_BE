@@ -11,7 +11,13 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-@Table(name = "calls")
+@Table(
+        name = "calls",
+        indexes = {
+                @Index(name = "idx_calls_status_id", columnList = "status,id"),
+                @Index(name = "idx_calls_driver_status", columnList = "driver_idx,status,id")
+        }
+)
 public class Call {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
