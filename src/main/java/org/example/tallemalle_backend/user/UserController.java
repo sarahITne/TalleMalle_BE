@@ -150,4 +150,15 @@ public class UserController {
         return ResponseEntity.ok("로그인 실패");
     }
 
+    // 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity logout() {
+        // 로그아웃 시 ATOKEN 쿠키에서 삭제
+        ResponseCookie cookie = cookieUtil.removeCookie();
+
+        return ResponseEntity.ok()
+                .header("Set-Cookie", cookie.toString())
+                .body(Map.of("message", "로그아웃 성공."));  // 응답 결과로 로그인한 사용자 정보 같이 반환;
+    }
+
 }
