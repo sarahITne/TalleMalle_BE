@@ -45,7 +45,7 @@ public class ChatService {
 
     public List<ChatDto.ListRes> list(AuthUserDetails user, Long recruitIdx) {
         validateParticipant(user, recruitIdx);
-        List<Chat> chatList = chatRepository.findAllByRecruit_IdxOrderByIdxAsc(recruitIdx);
+        List<Chat> chatList = chatRepository.findAllByRecruitIdxWithUserProfileOrderByIdxAsc(recruitIdx);
 
         if (!chatList.isEmpty()) {
             Long lastChatIdx = chatList.get(chatList.size() - 1).getIdx();
