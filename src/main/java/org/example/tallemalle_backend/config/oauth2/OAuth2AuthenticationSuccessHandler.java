@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.example.tallemalle_backend.utils.CookieUtil;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
@@ -22,21 +23,10 @@ import java.io.IOException;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
 
     @Value("${app.front-url}")
     private String frontUrl;
-
-    @Value("${app.cookie.domain}")
-    private String cookieDomain;
-
-    @Value("${app.cookie.max-age}")
-    private long cookieMaxAge;
-
-    @Value("${app.cookie.secure}")
-    private boolean isSecure;
-
-    @Value("${app.cookie.same-site}")
-    private String sameSite;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -46,15 +36,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         String jwt = jwtUtil.createToken(user);
 
-        // ATOKEN 쿠키 생성 : 개발 환경과 배포 환경에 따라 쿠키 설정을 다르게 해야하므로 변수 사용 (yml 파일 참고)
-        ResponseCookie cookie = ResponseCookie.from("ATOKEN", jwt)
-                .path("/")
-                .httpOnly(true)
-                .domain(cookieDomain)
-                .maxAge(cookieMaxAge)
-                .secure(isSecure)
-                .sameSite(sameSite)
-                .build();
+        // 쿠키 세팅 : CookieUtil 클래스에 구현해놓은 메소드 이용
+        ResponseCookie cookie = cookieUtil.createCookie(jwt);
 
         response.addHeader("Set-Cookie", cookie.toString());
 
