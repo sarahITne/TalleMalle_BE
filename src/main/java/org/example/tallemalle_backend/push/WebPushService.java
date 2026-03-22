@@ -22,6 +22,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 public class WebPushService {
+    private static final String VAPID_MAILTO = "mailto:admin@tallemalle.local";
+
     private final ParticipationRepository participationRepository;
     private final PushSubscriptionRepository pushSubscriptionRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -39,9 +41,11 @@ public class WebPushService {
         }
     }
 
+
+    // 채팅 메시지 — 방 참여자에게 브라우저 푸시 (발신자 제외)
     public void notifyRoom(Long recruitId, User sender, String contents) {
         try {
-            if (publicKey == null || publicKey.isBlank() || privateKey == null || privateKey.isBlank()) {
+            if (!isVapidConfigured()) {
                 log.info("웹푸시 비활성화: VAPID 키가 설정되지 않았습니다.");
                 return;
             }
@@ -67,22 +71,52 @@ public class WebPushService {
                     "recruitId", recruitId
             ));
 
-            PushService pushService = new PushService(publicKey, privateKey, "mailto:admin@tallemalle.local");
-            for (PushSubscription sub : subscriptions) {
-                try {
-                    Notification notification = new Notification(
-                            sub.getEndpoint(),
-                            sub.getP256dh(),
-                            sub.getAuth(),
-                            payload
-                    );
-                    pushService.send(notification);
-                } catch (Exception ex) {
-                    log.warn("푸시 전송 실패: endpoint={}, reason={}", sub.getEndpoint(), ex.getMessage());
-                }
-            }
+            sendPayload(subscriptions, payload);
         } catch (Exception e) {
             log.warn("푸시 전송 처리 실패: recruitId={}, reason={}", recruitId, e.getMessage());
+        }
+    }
+
+
+     // Refactor : 모집·콜 알림 — 해당 유저의 구독 사이트로 푸시. 채팅과 별도
+    public void notifyMatching(Long userIdx, Long recruitId, String title, String body) {
+        try {
+            if (!isVapidConfigured()) {
+                return;
+            }
+            List<PushSubscription> subscriptions = pushSubscriptionRepository.findAllByUser_Idx(userIdx);
+            if (subscriptions.isEmpty()) {
+                return;
+            }
+            String payload = objectMapper.writeValueAsString(Map.of(
+                    "title", title,
+                    "body", body,
+                    "recruitId", recruitId
+            ));
+            sendPayload(subscriptions, payload);
+        } catch (Exception e) {
+            log.warn("매칭 푸시 전송 실패: userIdx={}, recruitId={}, reason={}", userIdx, recruitId, e.getMessage());
+        }
+    }
+
+    private boolean isVapidConfigured() {
+        return publicKey != null && !publicKey.isBlank() && privateKey != null && !privateKey.isBlank();
+    }
+
+    private void sendPayload(List<PushSubscription> subscriptions, String payload) throws Exception {
+        PushService pushService = new PushService(publicKey, privateKey, VAPID_MAILTO);
+        for (PushSubscription sub : subscriptions) {
+            try {
+                Notification notification = new Notification(
+                        sub.getEndpoint(),
+                        sub.getP256dh(),
+                        sub.getAuth(),
+                        payload
+                );
+                pushService.send(notification);
+            } catch (Exception ex) {
+                log.warn("푸시 전송 실패: endpoint={}, reason={}", sub.getEndpoint(), ex.getMessage());
+            }
         }
     }
 }

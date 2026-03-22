@@ -86,7 +86,8 @@ public class CallService {
                         participation.getUser(),
                         "matching",
                         "운행 확정",
-                        notificationContents
+                        notificationContents,
+                        recruit.getIdx()
                 );
             }
         }
@@ -113,7 +114,8 @@ public class CallService {
                         participation.getUser(),
                         "matching",
                         "운행 시작",
-                        notificationContents
+                        notificationContents,
+                        recruit.getIdx()
                 );
             }
         }
@@ -141,7 +143,8 @@ public class CallService {
                         participation.getUser(),
                         "matching",
                         "운행 종료",
-                        notificationContents
+                        notificationContents,
+                        recruit.getIdx()
                 );
             }
         }

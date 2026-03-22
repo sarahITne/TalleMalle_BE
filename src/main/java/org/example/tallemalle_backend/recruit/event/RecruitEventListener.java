@@ -52,7 +52,8 @@ public class RecruitEventListener {
                         p.getUser(),
                         "matching",
                         "모집 확정",
-                        notificationContents
+                        notificationContents,
+                        event.getRecruitIdx()
                 ));
     }
 
