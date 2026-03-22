@@ -4,7 +4,11 @@ import lombok.Builder;
 import lombok.Getter;
 import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
 import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
+import org.example.tallemalle_backend.user.model.User;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class CallDto {
@@ -78,30 +82,53 @@ public class CallDto {
         public static class ParticipantInfo {
             private String nickname;
             private String phoneNumber;
+            /** 총요금 엔빵 시 해당 인원 부담액(나머지 원 단위는 앞쪽 인원에게 배분) */
+            private int shareAmount;
         }
 
-        public static SettlementRes from(Call call) {
-            List<Participation> active = call.getRecruit() != null
-                    ? call.getRecruit().getParticipations().stream()
-                            .filter(p -> "ACTIVE".equals(p.getStatus()) || "CANCELED".equals(p.getStatus()))
-                            .toList()
-                    : List.of();
-
-            int count = active.isEmpty() ? 1 : active.size();
-            int farePerPerson = call.getEstimatedFare() / count;
-
-            List<ParticipantInfo> participants = active.stream()
-                    .map(p -> ParticipantInfo.builder()
+        /**
+         * @param billableParticipations 정산 대상(CANCELED 제외). 동일 트랜잭션에서 user/profile 지연 로딩 가능.
+         * @param fallbackPayer 참가자 행이 없을 때만(예: DB 불일치) 모집 방장 표시용
+         */
+        public static SettlementRes from(Call call, List<Participation> billableParticipations, User fallbackPayer) {
+            int totalFare = call.getEstimatedFare();
+            List<Participation> ordered = billableParticipations.stream()
+                    .sorted(Comparator.comparing(Participation::getIdx))
+                    .toList();
+            int n = ordered.size();
+            int farePerPerson;
+            List<ParticipantInfo> participants;
+            if (n > 0) {
+                int base = totalFare / n;
+                int remainder = totalFare % n;
+                farePerPerson = (int) Math.round((double) totalFare / n);
+                participants = new ArrayList<>(n);
+                for (int i = 0; i < n; i++) {
+                    Participation p = ordered.get(i);
+                    int share = base + (i < remainder ? 1 : 0);
+                    participants.add(ParticipantInfo.builder()
                             .nickname(p.getUser().getNickname())
                             .phoneNumber(p.getUser().getPhoneNumber())
-                            .build())
-                    .toList();
+                            .shareAmount(share)
+                            .build());
+                }
+            } else if (fallbackPayer != null) {
+                farePerPerson = totalFare;
+                participants = List.of(ParticipantInfo.builder()
+                        .nickname(fallbackPayer.getNickname())
+                        .phoneNumber(fallbackPayer.getPhoneNumber())
+                        .shareAmount(totalFare)
+                        .build());
+            } else {
+                farePerPerson = totalFare;
+                participants = List.of();
+            }
 
             return SettlementRes.builder()
                     .callIdx(call.getId())
                     .startLocation(call.getStartLocation())
                     .endLocation(call.getEndLocation())
-                    .totalFare(call.getEstimatedFare())
+                    .totalFare(totalFare)
                     .farePerPerson(farePerPerson)
                     .participants(participants)
                     .build();
@@ -129,7 +156,7 @@ public class CallDto {
                     .recruitIdx(entity.getRecruit() != null ? entity.getRecruit().getIdx() : null)
                     .userIdxList(entity.getRecruit() != null
                             ? entity.getRecruit().getParticipations().stream()
-                                .filter(p -> "ACTIVE".equals(p.getStatus()))
+                                .filter(p -> p.getStatus() == ParticipationStatus.ACTIVE)
                                 .map(p -> p.getUser().getIdx())
                                 .toList()
                             : List.of())
@@ -146,7 +173,7 @@ public class CallDto {
                     .recruitIdx(entity.getRecruit() != null ? entity.getRecruit().getIdx() : null)
                     .userIdxList(entity.getRecruit() != null
                             ? entity.getRecruit().getParticipations().stream()
-                                .filter(p -> "ACTIVE".equals(p.getStatus()))
+                                .filter(p -> p.getStatus() == ParticipationStatus.ACTIVE)
                                 .map(p -> p.getUser().getIdx())
                                 .toList()
                             : List.of())
@@ -166,7 +193,7 @@ public class CallDto {
                     .recruitIdx(call.getRecruit() != null ? call.getRecruit().getIdx() : null)
                     .userIdxList(call.getRecruit() != null
                             ? call.getRecruit().getParticipations().stream()
-                                .filter(p -> "ACTIVE".equals(p.getStatus()))
+                                .filter(p -> p.getStatus() == ParticipationStatus.ACTIVE)
                                 .map(p -> p.getUser().getIdx())
                                 .toList()
                             : List.of())
