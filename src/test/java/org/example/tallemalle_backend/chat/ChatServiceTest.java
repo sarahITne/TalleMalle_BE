@@ -169,6 +169,29 @@ class ChatServiceTest {
         verifyNoInteractions(chatReadRepository, chatRepository);
     }
 
+    @Test
+    void rooms() {
+        // given: 참여중 방 1개
+        Long userId = 1L;
+        AuthUserDetails authUser = AuthUserDetails.builder().idx(userId).build();
+        User user = buildUser(userId, "owner", "nick");
+        Recruit recruit = buildRecruit(10L, user);
+        Participation participation = buildParticipation(1L, user, recruit);
+
+        when(participationRepository.findAllByUser_IdxAndStatus(userId, ParticipationStatus.ACTIVE))
+                .thenReturn(List.of(participation));
+
+        // when
+        List<ChatDto.RoomRes> result = chatService.rooms(authUser);
+
+        // then: 방 DTO 매핑 확인
+        assertEquals(1, result.size());
+        ChatDto.RoomRes room = result.get(0);
+        assertEquals(10L, room.getRecruitIdx());
+        assertEquals(recruit.getStatus().name(), room.getStatus());
+        assertEquals(recruit.getStartPointName(), room.getStartPointName());
+        assertEquals(recruit.getDestPointName(), room.getDestPointName());
+    }
 
     private User buildUser(Long id, String name, String nickname) {
         User user = User.builder()
