@@ -7,6 +7,8 @@ import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.ParticipationStatus;
+import org.example.tallemalle_backend.profile.ProfileRepository;
+import org.example.tallemalle_backend.profile.data.entity.Profile;
 import org.example.tallemalle_backend.push.model.PushSubscription;
 import org.example.tallemalle_backend.user.model.User;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +19,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import java.security.Security;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +29,7 @@ public class WebPushService {
 
     private final ParticipationRepository participationRepository;
     private final PushSubscriptionRepository pushSubscriptionRepository;
+    private final ProfileRepository profileRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${webpush.vapid.public-key}")
@@ -82,6 +86,10 @@ public class WebPushService {
     public void notifyMatching(Long userIdx, Long recruitId, String title, String body) {
         try {
             if (!isVapidConfigured()) {
+                return;
+            }
+            Optional<Profile> profileOpt = profileRepository.findById(userIdx);
+            if (profileOpt.isPresent() && Boolean.FALSE.equals(profileOpt.get().getRecruitPromotionPushEnabled())) {
                 return;
             }
             List<PushSubscription> subscriptions = pushSubscriptionRepository.findAllByUser_Idx(userIdx);

@@ -2,6 +2,8 @@ package org.example.tallemalle_backend.push;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.model.BaseResponse;
+import org.example.tallemalle_backend.profile.ProfileRepository;
+import org.example.tallemalle_backend.profile.data.entity.Profile;
 import org.example.tallemalle_backend.push.model.PushSubscription;
 import org.example.tallemalle_backend.push.model.PushSubscriptionDto;
 import org.example.tallemalle_backend.user.UserRepository;
@@ -9,7 +11,10 @@ import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.User;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/push")
@@ -17,6 +22,40 @@ import org.springframework.web.bind.annotation.*;
 public class PushSubscriptionController {
     private final PushSubscriptionRepository pushSubscriptionRepository;
     private final UserRepository userRepository;
+    private final ProfileRepository profileRepository;
+
+    @GetMapping("/preferences")
+    public ResponseEntity<BaseResponse<PushSubscriptionDto.PreferencesRes>> getPreferences(
+            @AuthenticationPrincipal AuthUserDetails user) {
+        if (user == null) {
+            return ResponseEntity.status(401).body(BaseResponse.fail(org.example.tallemalle_backend.common.model.BaseResponseStatus.REQUEST_ERROR));
+        }
+        boolean enabled = true;
+        Optional<Profile> profileOpt = profileRepository.findById(user.getIdx());
+        if (profileOpt.isPresent()) {
+            enabled = !Boolean.FALSE.equals(profileOpt.get().getRecruitPromotionPushEnabled());
+        }
+        return ResponseEntity.ok(BaseResponse.success(
+                PushSubscriptionDto.PreferencesRes.builder().recruitPromotionPushEnabled(enabled).build()));
+    }
+
+    @PatchMapping("/preferences")
+    @Transactional
+    public ResponseEntity<BaseResponse<PushSubscriptionDto.PreferencesRes>> patchPreferences(
+            @AuthenticationPrincipal AuthUserDetails user,
+            @RequestBody PushSubscriptionDto.PreferencesReq req) {
+        if (user == null) {
+            return ResponseEntity.status(401).body(BaseResponse.fail(org.example.tallemalle_backend.common.model.BaseResponseStatus.REQUEST_ERROR));
+        }
+        Profile profile = profileRepository.findById(user.getIdx())
+                .orElseThrow(() -> new IllegalStateException("프로필이 없습니다."));
+        if (req.getRecruitPromotionPushEnabled() != null) {
+            profile.setRecruitPromotionPushEnabled(req.getRecruitPromotionPushEnabled());
+        }
+        boolean enabled = !Boolean.FALSE.equals(profile.getRecruitPromotionPushEnabled());
+        return ResponseEntity.ok(BaseResponse.success(
+                PushSubscriptionDto.PreferencesRes.builder().recruitPromotionPushEnabled(enabled).build()));
+    }
 
     @PostMapping("/subscribe")
     public ResponseEntity subscribe(
