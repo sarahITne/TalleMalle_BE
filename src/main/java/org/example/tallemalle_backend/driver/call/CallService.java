@@ -12,6 +12,8 @@ import org.example.tallemalle_backend.driver.call.model.CallStatus;
 import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.participation.model.Participation;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +30,10 @@ public class CallService {
     private final DriverUserRepository driverUserRepository;
 
 
-    public List<CallDto.ListRes> list() {
-        List<Call> callList = callRepository.findByStatusIn(List.of(CallStatus.WAITING, CallStatus.CANCELED));
-        return callList.stream().map(CallDto.ListRes::from).toList();
+    public Page<CallDto.ListRes> list(Pageable pageable) {
+        return callRepository
+                .findByStatusIn(List.of(CallStatus.WAITING, CallStatus.CANCELED), pageable)
+                .map(CallDto.ListRes::from);
     }
 
     public CallDto.DetailRes read(Long callIdx) {
@@ -144,9 +147,21 @@ public class CallService {
         }
     }
 
-    public List<CallDto.HistoryRes> getHistory(Long driverIdx) {
-        List<Call> callList = callRepository.findAllByDriverIdxAndStatus(driverIdx, CallStatus.COMPLETED);
-        return callList.stream().map(CallDto.HistoryRes::from).toList();
+    @Transactional(readOnly = true)
+    public CallDto.HistoryPageRes getHistory(Long driverIdx, Pageable pageable) {
+        Page<Call> page = callRepository.findAllByDriverIdxAndStatus(driverIdx, CallStatus.COMPLETED, pageable);
+        Long sum = callRepository.sumEstimatedFareByDriverIdxAndStatus(driverIdx, CallStatus.COMPLETED);
+        long totalFare = sum != null ? sum : 0L;
+        return CallDto.HistoryPageRes.builder()
+                .content(page.getContent().stream().map(CallDto.HistoryRes::from).toList())
+                .totalElements(page.getTotalElements())
+                .totalPages(page.getTotalPages())
+                .number(page.getNumber())
+                .size(page.getSize())
+                .first(page.isFirst())
+                .last(page.isLast())
+                .totalEstimatedFare(totalFare)
+                .build();
     }
 
     @Transactional(readOnly = true)
