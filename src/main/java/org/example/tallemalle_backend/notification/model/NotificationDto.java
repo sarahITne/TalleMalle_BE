@@ -38,6 +38,7 @@ public class NotificationDto {
         private String type;
         @JsonProperty("isRead")
         private boolean isRead;
+        private LocalDateTime createdAt;
 
         public static ReadRes from(Notification entity) {
             return ReadRes.builder()
@@ -46,6 +47,7 @@ public class NotificationDto {
                     .contents(entity.getContents())
                     .type(entity.getType())
                     .isRead(entity.isRead())
+                    .createdAt(entity.getCreatedAt())
                     .build();
         }
     }
