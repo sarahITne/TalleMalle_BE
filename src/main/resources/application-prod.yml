@@ -13,8 +13,13 @@ project:
     key: ${AES_KEY}
 
 app:
+  # 쿠키 관련 설정 (배포 환경 쿠키 세팅)
+  cookie:
+    domain: ${COOKIE_DOMAIN}  # 예: tallemalle.com 또는 192.168.x.x
+    max-age: 86400            # 하루 (쿠키 삭제 시간)
+    secure: true              # HTTPS(ssl) 환경 O
+    same-site: "None"         # 배포 환경에서는 프론트/백 도메인 차이 허용
   front-url: ${FRONT_URL}       # 예: https://tallemalle.com 또는 http://192.168.x.x:5173
-  cookie-domain: ${COOKIE_DOMAIN} # 예: tallemalle.com 또는 192.168.x.x
   api-url: ${API_URL}
 
 # Jaeger 추가 시 주석 헤재 ======================
@@ -48,6 +53,10 @@ server:
 spring:
   application:
     name: tallemalle_backend
+
+  config:
+    import:
+      - optional:file:.env.prod[.properties]    # 프로필이 'prod'일 때, .env.prod를 읽게 설정
 
   security:
     oauth2:

@@ -28,7 +28,12 @@ public class JwtFilter extends OncePerRequestFilter {
     // JWT 검사 제외할 URL
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
-        String path = request.getServletPath();
+        // OPTIONS 메서드는 무조건 필터 제외 (CORS 해결)
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return true;
+        }
+
+        String path = request.getRequestURI();
 
         return path.startsWith("/user/login") ||
                 path.equals("/user/signup") ||

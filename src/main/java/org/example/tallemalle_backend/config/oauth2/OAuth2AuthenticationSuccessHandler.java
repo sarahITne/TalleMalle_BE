@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.example.tallemalle_backend.utils.CookieUtil;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -23,12 +24,10 @@ import java.io.IOException;
 @Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtUtil jwtUtil;
+    private final CookieUtil cookieUtil;
 
     @Value("${app.front-url}")
     private String frontUrl;
-
-    @Value("${app.cookie-domain}")
-    private String cookieDomain;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -37,17 +36,10 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();
         String jwt = jwtUtil.createToken(user);
 
-        ResponseCookie cookie = ResponseCookie.from("ATOKEN", jwt)
-                .path("/")
-                .httpOnly(true)       // JS에서 탈취 방지
-                .secure(true)         // HTTPS 환경에서만 전송 (HTTP 테스트 시엔 false로 변경 필요)
-                .sameSite("None")     // 프론트-백엔드 포트/도메인이 다를 때 필수
-                .domain(cookieDomain) // yml에 설정한 도메인/IP
-                .maxAge(60 * 60 * 24) // 1일 유지 (초 단위)
-                .build();
+        // 쿠키 세팅 : CookieUtil 클래스에 구현해놓은 메소드 이용
+        ResponseCookie cookie = cookieUtil.createCookie(jwt);
 
-        // 생성한 보안 쿠키를 헤더에 추가
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        response.addHeader("Set-Cookie", cookie.toString());
 
         // 권한 확인 후 리다이렉트 경로 결정
         String role = user.getAuthorities().iterator().next().getAuthority();
