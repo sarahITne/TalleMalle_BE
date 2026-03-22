@@ -1,0 +1,132 @@
+package org.example.tallemalle_backend.chat;
+
+import org.example.tallemalle_backend.chat.model.Chat;
+import org.example.tallemalle_backend.chat.model.ChatDto;
+import org.example.tallemalle_backend.chat.model.ChatRead;
+import org.example.tallemalle_backend.participation.ParticipationRepository;
+import org.example.tallemalle_backend.participation.model.Participation;
+import org.example.tallemalle_backend.participation.model.ParticipationStatus;
+import org.example.tallemalle_backend.profile.data.entity.Profile;
+import org.example.tallemalle_backend.push.WebPushService;
+import org.example.tallemalle_backend.recruit.RecruitRepository;
+import org.example.tallemalle_backend.recruit.model.Recruit;
+import org.example.tallemalle_backend.recruit.model.RecruitStatus;
+import org.example.tallemalle_backend.user.UserRepository;
+import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.example.tallemalle_backend.user.model.User;
+import org.example.tallemalle_backend.user.model.UserStatus;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+class ChatServiceTest {
+    @Mock
+    private ChatRepository chatRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private RecruitRepository recruitRepository;
+    @Mock
+    private ParticipationRepository participationRepository;
+    @Mock
+    private WebPushService webPushService;
+    @InjectMocks
+    private ChatService chatService;
+    @Test
+    void send() {
+        // given: 참여자 검증 통과 + user/recruit 조회 가능 + 저장 성공
+        Long userId = 1L;
+        Long recruitId = 10L;
+        AuthUserDetails authUser = AuthUserDetails.builder().idx(userId).build();
+        User user = buildUser(userId, "sender", "nick");
+        Recruit recruit = buildRecruit(recruitId, user);
+
+        ChatDto.SendReq dto = new ChatDto.SendReq();
+        dto.setContents("hello");
+        dto.setType(null);
+
+        when(participationRepository.existsByRecruit_IdxAndUser_IdxAndStatus(recruitId, userId, ParticipationStatus.ACTIVE))
+                .thenReturn(true);
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(recruitRepository.findById(recruitId)).thenReturn(Optional.of(recruit));
+        when(chatRepository.save(any(Chat.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        ChatDto.SendRes res = chatService.send(authUser, recruitId, dto);
+
+        // then: 저장 엔티티와 응답 DTO 매핑이 기대값인지 확인
+        ArgumentCaptor<Chat> chatCaptor = ArgumentCaptor.forClass(Chat.class);
+        verify(chatRepository).save(chatCaptor.capture());
+        Chat saved = chatCaptor.getValue();
+
+        assertEquals("message", saved.getType());
+        assertEquals("hello", saved.getContents());
+        assertEquals(user, saved.getUser());
+        assertEquals(recruit, saved.getRecruit());
+
+        assertEquals("message", res.getType());
+        assertEquals("hello", res.getContents());
+        assertEquals(recruitId, res.getRecruitIdx());
+        assertEquals(userId, res.getSenderId());
+        assertEquals("nick", res.getSenderName());
+
+        // then: 푸시 알림 호출
+        verify(webPushService).notifyRoom(recruitId, user, "hello");
+    }
+
+
+    private User buildUser(Long id, String name, String nickname) {
+        User user = User.builder()
+                .idx(id)
+                .name(name)
+                .email(name + "@test.com")
+                .password("pw")
+                .role("ROLE_USER")
+                .status(UserStatus.IDLE)
+                .enable(true)
+                .build();
+
+        Profile profile = Profile.builder()
+                .idx(id)
+                .user(user)
+                .nickname(nickname)
+                .phoneNumber("01000000000")
+                .birth(LocalDate.of(2000, 1, 1))
+                .gender("M")
+                .build();
+        user.setProfile(profile);
+        return user;
+    }
+
+    private Recruit buildRecruit(Long id, User owner) {
+        return Recruit.builder()
+                .idx(id)
+                .owner(owner)
+                .description("desc")
+                .startPointName("start")
+                .startLat(37.0)
+                .startLng(127.0)
+                .destPointName("dest")
+                .destLat(38.0)
+                .destLng(128.0)
+                .departureTime(LocalDateTime.of(2026, 1, 1, 10, 0))
+                .maxCapacity(4)
+                .currentCapacity(1)
+                .status(RecruitStatus.RECRUITING)
+                .createdAt(LocalDateTime.of(2026, 1, 1, 9, 0))
+                .build();
+    }
+}
