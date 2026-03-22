@@ -26,7 +26,7 @@ public class JwtUtil {
         return Keys.hmacShaKeyFor(Decoders.BASE64.decode(key));
     }
 
-    // 토큰 생성
+    // 토큰 생성 (User)
     public String createToken(AuthUserDetails user) {
         String jwt = Jwts.builder()
                 .claim("idx", user.getIdx())
@@ -43,7 +43,7 @@ public class JwtUtil {
         return jwt;
     }
 
-    // 토큰 생성
+    // 토큰 생성 (Driver)
     public String createToken(AuthDriverDetails user) {
         String jwt = Jwts.builder()
                 .claim("idx", user.getIdx())

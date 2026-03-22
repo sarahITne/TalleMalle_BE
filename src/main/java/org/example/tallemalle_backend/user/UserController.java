@@ -150,6 +150,19 @@ public class UserController {
         return ResponseEntity.ok("로그인 실패");
     }
 
+    // 로그인한 사용자 식별
+    @GetMapping("/me")
+    public ResponseEntity getCurrentUser(@AuthenticationPrincipal AuthUserDetails user) {
+        // Spring Security 필터에서 토큰 검증 후 user 객체를 채움
+        if (user != null) {
+            // 기존 로그인 응답과 동일한 DTO 형식을 사용
+            return ResponseEntity.ok(UserDto.LoginRes.from(user));
+        }
+
+        // 토큰이 없거나 유효하지 않은 경우
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 정보가 없습니다.");
+    }
+
     // 로그아웃
     @PostMapping("/logout")
     public ResponseEntity logout() {
