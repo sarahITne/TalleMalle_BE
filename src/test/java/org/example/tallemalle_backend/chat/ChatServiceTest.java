@@ -36,6 +36,8 @@ class ChatServiceTest {
     @Mock
     private ChatRepository chatRepository;
     @Mock
+    private ChatReadRepository chatReadRepository;
+    @Mock
     private UserRepository userRepository;
     @Mock
     private RecruitRepository recruitRepository;
@@ -87,6 +89,41 @@ class ChatServiceTest {
         verify(webPushService).notifyRoom(recruitId, user, "hello");
     }
 
+    @Test
+    void list() {
+        // given: 참여자 검증 통과 + 채팅 2개 + 읽음 마커 없음
+        Long userId = 1L;
+        Long recruitId = 10L;
+        AuthUserDetails authUser = AuthUserDetails.builder().idx(userId).build();
+        User user = buildUser(userId, "sender", "nick");
+        Recruit recruit = buildRecruit(recruitId, user);
+
+        Chat chat1 = buildChat(1L, "first", "message", user, recruit);
+        Chat chat2 = buildChat(2L, "second", "message", user, recruit);
+
+        when(participationRepository.existsByRecruit_IdxAndUser_IdxAndStatus(recruitId, userId, ParticipationStatus.ACTIVE))
+                .thenReturn(true);
+        when(chatRepository.findAllByRecruit_IdxOrderByIdxAsc(recruitId)).thenReturn(List.of(chat1, chat2));
+        when(chatReadRepository.findByUser_IdxAndRecruit_Idx(userId, recruitId)).thenReturn(Optional.empty());
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(recruitRepository.findById(recruitId)).thenReturn(Optional.of(recruit));
+        when(chatReadRepository.save(any(ChatRead.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // when
+        List<ChatDto.ListRes> result = chatService.list(authUser, recruitId);
+
+        // then: 목록 매핑 + 마지막 읽음 인덱스 저장
+        assertEquals(2, result.size());
+        assertEquals(1L, result.get(0).getIdx());
+        assertEquals("first", result.get(0).getContents());
+
+        ArgumentCaptor<ChatRead> readCaptor = ArgumentCaptor.forClass(ChatRead.class);
+        verify(chatReadRepository).save(readCaptor.capture());
+        ChatRead savedRead = readCaptor.getValue();
+        assertEquals(2L, savedRead.getLastReadChatIdx());
+        assertEquals(user, savedRead.getUser());
+        assertEquals(recruit, savedRead.getRecruit());
+    }
 
     private User buildUser(Long id, String name, String nickname) {
         User user = User.builder()
@@ -127,6 +164,16 @@ class ChatServiceTest {
                 .currentCapacity(1)
                 .status(RecruitStatus.RECRUITING)
                 .createdAt(LocalDateTime.of(2026, 1, 1, 9, 0))
+                .build();
+    }
+
+    private Chat buildChat(Long id, String contents, String type, User user, Recruit recruit) {
+        return Chat.builder()
+                .idx(id)
+                .contents(contents)
+                .type(type)
+                .user(user)
+                .recruit(recruit)
                 .build();
     }
 }
