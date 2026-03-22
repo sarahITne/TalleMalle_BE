@@ -88,6 +88,7 @@ public class SecurityConfig {
                         .requestMatchers("/notices/**").authenticated()
                         .requestMatchers("/driver/login", "/driver/signup").permitAll()
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
         );
 
