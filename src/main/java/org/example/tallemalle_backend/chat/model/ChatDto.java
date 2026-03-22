@@ -35,12 +35,17 @@ public class ChatDto {
         private Date createdAt;
         private Long senderId;
         private String senderName;
+        private String senderImg;
         private Long writerIdx;
         private String writer;
         private Long recruitIdx;
 
         public static SendRes from(Chat entity) {
             String messageType = entity.getType() == null ? "message" : entity.getType();
+            String profileImageUrl = null;
+            if (entity.getUser() != null && entity.getUser().getProfile() != null) {
+                profileImageUrl = entity.getUser().getProfile().getImageUrl();
+            }
             return SendRes.builder()
                     .idx(entity.getIdx())
                     .type(messageType)
@@ -48,6 +53,7 @@ public class ChatDto {
                     .senderId(entity.getUser().getIdx())
                     .createdAt(entity.getCreatedAt())
                     .senderName(entity.getUser().getNickname())
+                    .senderImg(profileImageUrl)
                     .writerIdx(entity.getUser().getIdx())
                     .writer(entity.getUser().getNickname())
                     .recruitIdx(entity.getRecruit().getIdx())
@@ -64,12 +70,17 @@ public class ChatDto {
         private Date createdAt;
         private Long senderId;
         private String senderName;
+        private String senderImg;
         private Long writerIdx;
         private String writer;
         private Long recruitIdx;
 
         public static ListRes from(Chat entity) {
             String messageType = entity.getType() == null ? "message" : entity.getType();
+            String profileImageUrl = null;
+            if (entity.getUser() != null && entity.getUser().getProfile() != null) {
+                profileImageUrl = entity.getUser().getProfile().getImageUrl();
+            }
             return ListRes.builder()
                     .idx(entity.getIdx())
                     .type(messageType)
@@ -77,6 +88,7 @@ public class ChatDto {
                     .createdAt(entity.getCreatedAt())
                     .senderId(entity.getUser().getIdx())
                     .senderName(entity.getUser().getNickname())
+                    .senderImg(profileImageUrl)
                     .writerIdx(entity.getUser().getIdx())
                     .writer(entity.getUser().getNickname())
                     .recruitIdx(entity.getRecruit().getIdx())

@@ -26,11 +26,17 @@ public class ParticipationDto {
     public static class MemberRes {
         private Long userIdx;
         private String userName;
+        private String imageUrl;
 
         public static MemberRes from(User user) {
+            String profileImageUrl = null;
+            if (user.getProfile() != null) {
+                profileImageUrl = user.getProfile().getImageUrl();
+            }
             return MemberRes.builder()
                     .userIdx(user.getIdx())
                     .userName(user.getNickname())
+                    .imageUrl(profileImageUrl)
                     .build();
         }
     }

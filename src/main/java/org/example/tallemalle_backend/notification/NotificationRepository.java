@@ -20,7 +20,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     List<Notification> findTop5ByUserIdxOrderByCreatedAtDesc(Long userIdx);
 
     // Refactor : 알림을 전부 로드한 뒤 행마다 save 하던 방식 대신 한번으로 읽음 처리하도록 변경
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("UPDATE Notification n SET n.isRead = true WHERE n.user.idx = :userIdx AND n.isRead = false")
     int markAllReadByUserIdx(@Param("userIdx") Long userIdx);
 }
