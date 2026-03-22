@@ -7,6 +7,7 @@ import org.example.tallemalle_backend.user.model.UserDto;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -25,11 +26,20 @@ public class UserController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    @Value("${app.cookie-domain}")
-    private String cookieDomain;
-
     @Value("${app.front-url}")
     private String frontUrl;
+
+    @Value("${app.cookie.domain}")
+    private String cookieDomain;
+
+    @Value("${app.cookie.max-age}")
+    private long cookieMaxAge;
+
+    @Value("${app.cookie.secure}")
+    private boolean isSecure;
+
+    @Value("${app.cookie.same-site}")
+    private String sameSite;
 
     // 회원 가입
     @PostMapping("/signup")
@@ -137,8 +147,19 @@ public class UserController {
 
         if(user != null) {
             String jwt = jwtUtil.createToken(user);
+
+            // ATOKEN 쿠키 생성 : 개발 환경과 배포 환경에 따라 쿠키 설정을 다르게 해야하므로 변수 사용 (yml 파일 참고)
+            ResponseCookie cookie = ResponseCookie.from("ATOKEN", jwt)
+                    .path("/")
+                    .httpOnly(true)
+                    .domain(cookieDomain)
+                    .maxAge(cookieMaxAge)
+                    .secure(isSecure)
+                    .sameSite(sameSite)
+                    .build();
+
             return ResponseEntity.ok()
-                    .header("Set-Cookie", "ATOKEN=" + jwt + "; path=/")   // JWT 토큰을 헤더로 설정해서 응답 (쿠키)
+                    .header("Set-Cookie", cookie.toString())   // JWT 토큰을 헤더로 설정해서 응답 (쿠키)
                     .body(UserDto.LoginRes.from(user));  // 응답 결과로 로그인한 사용자 정보 같이 반환
         }
 
