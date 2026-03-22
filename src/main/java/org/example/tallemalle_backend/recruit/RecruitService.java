@@ -63,9 +63,9 @@ public class RecruitService {
         eventPublisher.publishEvent(new RecruitEvents.CreatedEvent(RecruitDto.ListRes.from(savedRecruit)));
     }
 
-    // TODO: Slice로 페이징 처리 필요
+    // 모집글 전체 리스트 조회
     public List<RecruitDto.ListRes> list() {
-        List<Recruit> recruitList = recruitRepository.findAll();
+        List<Recruit> recruitList = recruitRepository.findAllWithFetchJoin();
         return recruitList.stream().filter(r -> r.getStatus() != RecruitStatus.END).map(RecruitDto.ListRes::from).toList();
     }
 
@@ -83,11 +83,10 @@ public class RecruitService {
         return recruitList.stream().filter(r -> r.getStatus() != RecruitStatus.END).map(RecruitDto.ListRes::from).toList();
     }
 
-    // TODO: 예외 처리
+    // 모집글 참여
     @Transactional
     public boolean join(AuthUserDetails user, Long recruitIdx) {
-        // 모집글 찾아오기 TODO: 비관적 락
-        Recruit recruit = recruitRepository.findById(recruitIdx).orElseThrow(
+        Recruit recruit = recruitRepository.findByIdForUpdate(recruitIdx).orElseThrow(
                 () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
         );
 
@@ -112,7 +111,7 @@ public class RecruitService {
         if (optParticipation.isPresent()) {
             Participation existingParticipation = optParticipation.get();
             // 이미 참여 중이면 거절
-            if ("ACTIVE".equals(existingParticipation.getStatus())) {
+            if (existingParticipation.getStatus() == ParticipationStatus.ACTIVE) {
                 return false;
             } else {
                 // 과거에 나갔다가 다시 들어오는 경우 상태만 Update
