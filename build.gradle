@@ -69,6 +69,9 @@ dependencies {
     // 프로메테우스 관련
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     runtimeOnly 'io.micrometer:micrometer-registry-prometheus'
+
+    // driver: 카카오 경로 API 응답 캐시
+    implementation 'com.github.ben-manes.caffeine:caffeine'
 }
 
 tasks.named('test') {
