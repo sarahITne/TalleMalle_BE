@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.example.tallemalle_backend.user.model.User;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDate;
 
@@ -40,6 +42,14 @@ public class Profile {
 
     @Column()
     private String imageUrl;
+
+    // 모집,콜 웹푸시 수신
+    // false면 notifyMatching만 스킵, 채팅 푸시는 유지
+    @Setter
+    @Builder.Default
+    @Column(name = "recruitPromotionPushEnabled", nullable = false)
+    @ColumnDefault("true")
+    private Boolean recruitPromotionPushEnabled = true;
 
     public void update(String nickname, String introduction, String imageUrl) {
         this.nickname = nickname;
