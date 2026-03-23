@@ -3,19 +3,31 @@ package org.example.tallemalle_backend.recruit;
 import jakarta.persistence.LockModeType;
 import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.recruit.model.RecruitStatus;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import org.springframework.data.domain.Pageable;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 public interface RecruitRepository extends JpaRepository<Recruit, Long> {
     // 지도 검색 시 방장(owner) Fetch Join
-    @Query("SELECT r FROM Recruit r JOIN FETCH r.owner WHERE r.startLat BETWEEN :swLat AND :neLat AND r.startLng BETWEEN :swLng AND :neLng")
-    List<Recruit> findRecruitsInBounds(@Param("swLat") Double swLat, @Param("swLng") Double swLng, @Param("neLat") Double neLat, @Param("neLng") Double neLng);
+    @Query("SELECT r FROM Recruit r " +
+            "JOIN FETCH r.owner " + // 1:1 관계인 owner는 페치 조인
+            "WHERE r.startLat BETWEEN :swLat AND :neLat " +
+            "AND r.startLng BETWEEN :swLng AND :neLng " +
+            "AND r.status != :status")
+    Slice<Recruit> findActiveRecruitsInBounds(
+            @Param("swLat") Double swLat,
+            @Param("swLng") Double swLng,
+            @Param("neLat") Double neLat,
+            @Param("neLng") Double neLng,
+            @Param("status") RecruitStatus status,
+            Pageable pageable);
 
     // 전체 목록 조회 시 방장(owner) Fetch Join
     @Query("SELECT r FROM Recruit r JOIN FETCH r.owner")

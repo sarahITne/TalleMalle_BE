@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.notice.model.Notice;
 import org.example.tallemalle_backend.notice.model.NoticeDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,28 +66,24 @@ public class NoticeService {
     }
 
   
-    // 공지사항 목록 조회 (전체 조회)
-    public List<NoticeDto.ListRes> getNotices() {
-        // 1. 전체 조회 한 결과가 엔티티 타입의 리스트로 반환됨
-        List<Notice> noticeList = noticeRepository.findAll();
+    // 공지사항 목록 조회 (Slice 페이징 조회)
+    @Transactional(readOnly = true)
+    public Slice<NoticeDto.ListRes> getNotices(Pageable pageable) {
+        // 1. Fetch Join을 사용하여 유저와 프로필 정보를 Slice 형태로 조회 (N+1 해결)
+        Slice<Notice> noticeSlice = noticeRepository.findAllSliceBy(pageable);
 
-        // 2. 조회한 엔티티 리스트를 응답 DTO 타입의 리스트로 바꾸기 위해서 List 생성
-        List<NoticeDto.ListRes> result = new ArrayList<>();
-
-        // 3. 엔티티 리스트를 하나씩 DTO로 바궈가며 응답 DTO 리스트로 변환
-        for (Notice notice : noticeList) {
-            result.add(NoticeDto.ListRes.from(notice));
-        }
-
-        // 4. 응답 DTO 리스트 반환
-        return result;
+        // 2. 엔티티 Slice를 응답 DTO Slice로 변환하여 반환
+        return noticeSlice.map(NoticeDto.ListRes::from);
     }
 
 
     // 공지사항 상세 조회 (단건 조회)
+    @Transactional(readOnly = true)
     public NoticeDto.DetailRes getNotice(Long idx) {
         // 1. 게시글 조회 결과를 Entity에 저장
-        Notice notice = noticeRepository.findById(idx).orElseThrow();
+        Notice notice = noticeRepository.findById(idx).orElseThrow(
+                () -> new IllegalArgumentException("해당 idx의 게시물이 없음")
+        );
 
         // 2. 조회 결과 Entity를 응답 DTO로 변환하여 반환
         return NoticeDto.DetailRes.from(notice);

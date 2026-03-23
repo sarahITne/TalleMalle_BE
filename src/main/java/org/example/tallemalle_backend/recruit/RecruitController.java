@@ -7,11 +7,13 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.model.BaseResponse;
 import org.example.tallemalle_backend.recruit.model.RecruitDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 
 @Tag(name = "Recruit API", description = "모집글 관련 API")
 @RequestMapping("/recruit")
@@ -30,24 +32,15 @@ public class RecruitController {
         return ResponseEntity.ok(BaseResponse.success("성공"));
     }
 
-    // 모든 모집글 리스트 불러오기
-    @Operation(summary = "모집글 전체 조회", description = "현재 모집 중인 모든 모집글 리스트를 조회하는 기능")
-    @GetMapping
-    public ResponseEntity list() {
-        List<RecruitDto.ListRes> result = recruitService.list();
-        return ResponseEntity.ok(BaseResponse.success(result));
-    }
-
     // 사용자의 현재 화면의 남서쪽/북동쪽 위경도 좌표 받아서 처리
     @Operation(summary = "모집글 지도 화면 검색", description = "사용자의 현재 화면(남서쪽/북동쪽 좌표) 내에 있는 모집글 리스트를 조회하는 기능")
     @GetMapping("/search")
     public ResponseEntity search(
-            @Parameter(description = "남서쪽 위도") @RequestParam Double swLat,
-            @Parameter(description = "남서쪽 경도") @RequestParam Double swLng,
-            @Parameter(description = "북동쪽 위도") @RequestParam Double neLat,
-            @Parameter(description = "북동쪽 경도") @RequestParam Double neLng
+            @RequestParam Double swLat, @RequestParam Double swLng,
+            @RequestParam Double neLat, @RequestParam Double neLng,
+            @PageableDefault(size = 20, sort = "departureTime", direction = Sort.Direction.ASC) Pageable pageable
     ) {
-        List<RecruitDto.ListRes> result = recruitService.search(swLat, swLng, neLat, neLng);
+        Slice<RecruitDto.ListRes> result = recruitService.search(swLat, swLng, neLat, neLng, pageable);
         return ResponseEntity.ok(BaseResponse.success(result));
     }
 

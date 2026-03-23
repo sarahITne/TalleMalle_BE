@@ -83,10 +83,18 @@ public class SecurityConfig {
                         // 접근 제어
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()    // OPTIONS 요청은 무조건 허용 (CORS Preflight 해결)
                         .requestMatchers("/user/signup/extra").authenticated()
-                        .requestMatchers("/user/signup", "/user/login", "/user/verify", "/user/verify-identity",
+                        .requestMatchers("/user/signup", "/user/login", "/user/verify", "/user/verify-identity", "/user/resend-verify",
                                 "/user/signup/check-email", "/user/signup/check-nickname", "/user/me").permitAll()
                         .requestMatchers("/notices/**").authenticated()
-                        .requestMatchers("/driver/login", "/driver/signup").permitAll()
+                        .requestMatchers(
+                                "/driver/signup",
+                                "/driver/login",
+                                "/driver/verify-identity",
+                                "/driver/verify-identity",
+                                "/driver/check-email",
+                                "/driver/check-nickname",
+                                "/driver/me"
+                        ).permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()

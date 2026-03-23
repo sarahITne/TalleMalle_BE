@@ -160,4 +160,32 @@ public class RecruitDto {
                     .build();
           }
     }
+
+    @Schema(name = "BoardingRecordRes", description = "최근 탑승 기록 응답 데이터")
+    @Builder
+    @Getter
+    public static class BoardingRecordRes {
+        @Schema(description = "출발 예정 시간", example = "2026-03-20 16:13:00")
+        private LocalDateTime departureTime;
+        @Schema(description = "도착 시간 (결제 시간)", example = "2026-03-20 17:00:00")
+        private LocalDateTime arrivalTime;
+        @Schema(description = "출발지 명칭", example = "강남역 2번 출구")
+        private String startPointName;
+        @Schema(description = "도착지 명칭", example = "판교역 1번 출구")
+        private String destPointName;
+        @Schema(description = "결제 금액", example = "12500")
+        private Integer amount;
+
+        public static BoardingRecordRes from(org.example.tallemalle_backend.payment.data.entity.Order order) {
+            Recruit recruit = order.getRecruit();
+            LocalDateTime arrival = order.getTransaction() != null ? order.getTransaction().getCreatedAt() : null;
+            return BoardingRecordRes.builder()
+                    .departureTime(recruit.getDepartureTime())
+                    .arrivalTime(arrival)
+                    .startPointName(recruit.getStartPointName())
+                    .destPointName(recruit.getDestPointName())
+                    .amount(order.getAmount())
+                    .build();
+        }
+    }
 }

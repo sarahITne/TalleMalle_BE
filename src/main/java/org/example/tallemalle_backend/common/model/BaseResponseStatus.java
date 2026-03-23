@@ -15,6 +15,8 @@ public enum BaseResponseStatus {
     SIGNUP_DUPLICATE_EMAIL(false, 3003, "중복된 이메일"),
     SIGNUP_INVALID_PASSWORD(false, 3004, "비밀번호는 대소문자, 숫자, 특수문자 포함"),
     SIGNUP_INVALID_UUID(false, 3005, "유효하지 않은 인증값"),
+    USER_NOT_FOUND(false, 3006, "존재하지 않는 사용자입니다."),
+    PASSWORD_WRONG(false, 3007, "비밀번호가 일치하지 않습니다."),
 
     // 4000번대 실패
     REQUEST_ERROR(false, 4001, "입력값이 잘못되었습니다."),
@@ -22,6 +24,9 @@ public enum BaseResponseStatus {
     ALREADY_JOINED(false, 4003, "이미 참여 중인 모집글이 있습니다."),
     RECRUIT_FULL(false, 4004, "모집이 마감되었거나 인원이 초과되었습니다."),
     ALREADY_CALLED(false, 4005, "이미 기사님 호출이 완료되어 나갈 수 없습니다."),
+    LOGIN_FAILED(false, 4006, "로그인에 실패하였습니다."),
+    DRIVER_ROLE_REQUIRED(false, 4007, "드라이버 계정만 로그인할 수 있습니다."),
+
 
     // 4100번대~ 결제 관련
     PAYMENT_UNAUTHENTICATED_USER(false, 4100, "인증받지 않은 사용자입니다."),

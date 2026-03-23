@@ -28,6 +28,13 @@ public class Order {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "recruit_idx")
+    private org.example.tallemalle_backend.recruit.model.Recruit recruit;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billing_idx")
     private Billing billing;
+
+    @OneToOne(mappedBy = "order", fetch = FetchType.LAZY)
+    private Transaction transaction;
 }

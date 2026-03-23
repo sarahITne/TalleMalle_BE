@@ -95,8 +95,11 @@ public class TossDto {
     @Builder
     @Getter
     public static class ChargePerUserResponse {
+        private String paymentKey;
+
         public Transaction toEntity(Order order) {
             return Transaction.builder()
+                    .paymentKey(this.paymentKey)
                     .billing(order.getBilling())
                     .order(order)
                     .build();

@@ -39,6 +39,9 @@ public class DriverDto {
         @NotBlank
         private String gender;
 
+        @NotBlank
+        private String identityVerificationId;
+
         public Driver toEntity(String encodedPassword) {
             return Driver.builder()
                     .email(this.email)
@@ -48,6 +51,7 @@ public class DriverDto {
                     .phoneNumber(this.phoneNumber)
                     .birth(this.birth)
                     .gender(this.gender)
+                    .enable(true)
                     .build();
         }
     }
