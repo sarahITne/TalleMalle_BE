@@ -1,5 +1,7 @@
 package org.example.tallemalle_backend.driver.auth;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.auth.model.DriverDto;
@@ -13,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "Driver Auth API", description = "드라이버 회원가입·로그인 API")
 @CrossOrigin
 @RequestMapping("/driver")
 @RestController
@@ -22,6 +25,7 @@ public class DriverUserController {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
+    @Operation(summary = "드라이버 회원가입", description = "이메일·비밀번호 기반 드라이버 계정을 등록하는 기능")
     @PostMapping("/signup")
     public ResponseEntity signup(@Valid @RequestBody DriverDto.SignupReq dto) {
         DriverDto.SignupRes result =  driverUserService.signup(dto);
@@ -30,6 +34,7 @@ public class DriverUserController {
     }
 
 
+    @Operation(summary = "드라이버 로그인", description = "드라이버 계정으로 로그인하고 JWT 쿠키(ATOKEN)를 발급하는 기능")
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody DriverDto.LoginReq dto) {
         String prefixedEmail = "DRIVER_" + dto.getEmail();
