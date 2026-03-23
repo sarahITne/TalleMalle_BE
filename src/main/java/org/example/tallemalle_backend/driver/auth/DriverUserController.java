@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.auth.model.DriverDto;
 import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
 import org.example.tallemalle_backend.utils.JwtUtil;
+import org.example.tallemalle_backend.common.exception.BaseException;
+import org.example.tallemalle_backend.common.model.BaseResponseStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,6 +39,10 @@ public class DriverUserController {
 
         Authentication authentication = authenticationManager.authenticate(token);  // 여기서 UserService의 loadUserByUsername 메소드로 이동
         AuthDriverDetails driver = (AuthDriverDetails) authentication.getPrincipal();     // 현재 로그인한 사용자의 객체를 꺼내는 메소드
+
+        if (!"DRIVER".equals(driver.getRole())) {
+            throw BaseException.from(BaseResponseStatus.DRIVER_ROLE_REQUIRED);
+        }
 
         if(driver != null) {
             String jwt = jwtUtil.createToken(driver);
