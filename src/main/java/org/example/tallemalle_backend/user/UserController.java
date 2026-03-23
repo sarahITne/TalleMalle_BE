@@ -2,6 +2,8 @@ package org.example.tallemalle_backend.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.tallemalle_backend.common.model.BaseResponse;
+import org.example.tallemalle_backend.common.model.BaseResponseStatus;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.UserDto;
 import org.example.tallemalle_backend.utils.CookieUtil;
@@ -12,9 +14,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -128,26 +133,41 @@ public class UserController {
     // 로그인
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody UserDto.LoginReq dto) {
-        String prefixedEmail = "USER_" + dto.getEmail();
+        try {
+            String prefixedEmail = "USER_" + dto.getEmail();
 
-        UsernamePasswordAuthenticationToken token =
-                new UsernamePasswordAuthenticationToken(prefixedEmail, dto.getPassword(), null);
+            // 1. 인증 토큰 생성
+            UsernamePasswordAuthenticationToken token =
+                    new UsernamePasswordAuthenticationToken(prefixedEmail, dto.getPassword(), null);
 
-        Authentication authentication = authenticationManager.authenticate(token);  // 여기서 UserService의 loadUserByUsername 메소드로 이동
-        AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();     // 현재 로그인한 사용자의 객체를 꺼내는 메소드
+            // 2. 인증 시도 (비밀번호가 틀리면 여기서 BadCredentialsException 등이 발생함)
+            Authentication authentication = authenticationManager.authenticate(token);  // 여기서 UserService의 loadUserByUsername 메소드로 이동
 
-        if(user != null) {
+            // 3. 인증 성공 시 로직
+            AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();     // 현재 로그인한 사용자의 객체를 꺼내는 메소드
             String jwt = jwtUtil.createToken(user);
-
-            // 쿠키 세팅 : CookieUtil 클래스에 구현해놓은 메소드 이용
             ResponseCookie cookie = cookieUtil.createCookie(jwt);
 
             return ResponseEntity.ok()
-                    .header("Set-Cookie", cookie.toString())   // JWT 토큰을 헤더로 설정해서 응답 (쿠키)
-                    .body(UserDto.LoginRes.from(user));  // 응답 결과로 로그인한 사용자 정보 같이 반환
-        }
+                    .header("Set-Cookie", cookie.toString())    // JWT 토큰을 헤더로 설정해서 응답 (쿠키)
+                    .body(UserDto.LoginRes.from(user));                    // 응답 결과로 로그인한 사용자 정보 같이 반환
 
-        return ResponseEntity.ok("로그인 실패");
+        } catch (UsernameNotFoundException e) {
+            // 4. 인증 실패 시
+            // 4-1). 이메일이 없는 경우 (404 Not Found)
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(BaseResponse.fail(BaseResponseStatus.USER_NOT_FOUND));
+
+        } catch (BadCredentialsException e) {
+            // 4-2). 비밀번호가 틀린 경우 (401 Unauthorized)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(BaseResponse.fail(BaseResponseStatus.PASSWORD_WRONG));
+
+        } catch (AuthenticationException e) {
+            // 4-3). 그 외 인증 오류 (401 Unauthorized)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(BaseResponse.fail(BaseResponseStatus.LOGIN_FAILED));
+        }
     }
 
     // 로그인한 사용자 식별
