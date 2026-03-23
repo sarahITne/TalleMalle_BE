@@ -25,6 +25,7 @@ public enum BaseResponseStatus {
     RECRUIT_FULL(false, 4004, "모집이 마감되었거나 인원이 초과되었습니다."),
     ALREADY_CALLED(false, 4005, "이미 기사님 호출이 완료되어 나갈 수 없습니다."),
     LOGIN_FAILED(false, 4006, "로그인에 실패하였습니다."),
+    DRIVER_ROLE_REQUIRED(false, 4007, "드라이버 계정만 로그인할 수 있습니다."),
 
 
     // 4100번대~ 결제 관련
