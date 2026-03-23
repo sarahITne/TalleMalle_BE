@@ -14,10 +14,11 @@ import org.example.tallemalle_backend.user.UserRepository;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.example.tallemalle_backend.user.model.User;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
 @Service
@@ -62,24 +63,15 @@ public class RecruitService {
         eventPublisher.publishEvent(new RecruitEvents.CreatedEvent(RecruitDto.ListRes.from(savedRecruit)));
     }
 
-    // 모집글 전체 리스트 조회
-    public List<RecruitDto.ListRes> list() {
-        List<Recruit> recruitList = recruitRepository.findAllWithFetchJoin();
-        return recruitList.stream().filter(r -> r.getStatus() != RecruitStatus.END).map(RecruitDto.ListRes::from).toList();
-    }
+    // 사용자의 현재 화면의 남서쪽/북동쪽 위경도 좌표 받아서 처리
+    @Transactional(readOnly = true)
+    public Slice<RecruitDto.ListRes> search(Double swLat, Double swLng, Double neLat, Double neLng, Pageable pageable) {
+        // DB 레벨에서 status 필터링 및 지정된 개수만 조회 (Slice 사용으로 count 쿼리 발생 안 함)
+        Slice<Recruit> recruitSlice = recruitRepository.findActiveRecruitsInBounds(
+                swLat, swLng, neLat, neLng, RecruitStatus.END, pageable);
 
-    // 모집글 상세 조회
-    public RecruitDto.DetailRes detail(Long recruitId) {
-        Recruit recruit = recruitRepository.findById(recruitId).orElseThrow(
-                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
-        );
-        return RecruitDto.DetailRes.from(recruit);
-    }
-
-    // TODO: Slice로 페이징 처리 필요
-    public List<RecruitDto.ListRes> search(Double swLat, Double swLng, Double neLat, Double neLng) {
-        List<Recruit> recruitList = recruitRepository.findRecruitsInBounds(swLat, swLng, neLat, neLng);
-        return recruitList.stream().filter(r -> r.getStatus() != RecruitStatus.END).map(RecruitDto.ListRes::from).toList();
+        // 바로 DTO로 매핑 후 반환
+        return recruitSlice.map(RecruitDto.ListRes::from);
     }
 
     // 모집글 참여
@@ -197,5 +189,13 @@ public class RecruitService {
         eventPublisher.publishEvent(new RecruitEvents.UserLeftEvent(recruitIdx, realUser.getIdx(), realUser.getName()));
 
         return true;
+    }
+
+    // 모집글 상세 조회
+    public RecruitDto.DetailRes detail(Long recruitId) {
+        Recruit recruit = recruitRepository.findById(recruitId).orElseThrow(
+                () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
+        );
+        return RecruitDto.DetailRes.from(recruit);
     }
 }
