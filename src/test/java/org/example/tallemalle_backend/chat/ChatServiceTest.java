@@ -29,6 +29,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -103,14 +105,15 @@ class ChatServiceTest {
 
         when(participationRepository.existsByRecruit_IdxAndUser_IdxAndStatus(recruitId, userId, ParticipationStatus.ACTIVE))
                 .thenReturn(true);
-        when(chatRepository.findAllByRecruit_IdxOrderByIdxAsc(recruitId)).thenReturn(List.of(chat1, chat2));
+        when(chatRepository.findPageByRecruitIdxWithUserProfile(eq(recruitId), isNull(), any()))
+                .thenReturn(List.of(chat2, chat1));
         when(chatReadRepository.findByUser_IdxAndRecruit_Idx(userId, recruitId)).thenReturn(Optional.empty());
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
         when(recruitRepository.findById(recruitId)).thenReturn(Optional.of(recruit));
         when(chatReadRepository.save(any(ChatRead.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
-        List<ChatDto.ListRes> result = chatService.list(authUser, recruitId);
+        List<ChatDto.ListRes> result = chatService.list(authUser, recruitId, null, 30);
 
         // then: 목록 매핑 + 마지막 읽음 인덱스 저장
         assertEquals(2, result.size());

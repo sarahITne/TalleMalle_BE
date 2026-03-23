@@ -4,6 +4,7 @@ import org.example.tallemalle_backend.chat.model.Chat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -15,8 +16,13 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
             JOIN FETCH c.user u
             LEFT JOIN FETCH u.profile p
             WHERE c.recruit.idx = :recruitIdx
-            ORDER BY c.idx ASC
+              AND (:before IS NULL OR c.idx < :before)
+            ORDER BY c.idx DESC
             """)
-    List<Chat> findAllByRecruitIdxWithUserProfileOrderByIdxAsc(@Param("recruitIdx") Long recruitIdx);
+    List<Chat> findPageByRecruitIdxWithUserProfile(
+            @Param("recruitIdx") Long recruitIdx,
+            @Param("before") Long before,
+            Pageable pageable
+    );
     boolean existsByRecruit_IdxAndIdxGreaterThanAndUser_IdxNot(Long recruitIdx, Long idx, Long userIdx);
 }
