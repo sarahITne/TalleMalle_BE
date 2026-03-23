@@ -46,14 +46,14 @@ public class DriverUserController {
     }
 
     @Operation(summary = "드라이버 이메일 중복 확인", description = "드라이버 회원가입 시 이메일 중복 여부를 확인하는 기능")
-    @GetMapping({"/signup/check-email", "/check-email"})
+    @GetMapping("/check-email")
     public ResponseEntity<?> emailCheck(@RequestParam String email) {
         boolean available = driverUserService.emailCheck(email);
         return ResponseEntity.ok(available);
     }
 
     @Operation(summary = "드라이버 닉네임 중복 확인", description = "드라이버 회원가입 시 닉네임 중복 여부를 확인하는 기능")
-    @GetMapping("/signup/check-nickname")
+    @GetMapping("/check-nickname")
     public ResponseEntity<?> nicknameCheck(@RequestParam String nickname) {
         boolean available = driverUserService.nicknameCheck(nickname);
         return ResponseEntity.ok(available);

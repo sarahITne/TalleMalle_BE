@@ -90,9 +90,9 @@ public class SecurityConfig {
                                 "/driver/signup",
                                 "/driver/login",
                                 "/driver/verify-identity",
-                                "/driver/signup/check-email",
+                                "/driver/verify-identity",
                                 "/driver/check-email",
-                                "/driver/signup/check-nickname",
+                                "/driver/check-nickname",
                                 "/driver/me"
                         ).permitAll()
                         .requestMatchers("/ws/**").permitAll()
