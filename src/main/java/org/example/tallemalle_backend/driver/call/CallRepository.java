@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CallRepository extends JpaRepository<Call, Long> {
-    // ListRes에서 recruit.idx 접근 시 N+1 방지 (페이징은 JOIN FETCH 대신 EntityGraph 사용)
+    // Refactor : recruitIdx·departureTime — recruit를 EntityGraph로 함께 로드 (N+1 방지)
     @EntityGraph(attributePaths = "recruit")
     @Query("SELECT c FROM Call c WHERE c.status IN :statuses")
     Page<Call> findByStatusIn(@Param("statuses") List<CallStatus> statuses, Pageable pageable);

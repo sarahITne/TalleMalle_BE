@@ -5,9 +5,11 @@ import lombok.Getter;
 import org.example.tallemalle_backend.driver.infrastructure.model.DirectionInfo;
 import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.participation.model.ParticipationStatus;
+import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.user.model.User;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -19,13 +21,16 @@ public class CallDto {
     public static class ListRes {
         private Long callIdx;
         private Long recruitIdx;
+        private LocalDateTime departureTime;
         private String startLocation;
         private CallStatus status;
 
-        public static ListRes from(Call entity){
+        public static ListRes from(Call entity) {
+            Recruit recruit = entity.getRecruit();
             return ListRes.builder()
                     .callIdx(entity.getId())
-                    .recruitIdx(entity.getRecruit() != null ? entity.getRecruit().getIdx() : null)
+                    .recruitIdx(recruit != null ? recruit.getIdx() : null)
+                    .departureTime(recruit != null ? recruit.getDepartureTime() : null)
                     .startLocation(entity.getStartLocation())
                     .status(entity.getStatus())
                     .build();
