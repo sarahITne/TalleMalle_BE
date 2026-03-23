@@ -199,8 +199,6 @@ public class UserDto {
     public static class LoginRes {
         private Long idx;
         private String email;
-        private String name;
-        private String nickname;
         private String role;
         private UserStatus status;
 
@@ -208,8 +206,6 @@ public class UserDto {
             return LoginRes.builder()
                     .idx(authUserDetails.getIdx())
                     .email(authUserDetails.getEmail())
-                    .name(authUserDetails.getName())
-                    .nickname(authUserDetails.getNickname())
                     .role(authUserDetails.getRole())
                     .status(authUserDetails.getStatus())
                     .build();
