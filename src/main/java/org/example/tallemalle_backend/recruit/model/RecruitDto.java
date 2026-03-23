@@ -131,8 +131,16 @@ public class RecruitDto {
         private Integer currentCapacity;
         @Schema(description = "방장 닉네임", example = "김기사")
         private String ownerName;
+        @Schema(description = "현재 모집 상태", example = "RECRUITING")
+        private RecruitStatus status;
+        @Schema(description = "배정된 기사님 이름", example = "홍길동")
+        private String driverName;
 
         public static DetailRes from(Recruit entity) {
+            return from(entity, null);
+        }
+
+        public static DetailRes from(Recruit entity, String driverName) {
             return DetailRes.builder()
                     .idx(entity.getIdx())
                     .startPointName(entity.getStartPointName())
@@ -141,6 +149,8 @@ public class RecruitDto {
                     .maxCapacity(entity.getMaxCapacity())
                     .currentCapacity(entity.getCurrentCapacity())
                     .ownerName(entity.getOwner() != null ? entity.getOwner().getName() : null)
+                    .status(entity.getStatus())
+                    .driverName(driverName)
                     .build();
           }
     }

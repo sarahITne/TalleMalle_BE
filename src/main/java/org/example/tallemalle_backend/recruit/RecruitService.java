@@ -3,6 +3,11 @@ package org.example.tallemalle_backend.recruit;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.common.model.BaseResponseStatus;
+import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
+import org.example.tallemalle_backend.driver.auth.model.Driver;
+import org.example.tallemalle_backend.driver.call.CallRepository;
+import org.example.tallemalle_backend.driver.call.model.Call;
+import org.example.tallemalle_backend.driver.call.model.CallStatus;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.participation.model.ParticipationStatus;
@@ -27,6 +32,8 @@ public class RecruitService {
     private final UserRepository userRepository;
     private final ParticipationRepository participationRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final CallRepository callRepository;
+    private final DriverUserRepository driverUserRepository;
 
     // TODO: Socket 통신 연결 필요
     @Transactional
@@ -74,7 +81,20 @@ public class RecruitService {
         Recruit recruit = recruitRepository.findById(recruitId).orElseThrow(
                 () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
         );
-        return RecruitDto.DetailRes.from(recruit);
+        String driverName = null;
+        if (recruit.getStatus() == RecruitStatus.DRIVING || recruit.getStatus() == RecruitStatus.END) {
+            Optional<Call> callOpt = callRepository.findTopByRecruit_IdxAndStatusInOrderByIdDesc(
+                    recruitId,
+                    List.of(CallStatus.ACCEPTED, CallStatus.DRIVING, CallStatus.COMPLETED)
+            );
+            if (callOpt.isPresent() && callOpt.get().getDriverIdx() != null) {
+                Optional<Driver> driverOpt = driverUserRepository.findById(callOpt.get().getDriverIdx());
+                if (driverOpt.isPresent()) {
+                    driverName = driverOpt.get().getName();
+                }
+            }
+        }
+        return RecruitDto.DetailRes.from(recruit, driverName);
     }
 
     // TODO: Slice로 페이징 처리 필요
