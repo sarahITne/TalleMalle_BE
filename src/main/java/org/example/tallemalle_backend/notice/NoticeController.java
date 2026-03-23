@@ -4,6 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.notice.model.NoticeDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -47,10 +50,10 @@ public class NoticeController {
     }
   
   
-    // 공지사항 목록 조회 (전체 조회)
+    // 공지사항 목록 조회 (Slice 페이징 조회)
     @GetMapping
-    public ResponseEntity getNotices() {
-        List<NoticeDto.ListRes> result = noticeService.getNotices();
+    public ResponseEntity getNotices(@PageableDefault(size = 10) Pageable pageable) {
+        Slice<NoticeDto.ListRes> result = noticeService.getNotices(pageable);
         return ResponseEntity.ok(result);
     }
 
