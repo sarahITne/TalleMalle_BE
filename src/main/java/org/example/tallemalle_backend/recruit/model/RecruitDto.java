@@ -135,12 +135,16 @@ public class RecruitDto {
         private RecruitStatus status;
         @Schema(description = "배정된 기사님 이름", example = "홍길동")
         private String driverName;
+        @Schema(description = "운행 요금(예상)", example = "12000")
+        private Integer estimatedFare;
+        @Schema(description = "1인당 부담금(예상)", example = "3000")
+        private Integer myFare;
 
         public static DetailRes from(Recruit entity) {
-            return from(entity, null);
+            return from(entity, null, null, null);
         }
 
-        public static DetailRes from(Recruit entity, String driverName) {
+        public static DetailRes from(Recruit entity, String driverName, Integer estimatedFare, Integer myFare) {
             return DetailRes.builder()
                     .idx(entity.getIdx())
                     .startPointName(entity.getStartPointName())
@@ -151,6 +155,8 @@ public class RecruitDto {
                     .ownerName(entity.getOwner() != null ? entity.getOwner().getName() : null)
                     .status(entity.getStatus())
                     .driverName(driverName)
+                    .estimatedFare(estimatedFare)
+                    .myFare(myFare)
                     .build();
           }
     }

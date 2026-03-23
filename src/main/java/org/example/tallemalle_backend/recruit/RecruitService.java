@@ -82,19 +82,28 @@ public class RecruitService {
                 () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
         );
         String driverName = null;
+        Integer estimatedFare = 0;
+        Integer myFare = 0;
         if (recruit.getStatus() == RecruitStatus.DRIVING || recruit.getStatus() == RecruitStatus.END) {
             Optional<Call> callOpt = callRepository.findTopByRecruit_IdxAndStatusInOrderByIdDesc(
                     recruitId,
                     List.of(CallStatus.ACCEPTED, CallStatus.DRIVING, CallStatus.COMPLETED)
             );
-            if (callOpt.isPresent() && callOpt.get().getDriverIdx() != null) {
-                Optional<Driver> driverOpt = driverUserRepository.findById(callOpt.get().getDriverIdx());
-                if (driverOpt.isPresent()) {
-                    driverName = driverOpt.get().getName();
+            if (callOpt.isPresent()) {
+                Call call = callOpt.get();
+                if (call.getDriverIdx() != null) {
+                    Optional<Driver> driverOpt = driverUserRepository.findById(call.getDriverIdx());
+                    if (driverOpt.isPresent()) {
+                        driverName = driverOpt.get().getName();
+                    }
+                }
+                estimatedFare = call.getEstimatedFare();
+                if (recruit.getCurrentCapacity() != null && recruit.getCurrentCapacity() > 0) {
+                    myFare = estimatedFare / recruit.getCurrentCapacity();
                 }
             }
         }
-        return RecruitDto.DetailRes.from(recruit, driverName);
+        return RecruitDto.DetailRes.from(recruit, driverName, estimatedFare, myFare);
     }
 
     // TODO: Slice로 페이징 처리 필요
