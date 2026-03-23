@@ -6,7 +6,15 @@ import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.user.model.User;
 
 @Entity
-@Table(name = "chat_reads")
+@Table(
+        name = "chat_reads",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_chat_reads_user_recruit", columnNames = {"user_idx", "recruit_idx"})
+        },
+        indexes = {
+                @Index(name = "idx_chat_reads_user_recruit", columnList = "user_idx, recruit_idx")
+        }
+)
 @Getter
 @Builder
 @NoArgsConstructor

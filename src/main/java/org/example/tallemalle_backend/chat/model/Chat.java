@@ -10,6 +10,9 @@ import org.example.tallemalle_backend.recruit.model.Recruit;
 import org.example.tallemalle_backend.user.model.User;
 
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_chat_recruit_idx_idx", columnList = "recruit_idx, idx")
+})
 @Builder
 @Getter
 @NoArgsConstructor
