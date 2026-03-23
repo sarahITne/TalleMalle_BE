@@ -2,6 +2,7 @@ package org.example.tallemalle_backend.user;
 
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
+import org.example.tallemalle_backend.common.model.BaseResponseStatus;
 import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
 import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
 import org.example.tallemalle_backend.driver.auth.model.Driver;
@@ -97,17 +98,12 @@ public class UserService implements UserDetailsService {
     public void resendVerificationMail(String email) {
         // 1. 해당 이메일로 가입된 유저가 있는지 확인
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("가입되지 않은 이메일입니다."));
+                .orElseThrow(() -> BaseException.from(BaseResponseStatus.USER_NOT_FOUND)); // BaseException 사용
 
-        // 2. 이미 인증된 유저인지 확인 (선택 사항)
-        if (user.getEnable()) {
-            throw new RuntimeException("이미 인증이 완료된 계정입니다.");
-        }
-
-        // 3. 기존 이메일 인증 토큰 내역이 있다면 삭제 (새로운 토큰 발행을 위해)
+        // 2. 기존 이메일 인증 토큰 내역이 있다면 삭제 (새로운 토큰 발행을 위해)
         emailVerifyRepository.findByEmail(email).ifPresent(emailVerifyRepository::delete);
 
-        // 4. 메일 발송 및 내역 저장 로직 호출
+        // 3. 메일 발송 및 내역 저장 로직 호출
         sendVerificationMail(email);
     }
 

@@ -1,5 +1,10 @@
 package org.example.tallemalle_backend.user;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.model.BaseResponse;
@@ -9,7 +14,6 @@ import org.example.tallemalle_backend.user.model.UserDto;
 import org.example.tallemalle_backend.utils.CookieUtil;
 import org.example.tallemalle_backend.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -25,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 import java.util.Map;
 
+@Tag(name = "User API", description = "회원가입·로그인·인증 관련 API")
 @RequestMapping("/user")
 @RestController
 @RequiredArgsConstructor
@@ -38,6 +43,7 @@ public class UserController {
     private String frontUrl;
 
     // 회원 가입
+    @Operation(summary = "회원가입", description = "사용자에게 필요한 정보를 받아 회원가입 하는 기능")
     @PostMapping("/signup")
     public ResponseEntity signup(@Valid @RequestBody UserDto.SignupReq dto) {
         UserDto.SignupRes result = userService.signup(dto);
@@ -46,10 +52,10 @@ public class UserController {
 
 
     // 본인 인증
+    @Operation(summary = "본인 인증 확인", description = "프론트에서 받은 identityVerificationId를 통해 PortOne 본인 인증 성공 여부를 확인합니다.")
     @PostMapping("/verify-identity")
-    public ResponseEntity verifyIdentity(@RequestBody Map<String, String> request) {
-        String identityVerificationId = request.get("identityVerificationId");
-
+    public ResponseEntity verifyIdentity(@RequestBody UserDto.VerifyIdentityReq request) {
+        String identityVerificationId = request.getIdentityVerificationId();
         // 서비스 호출 (본인인증 성공 여부 반환)
         Map<String, Object> userInfo = userService.confirmIdentity(identityVerificationId);
 
@@ -65,39 +71,47 @@ public class UserController {
 
 
     // 이메일 중복 확인
+    @Operation(summary = "이메일 중복 확인", description = "입력한 이메일의 사용 가능 여부를 확인합니다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "이메일 중복 확인 조회 성공 (true: 사용 가능, false: 중복/사용 불가)"
+    )
     @GetMapping("/signup/check-email")
     public ResponseEntity emailCheck(String email) {
         // true - 사용 가능한 이메일, false - 중복된 이메일
         boolean available = userService.emailCheck(email);
 
-        String message = available
-                ? "사용 가능한 이메일입니다."
-                : "이미 사용 중인 이메일입니다.";
-
         return ResponseEntity.ok(available);
     }
 
     // 닉네임 중복 확인
+    @Operation(summary = "닉네임 중복 확인", description = "입력한 닉네임의 사용 가능 여부를 확인합니다.")
+    @ApiResponse(
+            responseCode = "200",
+            description = "닉네임 중복 확인 조회 성공 (true: 사용 가능, false: 중복/사용 불가)"
+    )
     @GetMapping("/signup/check-nickname")
     public ResponseEntity nicknameCheck(String nickname) {
         // true - 사용 가능한 닉네임, false - 중복된 닉네임
         boolean available = userService.nicknameCheck(nickname);
 
-        String message = available
-                ? "사용 가능한 닉네임입니다."
-                : "이미 사용 중인 닉네임입니다.";
-
         return ResponseEntity.ok(available);
     }
 
-    // 이메일 인증 메일 재전송
+    // 인증 메일 재전송
+    @Operation(summary = "이메일 인증 메일 재전송", description = "가입한 이메일로 인증 메일을 다시 보냅니다.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "재전송 성공"),
+            @ApiResponse(responseCode = "400", description = "가입되지 않은 이메일 주소")
+    })
     @PostMapping("/resend-verify")
-    public ResponseEntity resendVerify(String email) {
+    public ResponseEntity<?> resendVerify(
+            @Parameter(description = "재전송할 이메일 주소", example = "user@example.com")
+            @RequestParam String email
+    ) {
         if (email == null || email.isEmpty()) {
-            return ResponseEntity.badRequest().body("이메일 주소가 필요합니다.");
+            return ResponseEntity.badRequest().body(Map.of("message", "이메일 주소가 필요합니다."));
         }
-
-        System.out.println("재전송 요청 이메일: " + email); // null이 찍히는지 확인
 
         userService.resendVerificationMail(email);
         return ResponseEntity.ok(Map.of("message", "인증 메일이 재전송되었습니다."));
@@ -105,6 +119,7 @@ public class UserController {
 
 
     // 이메일 인증 (완료)
+    @Operation(summary = "이메일 인증 처리", description = "인증 링크 클릭 시 호출되며 회원가입 시 입력한 이메일 인증을 완료 처리 후 사용자의 계정을 활성화 합니다.")
     @GetMapping("/verify")
     public ResponseEntity verify(String uuid) {
         userService.verify(uuid);
@@ -118,6 +133,7 @@ public class UserController {
 
 
     // 소셜 로그인 한 사용자 추가 정보 업데이트
+    @Operation(summary = "소셜 로그인으로 회원가입 시 추가 정보 입력", description = "소셜 로그인을 통해 회원가입 후 부족한 정보(전화번호 등)를 입력받아 계정을 활성화합니다.")
     @PatchMapping("/signup/extra")
     public ResponseEntity extraInfo(
             @AuthenticationPrincipal AuthUserDetails user,
@@ -131,6 +147,7 @@ public class UserController {
 
 
     // 로그인
+    @Operation(summary = "로그인", description = "이메일과 비밀번호로 로그인을 시도하고 성공 시 JWT 토큰과 쿠키를 발급합니다.")
     @PostMapping("/login")
     public ResponseEntity login(@RequestBody UserDto.LoginReq dto) {
         try {
@@ -146,7 +163,7 @@ public class UserController {
             // 3. 인증 성공 시 로직
             AuthUserDetails user = (AuthUserDetails) authentication.getPrincipal();     // 현재 로그인한 사용자의 객체를 꺼내는 메소드
             String jwt = jwtUtil.createToken(user);
-            ResponseCookie cookie = cookieUtil.createCookie(jwt);
+            ResponseCookie cookie = cookieUtil.createCookie(jwt);   // 쿠키 발급
 
             return ResponseEntity.ok()
                     .header("Set-Cookie", cookie.toString())    // JWT 토큰을 헤더로 설정해서 응답 (쿠키)
@@ -171,6 +188,7 @@ public class UserController {
     }
 
     // 로그인한 사용자 식별
+    @Operation(summary = "현재 로그인 유저 정보 조회", description = "현재 인증된 사용자의 정보를 반환합니다.")
     @GetMapping("/me")
     public ResponseEntity getCurrentUser(@AuthenticationPrincipal AuthUserDetails user) {
         // Spring Security 필터에서 토큰 검증 후 user 객체를 채움
@@ -184,6 +202,7 @@ public class UserController {
     }
 
     // 로그아웃
+    @Operation(summary = "로그아웃", description = "로그인 쿠키를 삭제하여 로그아웃 처리합니다.")
     @PostMapping("/logout")
     public ResponseEntity logout() {
         // 로그아웃 시 ATOKEN 쿠키에서 삭제
