@@ -11,6 +11,7 @@ import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.payment.adaptor.TossPaymentsAdaptor;
 import org.example.tallemalle_backend.payment.data.BillingRepository;
 import org.example.tallemalle_backend.payment.data.OrderRepository;
+import org.example.tallemalle_backend.payment.data.TransactionRepository;
 import org.example.tallemalle_backend.payment.data.dto.PaymentDto;
 import org.example.tallemalle_backend.payment.data.dto.TossDto;
 import org.example.tallemalle_backend.payment.data.entity.Billing;
@@ -29,10 +30,12 @@ import java.util.List;
 public class PaymentService {
     private final BillingRepository billingRepository;
     private final OrderRepository orderRepository;
+    private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final DriverUserRepository driverUserRepository;
     private final ParticipationRepository participationRepository;
     private final TossPaymentsAdaptor tossPaymentsAdaptor;
+    private final org.example.tallemalle_backend.recruit.RecruitRepository recruitRepository;
 
     public PaymentDto.CustomerKeyResponse customerKey(AuthUserDetails userDetails) {
         User user = userRepository.findById(userDetails.getIdx()).orElseThrow(
@@ -141,6 +144,8 @@ public class PaymentService {
 
         Driver driver = driverUserRepository.findById(driverIdx).orElseThrow();
 
+        org.example.tallemalle_backend.recruit.model.Recruit recruit = recruitRepository.findById(dto.getRecruitIdx()).orElseThrow();
+
         List<Participation> participations = participationRepository.findAllByRecruit_Idx(dto.getRecruitIdx());
 
         int amount = (dto.getCommission() + dto.getServiceFee()) / participations.size();
@@ -152,8 +157,8 @@ public class PaymentService {
             }
         }
 
-        // 성공한 주문을 저장할 리스트
-        List<Transaction> successTransaction = new ArrayList<>();
+        // 성공한 결제 내역을 저장할 리스트
+        List<Transaction> successTransactions = new ArrayList<>();
 
         // 결제에 대한 주문 생성 및 결제 시도
         try {
@@ -163,20 +168,35 @@ public class PaymentService {
                         .billing(user.getDefaultBilling())
                         .amount(amount)
                         .user(user)
+                        .recruit(recruit)
                         .build();
                 orderRepository.save(order);
 
-                TossDto.ChargePerUserResponse res = tossPaymentsAdaptor.chargePerUser(TossDto.ChargePerUserRequest.fromEntity(order));
-                // 결제 내역 생성
-                successTransaction.add(res.toEntity(order));
+                try {
+                    TossDto.ChargePerUserResponse res = tossPaymentsAdaptor.chargePerUser(TossDto.ChargePerUserRequest.fromEntity(order));
+                    
+                    // 주문 성공 상태 변경
+                    order.setStatus(org.example.tallemalle_backend.payment.common.OrderStatus.SUCCESS);
+                    
+                    // 결제 내역 생성 및 저장
+                    Transaction transaction = res.toEntity(order);
+                    transactionRepository.save(transaction);
+                    successTransactions.add(transaction);
+                } catch (Exception e) {
+                    order.setStatus(org.example.tallemalle_backend.payment.common.OrderStatus.FAILURE);
+                    throw e;
+                }
             }
         } catch (Exception e) {
-            for (Transaction transaction : successTransaction) {
+            // 하나라도 실패하면 성공한 결제들 취소(환불) 처리
+            for (Transaction transaction : successTransactions) {
                 TossDto.RefundTransactionRequest request = TossDto.RefundTransactionRequest.builder()
                         .paymentKey(transaction.getPaymentKey())
                         .cancelReason("결제 실패로 인한 환불")
                         .build();
                 tossPaymentsAdaptor.refundTransaction(request);
+                
+                transaction.getOrder().setStatus(org.example.tallemalle_backend.payment.common.OrderStatus.CANCELED);
             }
         }
         return PaymentDto.ChargeResponse.builder().build();

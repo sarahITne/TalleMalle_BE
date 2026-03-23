@@ -28,7 +28,6 @@ public class RecruitService {
     private final ParticipationRepository participationRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    // TODO: Socket 통신 연결 필요
     @Transactional
     public void reg(AuthUserDetails user, RecruitDto.RegReq dto) {
         // 유저 정보 가져오기
