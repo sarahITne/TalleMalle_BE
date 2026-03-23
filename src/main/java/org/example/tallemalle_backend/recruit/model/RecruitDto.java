@@ -131,8 +131,20 @@ public class RecruitDto {
         private Integer currentCapacity;
         @Schema(description = "방장 닉네임", example = "김기사")
         private String ownerName;
+        @Schema(description = "현재 모집 상태", example = "RECRUITING")
+        private RecruitStatus status;
+        @Schema(description = "배정된 기사님 이름", example = "홍길동")
+        private String driverName;
+        @Schema(description = "운행 요금(예상)", example = "12000")
+        private Integer estimatedFare;
+        @Schema(description = "1인당 부담금(예상)", example = "3000")
+        private Integer myFare;
 
         public static DetailRes from(Recruit entity) {
+            return from(entity, null, null, null);
+        }
+
+        public static DetailRes from(Recruit entity, String driverName, Integer estimatedFare, Integer myFare) {
             return DetailRes.builder()
                     .idx(entity.getIdx())
                     .startPointName(entity.getStartPointName())
@@ -141,6 +153,10 @@ public class RecruitDto {
                     .maxCapacity(entity.getMaxCapacity())
                     .currentCapacity(entity.getCurrentCapacity())
                     .ownerName(entity.getOwner() != null ? entity.getOwner().getName() : null)
+                    .status(entity.getStatus())
+                    .driverName(driverName)
+                    .estimatedFare(estimatedFare)
+                    .myFare(myFare)
                     .build();
           }
     }

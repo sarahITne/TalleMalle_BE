@@ -35,4 +35,6 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
     @Query("SELECT COALESCE(SUM(c.estimatedFare), 0) FROM Call c WHERE c.driverIdx = :driverIdx AND c.status = :status")
     Long sumEstimatedFareByDriverIdxAndStatus(@Param("driverIdx") Long driverIdx, @Param("status") CallStatus status);
+
+    Optional<Call> findTopByRecruit_IdxAndStatusInOrderByIdDesc(Long recruitIdx, List<CallStatus> statuses);
 }

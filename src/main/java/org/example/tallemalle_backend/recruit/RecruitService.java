@@ -3,6 +3,14 @@ package org.example.tallemalle_backend.recruit;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.exception.BaseException;
 import org.example.tallemalle_backend.common.model.BaseResponseStatus;
+import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
+import org.example.tallemalle_backend.driver.auth.model.Driver;
+import org.example.tallemalle_backend.driver.call.CallRepository;
+import org.example.tallemalle_backend.driver.call.model.Call;
+import org.example.tallemalle_backend.driver.call.model.CallStatus;
+import org.example.tallemalle_backend.driver.auth.model.Driver;
+import org.example.tallemalle_backend.driver.call.model.Call;
+import org.example.tallemalle_backend.driver.call.model.CallStatus;
 import org.example.tallemalle_backend.participation.ParticipationRepository;
 import org.example.tallemalle_backend.participation.model.Participation;
 import org.example.tallemalle_backend.participation.model.ParticipationStatus;
@@ -19,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.data.domain.Pageable;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -28,6 +37,8 @@ public class RecruitService {
     private final UserRepository userRepository;
     private final ParticipationRepository participationRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final CallRepository callRepository;
+    private final DriverUserRepository driverUserRepository;
 
     @Transactional
     public void reg(AuthUserDetails user, RecruitDto.RegReq dto) {
@@ -196,6 +207,28 @@ public class RecruitService {
         Recruit recruit = recruitRepository.findById(recruitId).orElseThrow(
                 () -> new BaseException(BaseResponseStatus.NOT_FOUND_DATA)
         );
-        return RecruitDto.DetailRes.from(recruit);
+        String driverName = null;
+        Integer estimatedFare = 0;
+        Integer myFare = 0;
+        if (recruit.getStatus() == RecruitStatus.DRIVING || recruit.getStatus() == RecruitStatus.END) {
+            Optional<Call> callOpt = callRepository.findTopByRecruit_IdxAndStatusInOrderByIdDesc(
+                    recruitId,
+                    List.of(CallStatus.ACCEPTED, CallStatus.DRIVING, CallStatus.COMPLETED)
+            );
+            if (callOpt.isPresent()) {
+                Call call = callOpt.get();
+                if (call.getDriverIdx() != null) {
+                    Optional<Driver> driverOpt = driverUserRepository.findById(call.getDriverIdx());
+                    if (driverOpt.isPresent()) {
+                        driverName = driverOpt.get().getName();
+                    }
+                }
+                estimatedFare = call.getEstimatedFare();
+                if (recruit.getCurrentCapacity() != null && recruit.getCurrentCapacity() > 0) {
+                    myFare = estimatedFare / recruit.getCurrentCapacity();
+                }
+            }
+        }
+        return RecruitDto.DetailRes.from(recruit, driverName, estimatedFare, myFare);
     }
 }
