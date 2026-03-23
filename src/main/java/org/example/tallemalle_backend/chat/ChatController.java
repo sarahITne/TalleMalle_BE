@@ -41,9 +41,11 @@ public class ChatController {
     @GetMapping("/{recruitIdx}/messages")
     public ResponseEntity list(
             @AuthenticationPrincipal AuthUserDetails user,
-            @PathVariable Long recruitIdx
+            @PathVariable Long recruitIdx,
+            @RequestParam(required = false) Long before,
+            @RequestParam(defaultValue = "30") Integer size
     ) {
-        List<ChatDto.ListRes> dto = chatService.list(user, recruitIdx);
+        List<ChatDto.ListRes> dto = chatService.list(user, recruitIdx, before, size);
         return ResponseEntity.ok(BaseResponse.success(dto));
     }
 
