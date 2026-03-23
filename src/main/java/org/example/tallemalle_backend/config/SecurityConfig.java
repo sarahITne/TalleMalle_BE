@@ -9,6 +9,7 @@ import org.example.tallemalle_backend.user.OAuth2UserService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -85,7 +86,6 @@ public class SecurityConfig {
                         .requestMatchers("/user/signup/extra").authenticated()
                         .requestMatchers("/user/signup", "/user/login", "/user/verify", "/user/verify-identity", "/user/resend-verify",
                                 "/user/signup/check-email", "/user/signup/check-nickname", "/user/me").permitAll()
-                        .requestMatchers("/notices/**").authenticated()
                         .requestMatchers(
                                 "/driver/signup",
                                 "/driver/login",
@@ -95,6 +95,10 @@ public class SecurityConfig {
                                 "/driver/check-nickname",
                                 "/driver/me"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/notices/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/notices/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/notices/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/notices/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated()
