@@ -1,5 +1,8 @@
 package org.example.tallemalle_backend.push;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.common.model.BaseResponse;
 import org.example.tallemalle_backend.profile.ProfileRepository;
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
 
+@Tag(name = "Push Subscription API", description = "웹 푸시 구독 및 알림 설정 API")
 @RestController
 @RequestMapping("/push")
 @RequiredArgsConstructor
@@ -24,9 +28,10 @@ public class PushSubscriptionController {
     private final UserRepository userRepository;
     private final ProfileRepository profileRepository;
 
+    @Operation(summary = "푸시 설정 조회", description = "로그인 사용자의 모집 홍보 푸시 수신 설정을 조회하는 기능")
     @GetMapping("/preferences")
-    public ResponseEntity<BaseResponse<PushSubscriptionDto.PreferencesRes>> getPreferences(
-            @AuthenticationPrincipal AuthUserDetails user) {
+    public ResponseEntity<?> getPreferences(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthUserDetails user) {
         if (user == null) {
             return ResponseEntity.status(401).body(BaseResponse.fail(org.example.tallemalle_backend.common.model.BaseResponseStatus.REQUEST_ERROR));
         }
@@ -39,10 +44,11 @@ public class PushSubscriptionController {
                 PushSubscriptionDto.PreferencesRes.builder().recruitPromotionPushEnabled(enabled).build()));
     }
 
+    @Operation(summary = "푸시 설정 수정", description = "로그인 사용자의 모집 홍보 푸시 수신 설정을 수정하는 기능")
     @PatchMapping("/preferences")
     @Transactional
-    public ResponseEntity<BaseResponse<PushSubscriptionDto.PreferencesRes>> patchPreferences(
-            @AuthenticationPrincipal AuthUserDetails user,
+    public ResponseEntity<?> patchPreferences(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthUserDetails user,
             @RequestBody PushSubscriptionDto.PreferencesReq req) {
         if (user == null) {
             return ResponseEntity.status(401).body(BaseResponse.fail(org.example.tallemalle_backend.common.model.BaseResponseStatus.REQUEST_ERROR));
@@ -57,9 +63,10 @@ public class PushSubscriptionController {
                 PushSubscriptionDto.PreferencesRes.builder().recruitPromotionPushEnabled(enabled).build()));
     }
 
+    @Operation(summary = "푸시 구독 등록", description = "브라우저 푸시 구독 정보를 서버에 저장하는 기능")
     @PostMapping("/subscribe")
-    public ResponseEntity subscribe(
-            @AuthenticationPrincipal AuthUserDetails user,
+    public ResponseEntity<?> subscribe(
+            @Parameter(hidden = true) @AuthenticationPrincipal AuthUserDetails user,
             @RequestBody PushSubscriptionDto.SubscribeReq dto
     ) {
         if (user == null) {
