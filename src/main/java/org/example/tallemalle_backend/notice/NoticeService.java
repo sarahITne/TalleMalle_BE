@@ -6,12 +6,8 @@ import org.example.tallemalle_backend.notice.model.NoticeDto;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RequiredArgsConstructor
 @Service
@@ -36,15 +32,10 @@ public class NoticeService {
                 () -> new IllegalArgumentException("해당 idx의 게시물이 없음")
         );
 
-        // 2. 작성자 검증 (작성자 idx와 현재 로그인한 유저 idx 비교)
-        if (!notice.getUser().getIdx().equals(user.getIdx())) {
-            throw new AccessDeniedException("수정 권한이 없습니다.");
-        }
-
-        // 3. 엔티티에 정의해둔 update 메소드 실행, 엔티티 수정 (엔티티 내용을 바꿈 -> 더티체킹)
+        // 2. 엔티티에 정의해둔 update 메소드 실행, 엔티티 수정 (엔티티 내용을 바꿈 -> 더티체킹)
         notice.update(dto);
 
-        // 4. 수정된 Entity를 응답 DTO로 변환하여 반환
+        // 3. 수정된 Entity를 응답 DTO로 변환하여 반환
         return NoticeDto.DetailRes.from(notice);
     }
 
@@ -56,12 +47,7 @@ public class NoticeService {
                 () -> new IllegalArgumentException("해당 idx의 게시물이 없음")
         );
 
-        // 2. 작성자 검증 (작성자 idx와 현재 로그인한 유저 idx 비교)
-        if (!notice.getUser().getIdx().equals(user.getIdx())) {
-            throw new AccessDeniedException("삭제 권한이 없습니다.");
-        }
-
-        // 3. 게시글 삭제
+        // 2. 게시글 삭제
         noticeRepository.deleteById(idx);
     }
 
