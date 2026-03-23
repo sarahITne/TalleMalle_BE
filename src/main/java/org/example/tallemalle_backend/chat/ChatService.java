@@ -15,6 +15,7 @@ import org.example.tallemalle_backend.user.model.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -46,6 +47,7 @@ public class ChatService {
         return ChatDto.SendRes.from(entity);
     }
 
+    @Transactional
     public List<ChatDto.ListRes> list(AuthUserDetails user, Long recruitIdx, Long before, Integer size) {
         validateParticipant(user, recruitIdx);
         int pageSize = normalizePageSize(size);
@@ -111,12 +113,21 @@ public class ChatService {
     }
 
     private void upsertReadMarker(Long userIdx, Long recruitIdx, Long lastChatIdx) {
+        int updated = chatReadRepository.updateLastReadIfGreater(userIdx, recruitIdx, lastChatIdx);
+        if (updated > 0) {
+            return;
+        }
+
         ChatRead read = chatReadRepository.findByUser_IdxAndRecruit_Idx(userIdx, recruitIdx)
                 .orElseGet(() -> ChatRead.builder()
-                        .user(userRepository.findById(userIdx).orElseThrow())
-                        .recruit(recruitRepository.findById(recruitIdx).orElseThrow())
+                        .user(userRepository.getReferenceById(userIdx))
+                        .recruit(recruitRepository.getReferenceById(recruitIdx))
                         .lastReadChatIdx(0L)
                         .build());
+
+        if (read.getLastReadChatIdx() >= lastChatIdx) {
+            return;
+        }
 
         read.setLastReadChatIdx(lastChatIdx);
         chatReadRepository.save(read);
