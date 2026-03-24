@@ -97,7 +97,7 @@
 
 * 🎯 [**프로젝트 개요 (Project Overview)**](https://github.com/beyond-sw-camp/be24-3rd-saraITne-TalleMalle/wiki/1.-%ED%94%84%EB%A1%9C%EC%A0%9D%ED%8A%B8-%EA%B0%9C%EC%9A%94-(Project-Overview))
 * 🧩 [**기술 선정 이유 (Tech Stack & Rationale)**](https://github.com/beyond-sw-camp/be24-3rd-saraITne-TalleMalle/wiki/2.-%EA%B8%B0%EC%88%A0-%EC%84%A0%EC%A0%95-%EC%9D%B4%EC%9C%A0-(Tech-Stack-&-Rationale))
-* 🏗 [**시스템 아키텍처 (Software Architecture)**](https://github.com/beyond-sw-camp/be24-3rd-saraITne-TalleMalle/wiki/3.-SW-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-(Software-Architecture))
+* 🏗 [**시스템 아키텍처 (Software Architecture)**](https://github.com/beyond-sw-camp/be24-3rd-saraITne-TalleMalle/wiki/3.-%EC%8B%9C%EC%8A%A4%ED%85%9C-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-(System-Architecture)-%EB%B0%8F-SW-%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98-(Software-Architecture))
 * ✨ [**코딩 컨벤션 (Coding Convention)**](https://github.com/beyond-sw-camp/be24-3rd-saraITne-TalleMalle/wiki/4.-%EC%BD%94%EB%94%A9-%EC%BB%A8%EB%B2%A4%EC%85%98)
 * 🚀 [**성능 개선 (Performance Improvement)**](https://github.com/beyond-sw-camp/be24-3rd-saraITne-TalleMalle/wiki/6.-%EC%84%B1%EB%8A%A5-%EA%B0%9C%EC%84%A0-(Performance-Improvement)-%F0%9F%9A%80)
 
