@@ -6,14 +6,12 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.example.tallemalle_backend.driver.auth.model.AuthDriverDetails;
 import org.example.tallemalle_backend.user.model.AuthUserDetails;
-import org.example.tallemalle_backend.user.model.UserStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 
-//@ConfigurationProperties(prefix = "jwt")
 @Component
 public class JwtUtil {
     @Value("${jwt.secret}")
@@ -28,36 +26,26 @@ public class JwtUtil {
 
     // 토큰 생성 (User)
     public String createToken(AuthUserDetails user) {
-        String jwt = Jwts.builder()
+        return Jwts.builder()
                 .claim("idx", user.getIdx())
                 .claim("email", user.getEmail())
-                .claim("name", user.getName())
-                .claim("nickname", user.getNickname())
                 .claim("role", user.getRole())
-                .claim("status", user.getStatus())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expire))
                 .signWith(getEncodedKey())
                 .compact();
-
-        return jwt;
     }
 
     // 토큰 생성 (Driver)
     public String createToken(AuthDriverDetails user) {
-        String jwt = Jwts.builder()
+        return Jwts.builder()
                 .claim("idx", user.getIdx())
                 .claim("email", user.getEmail())
-                .claim("name", user.getName())
-                .claim("nickname", user.getNickname())
                 .claim("role", user.getRole())
-                .claim("status", user.getStatus())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expire))
                 .signWith(getEncodedKey())
                 .compact();
-
-        return jwt;
     }
 
     // 1. 토큰에서 전체 Claims 추출 (공통 메서드)
@@ -74,27 +62,11 @@ public class JwtUtil {
         return extractAllClaims(token).get("idx", Long.class);
     }
 
-    public  String getEmail (String token) {
+    public String getEmail(String token) {
         return extractAllClaims(token).get("email", String.class);
-    }
-
-    public String getName(String token) {
-        return extractAllClaims(token).get("name", String.class);
-    }
-
-    public String getNickname(String token) {
-        return extractAllClaims(token).get("nickname", String.class);
     }
 
     public String getRole(String token) {
         return extractAllClaims(token).get("role", String.class);
-    }
-
-    public UserStatus getStatus(String token) {
-        String statusStr = extractAllClaims(token).get("status", String.class);
-        if (statusStr != null) {
-            return UserStatus.valueOf(statusStr);
-        }
-        return null;
     }
 }

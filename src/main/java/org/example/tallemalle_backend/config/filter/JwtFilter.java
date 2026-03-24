@@ -53,10 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     // JWT에서 정보 꺼내기
                     Long idx = jwtUtil.getUserIdx(cookie.getValue());
                     String email = jwtUtil.getEmail(cookie.getValue());
-                    String name = jwtUtil.getName(cookie.getValue());
-                    String nickname = jwtUtil.getNickname(cookie.getValue());
                     String role = jwtUtil.getRole(cookie.getValue());
-                    UserStatus status = jwtUtil.getStatus(cookie.getValue());
 
                     // 권한(role)에 따라 Principal 객체를 다르게 생성
                     Object principal;
@@ -70,21 +67,9 @@ public class JwtFilter extends OncePerRequestFilter {
                         principal = AuthUserDetails.builder()
                                 .idx(idx)
                                 .email(email)
-                                .name(name)
-                                .nickname(nickname)
                                 .role(role)
-                                .status(status)
                                 .build();
                     }
-
-//                    AuthUserDetails user = AuthUserDetails.builder()
-//                            .idx(idx)
-//                            .email(email)
-//                            .name(name)
-//                            .nickname(nickname)
-//                            .role(role)
-//                            .status(status)
-//                            .build();
 
                     // principal 객체를 넘겨줄 때 role에 맞는 GrantedAuthority를 부여
                     Authentication authentication = new UsernamePasswordAuthenticationToken(
