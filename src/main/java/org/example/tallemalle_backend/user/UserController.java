@@ -141,8 +141,13 @@ public class UserController {
     ) {
         UserDto.ExtraInfoRes result = userService.extraInfo(user.getEmail(), dto);
 
+        // 추가 정보 입력을 위한 임시 토큰 삭제
+        ResponseCookie cookie = cookieUtil.removeCookie();
+
         // 추가 정보 입력 후 로그인 페이지로 리다이렉트
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok()
+                .header("Set-Cookie", cookie.toString())
+                .body(result);
     }
 
 
