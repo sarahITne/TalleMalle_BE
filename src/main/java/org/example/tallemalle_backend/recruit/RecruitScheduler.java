@@ -18,6 +18,9 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class RecruitScheduler {
+
+    private static final int DEPARTURE_EXPIRE_GRACE_MINUTES = 12;
+
     private final RecruitRepository recruitRepository;
     private final CallService callService;
     private final ApplicationEventPublisher eventPublisher;
@@ -27,9 +30,10 @@ public class RecruitScheduler {
     @Transactional
     public void recruitTimeCheckScheduler() {
         LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime notExpiredAfter = now.minusMinutes(DEPARTURE_EXPIRE_GRACE_MINUTES);
 
-        // 출발 시간이 지났고, 인원이 꽉 찬(FULL) 방 찾기
-        List<Recruit> readyToCallList = recruitRepository.findReadyToCall(RecruitStatus.FULL, now);
+        // 정원 FULL · 콜 미생성 · 출발 전(만료 직전까지) → 드라이버가 출발 시각 전에 콜을 보고 수락 및 이동할 수 있게 함
+        List<Recruit> readyToCallList = recruitRepository.findReadyToCall(RecruitStatus.FULL, notExpiredAfter);
 
         for (Recruit r : readyToCallList) {
             // 다음 1분 뒤에 또 호출하는 것 방지
@@ -46,8 +50,8 @@ public class RecruitScheduler {
             callService.notifyNewCall();
         }
 
-        // 출발 시간 기준 20분이 지났는데 출발하지 못한 방 찾기
-        LocalDateTime limitTime = now.minusMinutes(12);
+        // 출발 시각 기준 grace 경과 후에도 진행되지 않은 방 정리
+        LocalDateTime limitTime = now.minusMinutes(DEPARTURE_EXPIRE_GRACE_MINUTES);
         List<RecruitStatus> targetStatuses = List.of(RecruitStatus.RECRUITING, RecruitStatus.FULL, RecruitStatus.CALLING);
         List<Recruit> expiredList = recruitRepository.findExpiredRecruits(targetStatuses, limitTime);
 

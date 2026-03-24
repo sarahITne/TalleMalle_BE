@@ -38,9 +38,13 @@ public interface RecruitRepository extends JpaRepository<Recruit, Long> {
     @Query("SELECT r FROM Recruit r WHERE r.idx = :idx")
     Optional<Recruit> findByIdForUpdate(@Param("idx") Long idx);
 
-    // 시간 다 되고 인원이 꽉 찬 방 찾기 (FULL 상태이면서 출발 시간이 현재 이전)
-    @Query("SELECT r FROM Recruit r WHERE r.status = :status AND r.departureTime <= :now")
-    List<Recruit> findReadyToCall(@Param("status") RecruitStatus status, @Param("now") LocalDateTime now);
+    // 인원 FULL · 아직 콜 없음 · 출발 만료 전 → 출발 시각 이전에 드라이버에게 콜 노출(수락·이동 시간 확보)
+    // notExpiredAfter = now - grace 분, findExpiredRecruits와 동일 grace로 출발 직후 소량 지연 보정
+    @Query("SELECT r FROM Recruit r WHERE r.status = :status "
+            + "AND NOT EXISTS (SELECT 1 FROM Call c WHERE c.recruit.idx = r.idx) "
+            + "AND r.departureTime > :notExpiredAfter")
+    List<Recruit> findReadyToCall(@Param("status") RecruitStatus status,
+            @Param("notExpiredAfter") LocalDateTime notExpiredAfter);
 
     // 출발 시간 20분 초과한 미출발 방 찾기
     @Query("SELECT r FROM Recruit r WHERE r.status IN :statuses AND r.departureTime <= :limitTime")
