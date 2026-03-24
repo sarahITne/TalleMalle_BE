@@ -82,25 +82,22 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
                 (auth) -> auth
                         // 접근 제어
-                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()    // OPTIONS 요청은 무조건 허용 (CORS Preflight 해결)
-                        .requestMatchers("/user/signup/extra").authenticated()
-                        .requestMatchers("/user/signup", "/user/login", "/user/verify", "/user/verify-identity", "/user/resend-verify",
-                                "/user/signup/check-email", "/user/signup/check-nickname", "/user/me").permitAll()
-                        .requestMatchers(
-                                "/driver/signup",
-                                "/driver/login",
-                                "/driver/verify-identity",
-                                "/driver/verify-identity",
-                                "/driver/check-email",
-                                "/driver/check-nickname",
-                                "/driver/me"
-                        ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/notices/**").authenticated()
-                        .requestMatchers(HttpMethod.PATCH, "/notices/**").authenticated()
-                        .requestMatchers(HttpMethod.DELETE, "/notices/**").authenticated()
+                        // 1. 1. 공용 인프라 및 설정 (CORS, Swagger, WebSocket)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/ws/**").permitAll()
+
+                        // 2. 공지사항 (Read는 전체 허용, Write/Update/Delete는 인증 필요)
                         .requestMatchers(HttpMethod.GET, "/notices/**").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/notices/**").authenticated()
+
+                        // 3. 예외적인 인증 필요 경로 (중요: 전체 허용 패턴보다 위에 위치해야 함)
+                        .requestMatchers("/user/me", "/user/signup/extra", "/driver/me").authenticated()
+
+                        // 4. 사용자(User) 및 드라이버(Driver) 관련 인증 절차
+                        // 회원가입, 로그인, 중복체크, 본인인증 등은 모두 비로그인 허용
+                        .requestMatchers("/user/**", "/driver/**").permitAll()
+
+                        // 5. 나머지 모든 API는 기본적으로 인증 필요
                         .anyRequest().authenticated()
         );
 
