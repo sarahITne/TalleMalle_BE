@@ -30,7 +30,7 @@ public class Driver extends BaseEntity {
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false, length = 20, unique = true)
+    @Column(nullable = false, length = 20)
     private String phoneNumber;
 
     @Column(nullable = false)

@@ -45,7 +45,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registration.interceptors(stompSubscriptionInterceptor);
     }
 
-    @Bean
+    @Bean("customMessageBrokerTaskScheduler")
     public TaskScheduler messageBrokerTaskScheduler() {
         ThreadPoolTaskScheduler scheduler = new ThreadPoolTaskScheduler();
         scheduler.setPoolSize(1);
