@@ -10,7 +10,8 @@ public enum CallStatus {
     ACCEPTED("수락됨"),
     DRIVING("운행 중"),
     COMPLETED("운행 완료"),
-    CANCELED("취소됨");
+    CANCELED("취소됨"),
+    EXPIRED("만료됨");
 
     private final String description;
 }
