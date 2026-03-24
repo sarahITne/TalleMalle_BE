@@ -3,6 +3,10 @@ package org.example.tallemalle_backend.driver.call;
 import org.example.tallemalle_backend.driver.auth.DriverUserRepository;
 import org.example.tallemalle_backend.driver.auth.model.Driver;
 import org.example.tallemalle_backend.notification.NotificationService;
+import org.example.tallemalle_backend.recruit.event.RecruitEvents;
+import org.example.tallemalle_backend.recruit.model.RecruitDto;
+import org.example.tallemalle_backend.recruit.model.RecruitStatus;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.tallemalle_backend.driver.infrastructure.KakaoMobilityService;
@@ -31,6 +35,7 @@ public class CallService {
     private final NotificationService notificationService;
     private final DriverUserRepository driverUserRepository;
     private final ParticipationRepository participationRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public Page<CallDto.ListRes> list(Pageable pageable) {
         return callRepository
@@ -78,6 +83,9 @@ public class CallService {
 
         // Notification에 알림 저장 로직
         Recruit recruit = call.getRecruit();
+        recruit.setStatus(RecruitStatus.DRIVING);
+        eventPublisher.publishEvent(new RecruitEvents.UpdatedEvent(RecruitDto.ListRes.from(recruit)));
+
         Driver driver = driverUserRepository.findById(driverIdx).orElseThrow();
         String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 운행에 " + driver.getName() + " 기사님이 배정되었습니다.";
 
@@ -136,6 +144,15 @@ public class CallService {
 
         // Notification에 알림 저장 로직
         Recruit recruit = call.getRecruit();
+        recruit.setStatus(RecruitStatus.END);
+        eventPublisher.publishEvent(new RecruitEvents.UpdatedEvent(RecruitDto.ListRes.from(recruit)));
+
+        recruit.getParticipations().forEach(p -> {
+            p.getUser().changeToIdle();
+            // participtions 테이블에 status DONE으로 변경
+            p.done();
+        });
+
         String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 운행이 종료되었습니다!";
 
         // 참여 중(ACTIVE)인 모든 유저에게 알림 보내기

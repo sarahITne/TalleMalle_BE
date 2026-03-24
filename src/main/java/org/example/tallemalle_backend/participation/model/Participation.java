@@ -38,6 +38,10 @@ public class Participation {
         this.status = ParticipationStatus.CANCELED;
     }
 
+    public void done() {
+        this.status = ParticipationStatus.DONE;
+    }
+
     public boolean isActive() {
         return this.status == ParticipationStatus.ACTIVE;
     }
