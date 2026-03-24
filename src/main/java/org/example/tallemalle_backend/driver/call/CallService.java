@@ -147,6 +147,11 @@ public class CallService {
         recruit.setStatus(RecruitStatus.END);
         eventPublisher.publishEvent(new RecruitEvents.UpdatedEvent(RecruitDto.ListRes.from(recruit)));
 
+        recruit.getParticipations().forEach(p -> {
+            p.getUser().changeToIdle();
+            // participtions 테이블에 status DONE으로 변경
+            p.done();
+        });
 
         String notificationContents = recruit.getStartPointName() + " → " + recruit.getDestPointName() + " 운행이 종료되었습니다!";
 
