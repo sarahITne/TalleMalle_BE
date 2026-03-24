@@ -17,7 +17,6 @@ import org.example.tallemalle_backend.participation.model.ParticipationStatus;
 import org.example.tallemalle_backend.user.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -29,7 +28,6 @@ import java.util.List;
 public class CallService {
     private final CallRepository callRepository;
     private final KakaoMobilityService kakaoMobilityService;
-    private final SimpMessagingTemplate simpMessagingTemplate;
     private final NotificationService notificationService;
     private final DriverUserRepository driverUserRepository;
     private final ParticipationRepository participationRepository;
@@ -215,8 +213,14 @@ public class CallService {
         callRepository.save(newCall);
     }
 
-    public void notifyNewCall() {
-        simpMessagingTemplate.convertAndSend("/topic/complete", "EW_CALL_ADDED");
+    public void expireCallFromRecruit(Recruit recruit) {
+        if (recruit == null || recruit.getIdx() == null) {
+            return;
+        }
+        callRepository.findTopByRecruit_IdxAndStatusInOrderByIdDesc(
+                recruit.getIdx(),
+                List.of(CallStatus.WAITING, CallStatus.CANCELED, CallStatus.ACCEPTED)
+        ).ifPresent(Call::expire);
     }
 
     // 예상 금액 계산 로직

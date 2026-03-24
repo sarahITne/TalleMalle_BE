@@ -85,4 +85,12 @@ public class Call {
         this.status = CallStatus.CANCELED;
         this.driverIdx = null;
     }
+
+    public void expire() {
+        if (this.status == CallStatus.COMPLETED || this.status == CallStatus.DRIVING) {
+            throw new IllegalStateException("운행 진행/완료 상태 콜은 만료 처리할 수 없습니다.");
+        }
+        this.status = CallStatus.EXPIRED;
+        this.driverIdx = null;
+    }
 }
