@@ -77,6 +77,7 @@ public class CallDto {
     @Builder
     public static class SettlementRes {
         private Long callIdx;
+        private Long recruitIdx;
         private String startLocation;
         private String endLocation;
         private int totalFare;
@@ -130,8 +131,10 @@ public class CallDto {
                 participants = List.of();
             }
 
+            Recruit linkedRecruit = call.getRecruit();
             return SettlementRes.builder()
                     .callIdx(call.getId())
+                    .recruitIdx(linkedRecruit != null ? linkedRecruit.getIdx() : null)
                     .startLocation(call.getStartLocation())
                     .endLocation(call.getEndLocation())
                     .totalFare(totalFare)
